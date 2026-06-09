@@ -192,6 +192,7 @@
 - EVI方法论、本体论实践写成2-3篇结构化文章（公众号/知乎/内部分享都行）
 - 既是给国企路线攒素材，也是给小公司路线建立个人品牌
 - 两份专利继续推进到授权
+- 学习Agentic AI前沿生态：[awesome-agentic-ai 中文版](https://github.com/WenyuChiou/awesome-agentic-ai-zh/blob/main/README.zh-Hans.md) — 掌握AI Agent框架、工具链与行业应用趋势
 
 ### 支线2：接触市场
 
