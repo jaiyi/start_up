@@ -206,6 +206,33 @@
 
 ---
 
+## 10. 知识图谱工程工具：DeepKE / Nebula Graph
+
+目标：把 DeepKE 和 Nebula Graph 纳入知识图谱工程调研范围，区分“知识抽取工具”和“图数据库/图存储底座”在知识复利系统中的位置。
+
+初步定位：
+
+- DeepKE：更偏知识抽取，重点关注实体识别、关系抽取、事件抽取，以及如何从非结构化文本中生成结构化知识；
+- Nebula Graph：更偏图数据库和图计算底座，重点关注大规模实体关系存储、图查询、图分析和工程化部署；
+- WeKnora / LightRAG / Reme：更偏知识库、RAG、图谱增强检索和应用层体验。
+
+重点问题：
+
+- DeepKE 适合解决哪些实体/关系/事件抽取问题？
+- DeepKE 与大模型抽取、传统 NLP 抽取、规则抽取相比，各自边界是什么？
+- Nebula Graph 与 Neo4j 在部署、查询语言、生态、可视化、运维复杂度上有什么差异？
+- 个人或小团队是否真的需要 Nebula Graph，还是 Neo4j / 内置图谱能力已经足够？
+- DeepKE 抽取出的实体关系，如何进入 WeKnora、LightRAG、Reme 或自建知识图谱系统？
+- 知识图谱在 RAG 中到底承担什么角色：增强召回、关系推理、上下文组织，还是可解释性展示？
+
+计划产出：
+
+```text
+10-knowledge-graph-engineering-deepke-nebula-graph.md
+```
+
+---
+
 ## 初步目录规划
 
 ```text
@@ -219,7 +246,8 @@ docs/technology/
 ├── 06-chunk-filtering-and-pruning.md
 ├── 07-evaluation-dataset-construction.md
 ├── 08-model-compression-and-private-deployment.md
-└── 09-weknora-lightrag-reme-comparison.md
+├── 09-weknora-lightrag-reme-comparison.md
+└── 10-knowledge-graph-engineering-deepke-nebula-graph.md
 ```
 
 ---
@@ -249,6 +277,8 @@ docs/technology/
 - Reranker；
 - 混合检索；
 - 知识图谱；
+- 实体关系抽取；
+- 图数据库选型；
 - 模型网关；
 - 私有化部署方案；
 - 成本、延迟、权限、审计。
