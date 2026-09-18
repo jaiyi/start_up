@@ -74,6 +74,7 @@
 10. 私有化部署与轻量化治理
 11. 对话驱动 Agent 工作流：从自然语言入口到可控业务执行
 12. 企业级 Agent 的真正价值：不是 LLM 壳，而是认知流程层
+13. 认知流程层如何落地：流程分层、BPMN 门槛与供应链数字员工
 ```
 
 原因是：
@@ -103,7 +104,8 @@ docs/technology/
 ├── 09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
 ├── 10-私有化部署：解决部署、压缩、权限、治理、成本.md
 ├── 11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
-└── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
+├── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
+└── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -139,7 +141,7 @@ docs/technology/
 
 ---
 
-## 5. 十二个模块的学习目标与框架候选
+## 5. 十三个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
@@ -569,6 +571,39 @@ docs/technology/
 - 知识与案例：LlamaIndex、LangChain、Neo4j、GraphDB；
 - 协同与自动化：n8n、Node-RED、Dify Workflow；
 - 评测与观测：Langfuse、LangSmith、OpenTelemetry、Ragas、DeepEval。
+
+---
+
+### 5.13 认知流程层落地与供应链数字员工
+
+对应文件：
+
+```text
+13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
+```
+
+核心问题：
+
+- 认知流程层会不会很多，如何避免流程资产失控？
+- 哪些认知任务应该只做 RAG / Skill，哪些应该升级成 Workflow / BPMN？
+- BPMN 如果让业务维护，技术门槛会不会太高？
+- 如何通过业务模板、DMN 决策表、AI 辅助生成和流程资产中心降低门槛？
+- 供应链数字员工应该优先落地哪些认知流程？
+
+重点关注：
+
+- 问答型、分析型、协同型、闭环型认知任务分层；
+- 只读解释、结构化分析、多人协同、写业务数据的技术选型；
+- BPMN 与 DMN 的业务 / 平台分工；
+- Draft / Pilot / Production 的流程生命周期；
+- 供应链异常诊断、PO 延期跟进、库存异常、供应商风险和会议行动项。
+
+开源框架 / 工具候选：
+
+- BPMN / Workflow：Camunda、Flowable、Temporal、SpiffWorkflow；
+- 规则 / 决策：Camunda DMN、Drools / Kogito、OpenRules、json-rules-engine；
+- Agent / Skill：LangGraph、Semantic Kernel、PydanticAI、Dify Workflow；
+- 观测与评测：Langfuse、LangSmith、OpenTelemetry、Promptfoo、DeepEval。
 
 ---
 
