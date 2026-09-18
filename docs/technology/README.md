@@ -72,7 +72,8 @@
 8. 知识图谱：DeepKE / Nebula Graph / Neo4j
 9. 大模型技术体系
 10. 私有化部署与轻量化治理
-11. 应用说明：对话驱动 Agent 工作流的多仓库协同实现
+11. 对话驱动 Agent 工作流：从自然语言入口到可控业务执行
+12. 企业级 Agent 的真正价值：不是 LLM 壳，而是认知流程层
 ```
 
 原因是：
@@ -101,7 +102,8 @@ docs/technology/
 ├── 08-知识图谱：支撑GraphRAG、关系检索、实体推理.md
 ├── 09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
 ├── 10-私有化部署：解决部署、压缩、权限、治理、成本.md
-└── 11-应用说明：对话驱动Agent工作流的多仓库协同实现.md
+├── 11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
+└── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -137,7 +139,7 @@ docs/technology/
 
 ---
 
-## 5. 十个模块的学习目标与框架候选
+## 5. 十二个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
@@ -497,6 +499,76 @@ docs/technology/
 - 可观测性：Langfuse、Helicone、OpenTelemetry；
 - 基础设施：Docker、Docker Compose、Kubernetes、MinIO、Postgres；
 - 权限与身份：Keycloak、Casdoor、Authentik。
+
+---
+
+### 5.11 对话驱动 Agent 工作流
+
+对应文件：
+
+```text
+11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
+```
+
+核心问题：
+
+- 如何让用户用自然语言进入业务流程？
+- 为什么模型可以驱动流程，但不能篡改流程？
+- LLM、Tool、Policy Guard、Workflow Engine、Business Adapter 如何分工？
+- DMN、BPMN、OWL、AGE 分别解决什么问题？
+- Skill 路径和 Workflow 路径如何选择？
+- BPMN 自动节点如何查表、查图谱、调规则并流转？
+
+重点关注：
+
+- 对话入口和确定性流程控制；
+- Workflow Signal、WaitingPoint、Human Task；
+- 工具治理、权限、幂等、恢复、审计；
+- 多仓库 / 多模块协同契约；
+- Skill 到 Workflow 的升级标准；
+- Agent Workflow 的评测方法。
+
+开源框架 / 工具候选：
+
+- Workflow / BPMN：Camunda、Flowable、Activiti、Temporal、SpiffWorkflow；
+- Agent 编排：LangGraph、Semantic Kernel、AutoGen、CrewAI；
+- DMN / Rules：Camunda DMN、Drools / Kogito、OpenRules；
+- Knowledge Graph：Apache AGE、Neo4j、TypeDB、GraphDB、Jena Fuseki；
+- Observability / Eval：Langfuse、LangSmith、OpenTelemetry、Phoenix、Ragas。
+
+---
+
+### 5.12 企业级 Agent 与认知流程层
+
+对应文件：
+
+```text
+12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
+```
+
+核心问题：
+
+- 企业级 Agent 如果只是给现有 IT 系统包 LLM 壳，价值为什么有限？
+- 数字员工真正区别于聊天机器人的地方是什么？
+- 传统 IT 系统不擅长承载哪些认知劳动？
+- 什么是“认知流程层”？
+- BPMN + LLM Workflow 新增的“认知节点”是什么？
+- 企业级 Agent 的成熟度应该如何分层？
+
+重点关注：
+
+- 传统 IT 流程与 Agent Workflow 的本质差异；
+- 数字员工的角色、工具、流程、知识、权限、评测和交接机制；
+- 入口增量、知识增量、认知增量、协同增量、反馈增量；
+- L0 传统 IT 到 L5 Agentic Operating Model 的成熟度路径；
+- 如何把系统外的认知劳动纳入可观察、可复用、可改进的系统内流程。
+
+开源框架 / 工具候选：
+
+- 流程与编排：Camunda、Temporal、Flowable、LangGraph；
+- 知识与案例：LlamaIndex、LangChain、Neo4j、GraphDB；
+- 协同与自动化：n8n、Node-RED、Dify Workflow；
+- 评测与观测：Langfuse、LangSmith、OpenTelemetry、Ragas、DeepEval。
 
 ---
 
