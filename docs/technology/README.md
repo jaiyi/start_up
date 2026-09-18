@@ -63,14 +63,15 @@
 
 ```text
 1. 知识工程与知识资产设计
-2. RAG 链路设计
-3. 评测集与反馈闭环
-4. Prompt / CoT / 任务协议
-5. Agent / Workflow / Enterprise Harness
-6. WeKnora / LightRAG / Reme 对比
-7. 知识图谱：DeepKE / Nebula Graph / Neo4j
-8. 大模型技术体系
-9. 私有化部署与轻量化治理
+2. 全链路概览：知识如何进入 RAG、Agent 与业务流程
+3. RAG 链路设计
+4. 评测集与反馈闭环
+5. Prompt / CoT / 任务协议
+6. Agent / Workflow / Enterprise Harness
+7. WeKnora / LightRAG / Reme 对比
+8. 知识图谱：DeepKE / Nebula Graph / Neo4j
+9. 大模型技术体系
+10. 私有化部署与轻量化治理
 ```
 
 原因是：
@@ -89,15 +90,16 @@
 ```text
 docs/technology/
 ├── README.md
-├── 01-knowledge-engineering-and-asset-design.md
-├── 02-rag-pipeline-design.md
-├── 03-evaluation-dataset-and-feedback-loop.md
-├── 04-prompt-cot-and-task-protocol.md
-├── 05-agent-workflow-and-enterprise-harness.md
-├── 06-weknora-lightrag-reme-comparison.md
-├── 07-knowledge-graph-engineering-deepke-nebula-graph.md
-├── 08-llm-technology-system.md
-└── 09-model-compression-private-deployment-and-governance.md
+├── 01-知识工程：决定什么知识值得沉淀.md
+├── 02-全链路概览：知识如何进入RAG、Agent与业务流程.md
+├── 03-RAG：决定知识如何被检索和组织进上下文.md
+├── 04-评测：决定回答和检索是否真的有效.md
+├── 05-Prompt与任务协议：决定模型如何理解任务.md
+├── 06-Harness：决定模型如何进入流程、工具、权限和协作.md
+├── 07-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
+├── 08-知识图谱：支撑GraphRAG、关系检索、实体推理.md
+├── 09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
+└── 10-私有化部署：解决部署、压缩、权限、治理、成本.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -133,14 +135,14 @@ docs/technology/
 
 ---
 
-## 5. 九个模块的学习目标与框架候选
+## 5. 十个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
 对应文件：
 
 ```text
-01-knowledge-engineering-and-asset-design.md
+01-知识工程：决定什么知识值得沉淀.md
 ```
 
 核心问题：
@@ -171,12 +173,43 @@ docs/technology/
 
 ---
 
-### 5.2 RAG 链路设计
+### 5.2 全链路概览：知识如何进入 RAG、Agent 与业务流程
 
 对应文件：
 
 ```text
-02-rag-pipeline-design.md
+02-全链路概览：知识如何进入RAG、Agent与业务流程.md
+```
+
+核心问题：
+
+- 知识库、RAG、Prompt、Agent、Workflow、Harness、评测和反馈是什么关系？
+- 业务知识如何从现实场景进入 AI 系统？
+- 为什么不是“有知识库就够了”，也不是“有 RAG 就够了”？
+- 一个知识复利系统从输入、检索、生成、执行到反馈的完整链路是什么？
+- WeKnora、LightRAG、GraphRAG、DeepSeek Harness 等技术分别处在链路中的哪一段？
+
+重点关注：
+
+- 业务现场到知识资产的转化；
+- 知识存储、索引、检索、上下文组装；
+- 模型生成、Agent 执行和人工确认；
+- 结果反馈、知识更新和治理；
+- 初学者视角下的全链路技术地图。
+
+开源框架 / 工具候选：
+
+- 知识库：WeKnora、RAGFlow、Dify Knowledge；
+- RAG / Agent 框架：LlamaIndex、LangChain、LangGraph；
+- 评测与观测：Ragas、DeepEval、Langfuse、LangSmith；
+- 图谱增强：GraphRAG、LightRAG、Neo4j、Nebula Graph。
+
+### 5.3 RAG 链路设计
+
+对应文件：
+
+```text
+03-RAG：决定知识如何被检索和组织进上下文.md
 ```
 
 核心问题：
@@ -208,12 +241,12 @@ docs/technology/
 
 ---
 
-### 5.3 评测集与反馈闭环
+### 5.4 评测集与反馈闭环
 
 对应文件：
 
 ```text
-03-evaluation-dataset-and-feedback-loop.md
+04-评测：决定回答和检索是否真的有效.md
 ```
 
 核心问题：
@@ -243,12 +276,12 @@ docs/technology/
 
 ---
 
-### 5.4 Prompt / CoT / 任务协议设计
+### 5.5 Prompt / CoT / 任务协议设计
 
 对应文件：
 
 ```text
-04-prompt-cot-and-task-protocol.md
+05-Prompt与任务协议：决定模型如何理解任务.md
 ```
 
 核心问题：
@@ -278,12 +311,12 @@ docs/technology/
 
 ---
 
-### 5.5 Agent / Workflow / Enterprise Harness
+### 5.6 Agent / Workflow / Enterprise Harness
 
 对应文件：
 
 ```text
-05-agent-workflow-and-enterprise-harness.md
+06-Harness：决定模型如何进入流程、工具、权限和协作.md
 ```
 
 核心问题：
@@ -316,12 +349,12 @@ docs/technology/
 
 ---
 
-### 5.6 WeKnora / LightRAG / Reme 对比
+### 5.7 WeKnora / LightRAG / Reme 对比
 
 对应文件：
 
 ```text
-06-weknora-lightrag-reme-comparison.md
+07-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
 ```
 
 核心问题：
@@ -356,12 +389,12 @@ docs/technology/
 
 ---
 
-### 5.7 知识图谱工程：DeepKE / Nebula Graph / Neo4j
+### 5.8 知识图谱工程：DeepKE / Nebula Graph / Neo4j
 
 对应文件：
 
 ```text
-07-knowledge-graph-engineering-deepke-nebula-graph.md
+08-知识图谱：支撑GraphRAG、关系检索、实体推理.md
 ```
 
 核心问题：
@@ -392,12 +425,12 @@ docs/technology/
 
 ---
 
-### 5.8 大模型技术体系
+### 5.9 大模型技术体系
 
 对应文件：
 
 ```text
-08-llm-technology-system.md
+09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
 ```
 
 核心问题：
@@ -427,12 +460,12 @@ docs/technology/
 
 ---
 
-### 5.9 私有化部署与轻量化治理
+### 5.10 私有化部署与轻量化治理
 
 对应文件：
 
 ```text
-09-model-compression-private-deployment-and-governance.md
+10-私有化部署：解决部署、压缩、权限、治理、成本.md
 ```
 
 核心问题：
