@@ -75,6 +75,8 @@
 11. 对话驱动 Agent 工作流：从自然语言入口到可控业务执行
 12. 企业级 Agent 的真正价值：不是 LLM 壳，而是认知流程层
 13. 认知流程层如何落地：流程分层、BPMN 门槛与供应链数字员工
+14. 本体 Ontology：让 AI 理解业务世界的概念、关系与约束
+15. Agent 记忆管理：决定上下文、经验与长期知识如何沉淀
 ```
 
 原因是：
@@ -105,7 +107,9 @@ docs/technology/
 ├── 10-私有化部署：解决部署、压缩、权限、治理、成本.md
 ├── 11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
 ├── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
-└── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
+├── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
+├── 14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
+└── 15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -141,7 +145,7 @@ docs/technology/
 
 ---
 
-## 5. 十三个模块的学习目标与框架候选
+## 5. 十五个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
@@ -604,6 +608,76 @@ docs/technology/
 - 规则 / 决策：Camunda DMN、Drools / Kogito、OpenRules、json-rules-engine；
 - Agent / Skill：LangGraph、Semantic Kernel、PydanticAI、Dify Workflow；
 - 观测与评测：Langfuse、LangSmith、OpenTelemetry、Promptfoo、DeepEval。
+
+---
+
+### 5.14 本体 Ontology 与语义建模
+
+对应文件：
+
+```text
+14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
+```
+
+核心问题：
+
+- 什么是本体，和术语表、数据库、知识图谱、RAG 有什么区别？
+- 如何建立一个领域本体，应该如何设计类、实体、属性、关系、约束、事件和 Action？
+- RDF、RDFS、OWL、SHACL、SPARQL 分别解决什么问题？
+- 本体自动抽取有哪些方式，如何从文档、数据库、流程和历史案例中抽取候选本体？
+- 本体相关国标 / 标准通常关注哪些要求？
+- 本体和 OWL、DMN、BPMN、Tool、Agent Workflow 之间是什么关系？
+
+重点关注：
+
+- 术语表、类、实体、属性、关系、约束、规则、事件、Action；
+- 本体构建流程、能力问题、数据源映射、版本治理；
+- RDF / OWL 语义路线与 Neo4j / AGE / NebulaGraph 属性图路线；
+- 本体自动抽取、Schema / SHACL 校验、专家审核；
+- 本体如何支撑 RAG、GraphRAG、Tool Contract、DMN 判断和 BPMN 流程节点。
+
+开源框架 / 工具候选：
+
+- 本体编辑：Protégé、WebProtégé、VocBench；
+- RDF / OWL：Apache Jena、RDF4J、GraphDB、Stardog、HermiT、Pellet、ELK；
+- 图数据库：Neo4j、Apache AGE、NebulaGraph、Memgraph、ArangoDB、JanusGraph；
+- 抽取与标注：OntoGPT、LinkML、DeepKE、OpenNRE、HanLP、spaCy、Label Studio、Doccano；
+- LLM 结构化抽取：LlamaIndex、LangChain、Instructor、PydanticAI。
+
+---
+
+### 5.15 Agent 记忆管理
+
+对应文件：
+
+```text
+15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
+```
+
+核心问题：
+
+- Agent 记忆管理为什么不等于聊天记录，也不等于向量库？
+- 短期记忆、工作记忆、长期用户记忆、语义记忆、情节记忆、程序性记忆、组织记忆分别是什么？
+- 记忆写入、存储、检索、使用、更新、遗忘和审计应该如何治理？
+- Memory 与 RAG、Ontology、Workflow、Tool、Trace、Audit Log 的关系是什么？
+- 数字员工如何安全地跨会话积累经验，又不越权、不乱记、不污染系统？
+
+重点关注：
+
+- Memory 生命周期；
+- Conversation Summary、Key-Value Profile、Vector Memory、Graph Memory、Workflow State、Case Library；
+- 记忆写入门槛、来源标注、置信度、过期、删除、权限过滤；
+- 供应链数字员工中的用户偏好、任务记忆、案例记忆和组织记忆；
+- 记忆系统评测与治理。
+
+开源框架 / 工具候选：
+
+- Agent Memory：Mem0、Zep、Letta；
+- Workflow Checkpoint：LangGraph Checkpoint、Temporal；
+- Vector Memory：pgvector、Qdrant、Milvus、Weaviate；
+- Graph Memory：Neo4j、Apache AGE、Graphiti；
+- Session / Cache：Redis；
+- Trace / Audit：Langfuse、LangSmith、OpenTelemetry。
 
 ---
 
