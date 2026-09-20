@@ -1528,6 +1528,16 @@ Tool 管执行；
 Agent 管理解和协调。
 ```
 
+更准确地说，本体不是业务执行引擎，但也不只是给人看的说明书。
+
+```text
+如果只写在 Markdown 里，本体更像业务说明书；
+如果表达成 YAML / JSON Schema / OWL / SHACL / Mapping，
+本体就会变成系统可读取、可校验、可映射、可复用的语义契约。
+```
+
+所以在企业 Agent 架构里，本体通常位于“语义层”，负责定义业务对象和边界；真正的运行时执行，则交给图数据库、规则引擎、流程引擎和 Tool / API。
+
 ---
 
 ### 13.1 本体与 OWL
@@ -1821,6 +1831,171 @@ Tool 告诉系统“怎么查和怎么做”；
 DMN 告诉系统“怎么判断”；
 BPMN 告诉系统“怎么推进”；
 Agent 告诉用户“现在发生了什么、为什么、下一步怎么办”。
+```
+
+### 14.9 一个企业 Agent 落地链路
+
+为了避免把本体误解成“执行系统”，可以把一次企业 Agent 任务拆成完整运行链路。
+
+假设用户问：
+
+```text
+供应商 A 这次延期严重吗？要不要升级处理？
+```
+
+#### 第一步：Agent 参考本体理解问题
+
+本体告诉 Agent：
+
+```text
+“供应商 A”属于 Supplier；
+“延期”可能对应 DelayEvent；
+“严重”不是一个原始事实，而是需要根据规则判断出来的结果；
+判断严重程度可能需要 PurchaseOrderLine、Material、Inventory、ProductionPlan、RiskEvent 等对象。
+```
+
+这一步本体的作用不是执行，而是帮助 Agent 把自然语言问题映射成业务对象和关系路径。
+
+#### 第二步：Agent 查询图数据库 / AGE 获取事实关系
+
+如果企业使用 Apache AGE、Neo4j、NebulaGraph 等图数据库，本体可以被投影成图谱 schema。
+
+运行时可以查询：
+
+```text
+Supplier_A supplies 哪些 Material；
+这些 Material 被哪些 PurchaseOrderLine 订购；
+相关订单行是否存在 DelayEvent；
+这些物料是否影响 ProductionPlan；
+该供应商是否关联历史 RiskEvent。
+```
+
+这里 AGE / 图数据库负责的是：
+
+```text
+存储实体和关系；
+查询事实路径；
+支撑 GraphRAG；
+为 Agent / Workflow 提供上下文。
+```
+
+本体负责的是：
+
+```text
+定义哪些点、边、属性是有意义的；
+定义字段和关系的业务含义；
+定义图谱 schema 与业务语言之间的映射。
+```
+
+#### 第三步：Agent 调用 Tool 获取实时数据
+
+图谱里不一定保存所有实时数据。
+
+所以 Agent 可能继续调用工具：
+
+```text
+query_purchase_order(po_line_id)：查询订单状态；
+query_inventory(material_code)：查询库存；
+query_supplier_risk(supplier_id)：查询供应商风险；
+query_production_impact(material_code)：查询生产影响。
+```
+
+本体在这里提供 Tool 语义契约：
+
+```text
+Tool 作用于哪个业务对象；
+输入参数来自哪个实体属性；
+输出字段应该映射成本体里的什么概念；
+哪些 Tool 只有查询能力；
+哪些 Tool 有副作用，需要权限或人工确认。
+```
+
+#### 第四步：DMN / 规则引擎做业务判断
+
+“严重不严重”通常不是本体自己判断，而是交给 DMN 或规则引擎。
+
+例如：
+
+```text
+如果 delay_days > 7，
+并且 material_criticality = high，
+并且 impacts_production = true，
+则 priority = high，
+escalation_required = true，
+target_role = supply_chain_manager。
+```
+
+本体定义 DMN 使用的字段语义，DMN 定义判断逻辑。
+
+```text
+本体定义：delay_days、material_criticality、impacts_production 是什么；
+DMN 判断：这些条件组合起来是否需要升级。
+```
+
+#### 第五步：BPMN / Workflow 推进业务流程
+
+如果 DMN 判断需要升级，流程引擎负责推进后续步骤。
+
+例如：
+
+```text
+生成延期分析报告
+  ↓
+等待采购负责人确认
+  ↓
+创建协同工单
+  ↓
+通知供应商
+  ↓
+升级供应链经理
+  ↓
+跟踪反馈
+  ↓
+关闭流程
+```
+
+本体在这里定义流程节点操作的业务对象；BPMN / Workflow 定义执行顺序、人工节点、异常分支和状态流转。
+
+#### 第六步：Tool / API 执行真实动作
+
+真正产生副作用的动作由 Tool / API 执行。
+
+例如：
+
+```text
+create_follow_up_task；
+send_supplier_reminder；
+start_delay_workflow；
+update_case_status。
+```
+
+本体可以声明这些 Action 的语义、对象、输入、权限和风险等级，但不会自己发送消息或修改业务系统。
+
+#### 第七步：Agent 向用户解释结论和证据
+
+最后 Agent 把事实、规则判断和流程状态组织成用户可理解的回答：
+
+```text
+这个延期属于高优先级。
+原因是：延期 9 天、物料为关键物料、当前库存只能覆盖 2 天、会影响生产计划 P-01。
+系统已建议发起延期处理流程，但发送供应商通知前需要你确认。
+```
+
+这时 Agent 的回答来自多个层的协作：
+
+```text
+本体：提供业务语义和关系路径；
+图谱 / AGE：提供事实关系；
+Tool：提供实时数据和可执行动作；
+DMN：提供判断结果；
+BPMN / Workflow：提供流程状态；
+Agent：整合上下文并向用户解释。
+```
+
+#### 一句话总结
+
+```text
+本体不是“自动做事的机器”，而是“让机器知道该围绕什么业务对象、关系、规则和动作去做事的语义契约”。
 ```
 
 ---
