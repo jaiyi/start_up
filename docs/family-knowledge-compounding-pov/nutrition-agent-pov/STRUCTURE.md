@@ -74,25 +74,25 @@ nutrition-agent-pov/
 │
 ├── skills/
 │   ├── meal-recommender/
-│   │   ├── README.md
-│   │   ├── skill.md
-│   │   └── examples.md
+│   │   ├── module-meal-recommender-readme.md
+│   │   ├── skill-meal-recommender.md
+│   │   └── examples-meal-recommender.md
 │   ├── inventory-manager/
-│   │   ├── README.md
-│   │   ├── skill.md
-│   │   └── examples.md
+│   │   ├── module-inventory-manager-readme.md
+│   │   ├── skill-inventory-manager.md
+│   │   └── examples-inventory-manager.md
 │   ├── recipe-collector/
-│   │   ├── README.md
-│   │   ├── skill.md
-│   │   └── examples.md
+│   │   ├── module-recipe-collector-readme.md
+│   │   ├── skill-recipe-collector.md
+│   │   └── examples-recipe-collector.md
 │   ├── feedback-learner/
-│   │   ├── README.md
-│   │   ├── skill.md
-│   │   └── examples.md
+│   │   ├── module-feedback-learner-readme.md
+│   │   ├── skill-feedback-learner.md
+│   │   └── examples-feedback-learner.md
 │   └── knowledge-maintainer/
-│       ├── README.md
-│       ├── skill.md
-│       └── examples.md
+│       ├── module-knowledge-maintainer-readme.md
+│       ├── skill-knowledge-maintainer.md
+│       └── examples-knowledge-maintainer.md
 │
 ├── weknora/
 │   ├── agent-config.md
@@ -279,10 +279,12 @@ Prompt 要和测试用例一起演进。
 第一版可以只放 Markdown：
 
 ```text
-skill.md：Skill 定义、输入、输出、边界
-examples.md：典型用户输入和理想输出
-README.md：该 Skill 的职责说明
+skill-<module>.md：Skill 定义、输入、输出、边界
+examples-<module>.md：典型用户输入和理想输出
+module-<module>-readme.md：该能力模块的职责说明
 ```
+
+说明：这里使用带模块名的文件名，是为了上传到 WeKnora 知识库时避免多个 `skill.md` / `examples.md` 在文档列表里难以区分。
 
 后续如果 WeKnora Skill 支持代码或 manifest，可以扩展为：
 
@@ -470,7 +472,8 @@ planned-consumption-log.md
 ```text
 main-agent-system-prompt.md
 meal-recommender.prompt.md
-meal-recommender/skill.md
+skills/meal-recommender/skill-meal-recommender.md
+skills/meal-recommender/examples-meal-recommender.md
 ```
 
 规则：
@@ -478,7 +481,7 @@ meal-recommender/skill.md
 ```text
 Prompt 文件直接可复制到 WeKnora；
 Skill 文件记录职责、输入、输出、工具和边界；
-示例放 examples.md。
+示例放 examples-<module>.md。
 ```
 
 ## 8. 状态文件写入边界
@@ -518,7 +521,7 @@ WeKnora Agent：对话入口和工具调用层
 1. 先补齐 inventory/current-inventory.md、purchase-log.md、planned-consumption-log.md。
 2. 补齐 meals/recent-menu-log.md、meal-feedback-log.md。
 3. 把主 Agent Prompt 从配置方案中拆到 prompts/main-agent-system-prompt.md。
-4. 为 5 个后台 Skill 各建 skill.md 和 examples.md。
+4. 为 5 个后台能力模块各建 `skill-<module>.md` 和 `examples-<module>.md`。
 5. 建 weknora/agent-config.md 和 tool-permissions.md。
 6. 在 WeKnora 平台按文档配置 Agent。
 7. 用 tests/prompt-cases/ 记录典型问题和理想回答。

@@ -37,6 +37,7 @@ agent-rules/recommendation-rules.md
 
 ```text
 推荐菜单；
+如果是早餐，默认包含两个快手菜；
 为什么适合；
 宝宝版处理；
 成人/老人版处理；
