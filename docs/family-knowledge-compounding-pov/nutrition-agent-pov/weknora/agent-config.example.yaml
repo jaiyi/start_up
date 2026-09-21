@@ -1,0 +1,59 @@
+# WeKnora Agent 配置样例
+
+agent:
+  name: 家庭营养师
+  mode: smart-reasoning
+  type: custom
+  memory_enabled: true
+  web_search_enabled: true
+  web_search_policy: only_recipe_collection
+
+knowledge_base:
+  selection_mode: selected
+  names:
+    - 家庭营养师知识库
+  source_paths:
+    - family/
+    - recipes/
+    - sources/
+    - inventory/
+    - meals/
+    - agent-rules/
+    - prompts/
+    - skills/
+
+skills:
+  selection_mode: selected
+  names:
+    - meal-recommender
+    - inventory-manager
+    - recipe-collector
+    - feedback-learner
+    - knowledge-maintainer
+
+tools:
+  read_allowed:
+    - search_knowledge
+    - read_document
+    - list_documents
+    - wiki_search
+    - wiki_read_page
+    - wiki_flag_issue
+  write_allowed_after_confirmation:
+    - wiki_write_page
+    - wiki_replace_text
+  disabled:
+    - wiki_delete_page
+    - wiki_rename_page
+    - shell_exec
+
+model:
+  temperature: 0.4
+  max_iterations: 25
+  citation_enabled: true
+  retrieve_kb_only_when_mentioned: false
+  retain_retrieval_history: true
+
+server_env:
+  WEKNORA_MODEL_MAX_CONCURRENCY: 5
+  WEKNORA_WIKI_ASYNQ_CONCURRENCY: 1

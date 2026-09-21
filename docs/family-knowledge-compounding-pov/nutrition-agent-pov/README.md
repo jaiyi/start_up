@@ -8,10 +8,15 @@
 family/：家庭成员画像、偏好和饮食规则
 recipes/：扁平 Markdown 菜谱库，每道菜一个文件
 sources/：做菜博主、菜谱来源和来源评价规则
-inventory/：当前库存和采购记录
-meals/：每餐反馈和菜单历史
+inventory/：当前库存、采购记录和计划消耗
+meals/：近期菜单、每餐反馈和菜单历史
 agent-rules/：推荐、反馈、库存更新和微信交互规则
+prompts/：可复制到 WeKnora 平台的主 Agent / Skill Prompt
+skills/：后台 Skill 定义、示例和后续可执行逻辑
+weknora/：WeKnora 平台配置、工具权限和知识库绑定说明
 ```
+
+详细结构规划见：[`STRUCTURE.md`](./STRUCTURE.md)。
 
 ## 核心原则
 
