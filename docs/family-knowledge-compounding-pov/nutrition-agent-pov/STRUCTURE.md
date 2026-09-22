@@ -12,10 +12,10 @@
 
 ```text
 1. 知识库内容和代码分层，但放在同一个项目根目录下。
-2. Markdown 仍然是第一版家庭饮食知识和强状态的 source of truth。
+2. Markdown 是稳定知识、规则、Prompt、Skill、模板和导出快照的 source of truth；动态强状态以独立 Postgres 为准。
 3. Prompt / Skill 要版本化，不能只存在于 WeKnora 平台页面里。
 4. WeKnora 平台配置要可复现，避免只靠手工记忆。
-5. 后续如果接微信机器人、MCP 或轻量后端服务，也放在本目录下逐步扩展。
+5. 同机 Docker Postgres + MCP 服务的设计、代码和部署说明也放在本目录下逐步扩展。
 6. 菜谱库继续保持扁平结构，不按目录拆分类，分类写在菜谱 metadata / 标签里。
 ```
 
@@ -101,16 +101,41 @@ nutrition-agent-pov/
 │   ├── tool-permissions.md
 │   └── deployment-notes.md
 │
+├── state/
+│   ├── README.md
+│   ├── data-dictionary.md
+│   ├── schemas/
+│   ├── migrations/
+│   ├── seeds/
+│   ├── fixtures/
+│   └── exports/
+│       └── markdown/
+│
 ├── app/
 │   ├── README.md
 │   ├── src/
 │   │   ├── domain/
-│   │   ├── services/
-│   │   ├── repositories/
+│   │   ├── application/
+│   │   ├── ports/
 │   │   ├── adapters/
-│   │   ├── schemas/
+│   │   │   ├── postgres/
+│   │   │   ├── markdown/
+│   │   │   └── weknora/
+│   │   ├── mcp/
+│   │   │   ├── tools/
+│   │   │   └── schemas/
+│   │   ├── jobs/
 │   │   └── utils/
 │   └── tests/
+│       ├── unit/
+│       ├── integration/
+│       └── contract/
+│
+├── infra/
+│   ├── README.md
+│   ├── docker-compose.family-state.example.yml
+│   ├── env.example
+│   └── postgres/
 │
 ├── scripts/
 │   ├── validate-recipes.md
@@ -212,14 +237,14 @@ repeat_policy:
 
 ### 3.4 `inventory/`
 
-职责：库存强状态和采购记录。
+职责：保存由 Postgres 导出的库存快照、采购记录摘要和计划消耗摘要。
 
 建议补齐：
 
 ```text
-current-inventory.md：当前真实库存
-purchase-log.md：每周/每次采购记录
-planned-consumption-log.md：推荐后生成的计划消耗
+current-inventory.md：由 Postgres 导出的当前库存快照
+purchase-log.md：由 Postgres 导出的每周/每次采购记录摘要
+planned-consumption-log.md：由 Postgres 导出的计划消耗摘要
 ingredient-inventory-profile.md：家庭常备食材画像
 fish-seafood-purchase-guide.md：鱼虾海鲜采购规则
 ```
@@ -227,25 +252,26 @@ fish-seafood-purchase-guide.md：鱼虾海鲜采购规则
 关键规则：
 
 ```text
-推荐菜单只生成 planned consumption；
-确认执行且饭后无反馈，才把 planned consumption 转成实际库存扣减；
-饭后有反馈时，以反馈修正实际消耗。
+推荐菜单通过 MCP 生成 planned consumption；
+确认执行且饭后无反馈，通过 MCP 把 planned consumption 转成实际库存扣减；
+饭后有反馈时，通过 MCP 以反馈修正实际消耗；
+Markdown 文件只承接导出快照，不作为实时事务状态源。
 ```
 
 ### 3.5 `meals/`
 
-职责：近期菜单、饭后反馈、一周菜单和历史归档。
+职责：保存由 Postgres 导出的近期菜单、饭后反馈、一周菜单和历史归档摘要。
 
 建议补齐：
 
 ```text
-recent-menu-log.md：最近 14 天滚动菜单记录
-meal-feedback-log.md：饭后反馈记录
+recent-menu-log.md：由 Postgres 导出的最近 14 天滚动菜单摘要
+meal-feedback-log.md：由 Postgres 导出的饭后反馈摘要
 weekly-menu-log.md：周菜单计划
 monthly-menu-summary.md：超过 14 天后的简要归档
 ```
 
-`recent-menu-log.md` 是第一版避免重复推荐的主索引。
+近期重复规避以 Postgres 中的 meal_events / meal_plans 为准，`recent-menu-log.md` 是导出快照。
 
 ## 4. 新增目录职责
 
@@ -316,25 +342,53 @@ deployment-notes.md：与部署文档的关联说明
 只放可公开的配置项和操作步骤。
 ```
 
-### 4.4 `app/`
+### 4.4 `state/`
 
-职责：后续如果要把家庭营养师做成微信 Bot、MCP 服务或轻量 API，代码放在这里。
+职责：保存动态状态的数据模型、数据库迁移、测试数据和 Markdown 导出规范。
+
+建议内容：
+
+```text
+state/data-dictionary.md：动态状态字段、枚举和业务含义
+state/schemas/：MCP 输入输出和数据库记录 schema
+state/migrations/：Postgres 迁移脚本
+state/seeds/：初始化数据
+state/fixtures/：测试数据
+state/exports/markdown/：状态导出 Markdown 的结构规范
+```
+
+### 4.5 `app/`
+
+职责：后续实现家庭营养状态 MCP 服务、微信 Bot 或轻量 API 时，代码放在这里。
 
 建议分层：
 
 ```text
 app/src/domain/：核心领域模型，例如 Recipe、InventoryItem、MealEvent
-app/src/services/：业务服务，例如推荐编排、库存扣减、反馈学习
-app/src/repositories/：文件/数据库访问接口
-app/src/adapters/：WeKnora、微信、MCP、文件系统适配器
-app/src/schemas/：输入输出 schema 和校验
+app/src/application/：业务用例，例如推荐编排、库存扣减、反馈学习
+app/src/ports/：仓储和外部服务接口
+app/src/adapters/：Postgres、Markdown、WeKnora、微信适配器
+app/src/mcp/：MCP 工具定义和输入输出 schema
 app/src/utils/：通用工具
 app/tests/：代码级单元测试和集成测试
 ```
 
-第一版如果没有代码，可以只保留规划，不急着创建空目录。
+当前先保留 README 规划；真正实现 MCP 服务时再补代码、测试和迁移。
 
-### 4.5 `scripts/`
+### 4.6 `infra/`
+
+职责：保存同机 Docker Postgres + MCP 服务的部署说明和示例配置。
+
+建议文件：
+
+```text
+infra/README.md：部署原则和目录边界
+infra/docker-compose.family-state.example.yml：示例 compose，不含真实密钥
+infra/env.example：环境变量示例
+infra/postgres/：Postgres 初始化和运维说明
+```
+
+### 4.7 `scripts/`
 
 职责：保存维护脚本说明或脚本。
 
@@ -347,7 +401,7 @@ export-knowledge：导出知识库快照
 archive-menu-log：把超过 14 天菜单归档
 ```
 
-### 4.6 `tests/`
+### 4.8 `tests/`
 
 职责：保存 Prompt / Skill / 回归测试样例。
 
@@ -362,7 +416,7 @@ tests/regression-cases/：历史失败案例，防止回归
 
 第一版测试可以先用 Markdown 表格，不一定马上写自动化测试。
 
-### 4.7 `ops/`
+### 4.9 `ops/`
 
 职责：运维、备份、发布和故障处理。
 
@@ -376,7 +430,7 @@ release-checklist.md：每次更新 WeKnora 配置前的检查清单
 
 ## 5. 第一阶段最小落地结构
 
-不建议一次性创建所有目录。第一阶段先补齐和当前 MVP 强相关的目录：
+第一阶段直接按“稳定知识 + Postgres 动态状态 + MCP 服务”的方向组织，不再把库存和菜单 Markdown 当作实时强状态。
 
 ```text
 nutrition-agent-pov/
@@ -406,29 +460,40 @@ nutrition-agent-pov/
 │   ├── recipe-collector/
 │   ├── feedback-learner/
 │   └── knowledge-maintainer/
-└── weknora/
-    ├── agent-config.md
-    └── tool-permissions.md
+├── weknora/
+│   ├── agent-config.md
+│   └── tool-permissions.md
+├── state/
+│   └── README.md
+├── app/
+│   └── README.md
+└── infra/
+    ├── README.md
+    ├── docker-compose.family-state.example.yml
+    └── env.example
 ```
 
 ## 6. 第二阶段扩展结构
 
-当 WeKnora 平台配置跑通、微信入口开始接入后，再补：
+当 WeKnora 平台配置和 MCP 架构跑通后，再补代码级实现和自动化：
 
 ```text
-app/
+state/data-dictionary.md
+state/migrations/
+state/schemas/
+app/src/
+app/tests/
 scripts/
-tests/
 ops/
 ```
 
 第二阶段重点：
 
 ```text
-1. 自动校验菜谱格式；
-2. 自动归档 recent-menu-log；
-3. 自动同步 Markdown 到 WeKnora；
-4. 接微信 Bot 或 MCP 工具；
+1. 建立 Postgres 表结构和迁移；
+2. 实现 MCP 工具的输入校验、幂等和审计；
+3. 自动导出 inventory/ 和 meals/ Markdown 快照；
+4. 自动同步稳定 Markdown 到 WeKnora；
 5. 为推荐、库存、反馈建立回归测试集。
 ```
 
@@ -486,14 +551,14 @@ Skill 文件记录职责、输入、输出、工具和边界；
 
 ## 8. 状态文件写入边界
 
-第一版允许 Agent 建议更新，但写入需要确认。
+第一版允许 Agent 建议更新；稳定知识写入 Markdown/Wiki 需要确认，动态状态写入 Postgres 也必须通过 MCP 确认工具。
 
 ```text
-可读：全部 Markdown 文件
-可建议更新：family、recipes、inventory、meals、agent-rules
-可自动扣减：仅在用户确认执行且饭后无负面反馈后，更新 inventory 和 meals
-必须确认：新增菜谱、修改家庭偏好、修改饮食规则、修改推荐规则
-禁止自动：删除菜谱、重命名菜谱、覆盖整份规则文件
+可读：全部 Markdown 稳定知识 + MCP 动态状态只读工具
+可建议更新：family、recipes、agent-rules、Prompt、Skill、Postgres 动态状态
+可扣减：仅在用户确认执行且饭后无负面反馈后，通过 MCP 更新 Postgres
+必须确认：新增菜谱、修改家庭偏好、修改饮食规则、修改推荐规则、写入动态状态
+禁止自动：删除菜谱、重命名菜谱、覆盖整份规则文件、执行任意 SQL
 ```
 
 ## 9. 与 WeKnora 平台的关系
@@ -503,14 +568,16 @@ nutrition-agent-pov/：源文件和配置版本库
 WeKnora 知识库：索引和检索层
 WeKnora Wiki：可视化知识页面和人工编辑层
 WeKnora Agent：对话入口和工具调用层
+Family Nutrition MCP：动态状态读写边界
+独立 Docker Postgres：库存、菜单、反馈等动态状态源
 微信入口：低摩擦日常使用入口
 ```
 
 同步原则：
 
 ```text
-先改 nutrition-agent-pov/ 源文件；
-再同步到 WeKnora；
+稳定知识先改 nutrition-agent-pov/ 源文件，再同步到 WeKnora；
+动态状态通过 MCP 写入 Postgres，再按需导出 Markdown 快照；
 平台配置变更要回写到 weknora/ 和 prompts/；
 不要让平台页面成为唯一真实版本。
 ```
@@ -518,12 +585,12 @@ WeKnora Agent：对话入口和工具调用层
 ## 10. 推荐执行顺序
 
 ```text
-1. 先补齐 inventory/current-inventory.md、purchase-log.md、planned-consumption-log.md。
-2. 补齐 meals/recent-menu-log.md、meal-feedback-log.md。
-3. 把主 Agent Prompt 从配置方案中拆到 prompts/main-agent-system-prompt.md。
-4. 为 5 个后台能力模块各建 `skill-<module>.md` 和 `examples-<module>.md`。
-5. 建 weknora/agent-config.md 和 tool-permissions.md。
-6. 在 WeKnora 平台按文档配置 Agent。
-7. 用 tests/prompt-cases/ 记录典型问题和理想回答。
-8. 稳定后再考虑 app/、scripts/、自动同步和微信入口。
+1. 明确稳定知识和动态状态边界。
+2. 建 state/、app/、infra/ 文档，定义 Postgres + MCP 目标结构。
+3. 更新 prompts/ 和 agent-rules/，让库存/菜单/反馈走 MCP。
+4. 建 weknora/agent-config.md 和 tool-permissions.md 的 MCP 配置说明。
+5. 后续实现 MCP 服务、数据库迁移和 Docker 部署。
+6. 在 WeKnora 平台接入 MCP 工具。
+7. 用 tests/prompt-cases/ 和 app/tests/ 记录端到端测试。
+8. 增加导出 Markdown 快照、备份和恢复流程。
 ```

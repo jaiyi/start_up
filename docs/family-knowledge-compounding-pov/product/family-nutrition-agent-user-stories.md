@@ -4,7 +4,7 @@
 
 ## 1. 产品一句话
 
-家庭营养师 Agent 是一个通过微信或 WeKnora 对话入口使用的家庭饮食助手。它基于家庭成员画像、饮食规则、菜谱库、当前库存、近期菜单和饭后反馈，帮助家庭每天决定吃什么，并持续沉淀更懂这个家庭的饮食知识。
+家庭营养师 Agent 是一个通过微信或 WeKnora 对话入口使用的家庭饮食助手。它基于家庭成员画像、饮食规则、菜谱库、当前库存、近期菜单和饭后反馈，帮助家庭每天决定吃什么，并持续沉淀更懂这个家庭的饮食知识。其中稳定知识由 Git Markdown + WeKnora 知识库管理，库存、菜单、反馈等动态状态由独立 Docker Postgres + MCP 服务管理。
 
 核心不是“生成一道菜”，而是形成闭环：
 
@@ -107,7 +107,7 @@
 2. inventory-manager：库存新增、库存扣减、临期提醒和采购建议
 3. recipe-collector：新菜谱收集、适配判断和标准化
 4. feedback-learner：饭后反馈理解和知识更新建议
-5. knowledge-maintainer：用户确认后写入 Wiki / Markdown
+5. knowledge-maintainer：用户确认后沉淀稳定知识到 Wiki / Markdown；动态状态写入交给 MCP 工具
 ```
 
 ## 4. 核心产品原则
@@ -129,20 +129,20 @@
 
 ### 4.2 库存是强状态
 
-推荐必须读取当前库存。如果库存缺失或不确定，Agent 必须先问，不要假设。
+推荐必须通过 MCP 读取 Postgres 中的当前库存。如果 MCP 返回库存缺失或不确定，Agent 必须先问，不要假设。
 
 ### 4.3 推荐时生成计划消耗
 
-推荐菜品时，Agent 必须同步生成“预计库存消耗”。
+推荐菜品时，Agent 必须同步生成“预计库存消耗”，但只有用户确认后才通过 MCP 写入计划消耗。
 
 推荐本身不等于已经做饭，因此第一步记录为计划消耗：
 
 ```text
 推荐菜单
   ↓
-生成 planned consumption
+生成 planned consumption 建议
   ↓
-等待用户执行或默认确认
+等待用户确认后写入 MCP / 等待执行
 ```
 
 ### 4.4 饭后无反馈视为正常
@@ -152,12 +152,12 @@
 ```text
 本餐执行正常；
 没有新增口味/做法问题；
-按计划消耗自动扣减库存；
-菜单进入近期菜单记录；
+通过 MCP 按计划消耗扣减库存；
+通过 MCP 写入 meal event；
 菜谱推荐权重不做负向调整。
 ```
 
-如果用户补充反馈，则以反馈为准修正库存和偏好。
+如果用户补充反馈，则以反馈为准通过 MCP 修正库存，并生成偏好/菜谱更新建议。
 
 ### 4.5 新增菜谱必须人工确认
 
@@ -177,14 +177,11 @@
 recipes/*.md
 family/member-preferences.md
 family/dietary-rules.md
-inventory/current-inventory.md
-inventory/purchase-log.md
-meals/meal-feedback-log.md
-meals/recent-menu-log.md
 agent-rules/*.md
+Postgres 动态状态：inventory、purchase、planned consumption、meal events、feedback
 ```
 
-确认前只输出建议更新内容。
+确认前只输出建议更新内容。稳定知识确认后写入 Markdown / Wiki；动态状态确认后通过 MCP 工具写入 Postgres。
 
 ## 5. 用户故事 P0
 
@@ -200,8 +197,8 @@ agent-rules/*.md
 
 ```text
 1. 读取家庭成员画像和饮食规则；
-2. 读取当前库存；
-3. 读取最近 2 周推荐/实际吃过的菜单；
+2. 通过 MCP 读取当前库存；
+3. 通过 MCP 读取最近 2 周推荐/实际吃过的菜单；
 4. 检索菜谱库；
 5. 排除最近频繁出现的菜；
 6. 生成宝宝版和成人/老人共用版；
@@ -329,8 +326,8 @@ agent-rules/*.md
 1. 解析新增食材；
 2. 归类为蔬菜、蛋白质、豆制品、根茎、耐放食材等；
 3. 判断优先消耗顺序；
-4. 生成 current-inventory.md 和 purchase-log.md 的更新建议；
-5. 等待用户确认写入。
+4. 生成采购入库和库存优先级的结构化变更；
+5. 等待用户确认后，通过 MCP 写入 Postgres。
 ```
 
 验收标准：
@@ -356,8 +353,8 @@ agent-rules/*.md
 ```text
 1. 读取本餐 planned consumption；
 2. 将计划消耗转为实际消耗；
-3. 更新 current-inventory.md 建议；
-4. 记录 recent-menu-log.md；
+3. 通过 MCP 扣减或修正库存；
+4. 通过 MCP 记录 meal event；
 5. 不更新负向偏好；
 6. 如果有剩菜，记录可复热状态。
 ```
@@ -385,7 +382,7 @@ agent-rules/*.md
 
 没有负面反馈，本次不调整成员偏好和菜谱权重。
 
-是否确认写入库存和菜单记录？
+是否确认通过 MCP 写入库存和菜单记录？
 ```
 
 验收标准：
@@ -414,7 +411,7 @@ agent-rules/*.md
 4. 生成成员偏好更新建议；
 5. 生成推荐权重调整建议；
 6. 同步判断库存实际消耗；
-7. 等待用户确认写入。
+7. 等待用户确认后，通过 MCP 写入动态状态；稳定知识变更另行生成 Markdown 建议。
 ```
 
 验收标准：
@@ -505,7 +502,7 @@ agent-rules/*.md
 系统行为：
 
 ```text
-1. 读取 recent-menu-log.md；
+1. 通过 MCP 的 list_recent_meals 读取近期菜单；
 2. 降低近 2 周已推荐或已执行菜品；
 3. 区分“推荐过但没做”和“实际做过”；
 4. 给出替代方案。
@@ -513,13 +510,9 @@ agent-rules/*.md
 
 ## 7. 近期菜单滚动记录
 
-为了避免文档过长，同时规避菜品频繁出现，第一版维护一个滚动文件：
+为了避免菜品频繁出现，第一版在 Postgres 维护近期菜单滚动状态，并通过 MCP 读取。
 
-```text
-meals/recent-menu-log.md
-```
-
-保留范围：
+动态状态保留范围：
 
 ```text
 最近 14 天推荐菜单；
@@ -530,45 +523,14 @@ meals/recent-menu-log.md
 是否适合近期再次推荐。
 ```
 
-建议结构：
+建议数据对象：
 
-```markdown
-# 近期菜单记录
-
-## 滚动规则
-
-- 只保留最近 14 天详细记录。
-- 超过 14 天的详细记录可归档到 monthly-menu-summary.md。
-- 推荐过但未确认执行的菜，记为 recommended。
-- 确认执行或饭后无反馈默认正常的菜，记为 cooked。
-
-## 菜品最近状态
-
-| 菜品 | 最近推荐日期 | 最近执行日期 | 最近反馈 | 近期推荐策略 |
-|---|---|---|---|---|
-| 虾仁豆腐羹 | 2026-09-20 | 2026-09-20 | 正常 | 7 天内降低推荐 |
-| 番茄鸡蛋 | 2026-09-18 | 2026-09-18 | 最近重复 | 14 天内降低推荐 |
-
-## 每日记录
-
-### 2026-09-20 晚餐
-
-状态：cooked
-
-推荐菜单：
-- 虾仁豆腐羹
-- 西兰花鸡蛋
-
-计划消耗：
-- 虾仁：150g
-- 豆腐：1 盒
-- 西兰花：半颗
-
-实际消耗：
-- 默认按计划消耗
-
-反馈：
-- 无负面反馈
+```text
+meal_plans：推荐和计划菜单；
+meal_plan_items：每餐菜品明细；
+planned_consumptions：计划消耗；
+meal_events：实际执行菜单；
+meal_feedback：饭后反馈。
 ```
 
 推荐规则：
@@ -581,65 +543,68 @@ meals/recent-menu-log.md
 负面反馈菜品：按反馈严重程度降低。
 ```
 
-备选方案：也可以在每道菜谱 frontmatter 里维护：
+`meals/recent-menu-log.md` 可作为 Postgres 导出的可读快照，用于 Git 归档、人工审阅和 WeKnora 索引摘要。不要在每道菜谱 frontmatter 中高频维护 `last_recommended_at` / `last_cooked_at`，避免频繁改动大量菜谱文件。
 
-```yaml
-last_recommended_at: 2026-09-20
-last_cooked_at: 2026-09-20
-recent_feedback: 正常
-```
+## 8. PostgreSQL、MCP 与动态状态管理
 
-但第一版不建议这样做，因为会频繁改动大量菜谱文件。优先使用 `recent-menu-log.md` 作为滚动索引。
-
-## 8. PostgreSQL 与文件状态管理
-
-WeKnora 自身有 PostgreSQL，用于平台数据、用户、知识库、任务、索引相关元数据等。但第一版家庭营养师 POV 不建议直接新建业务表。
+WeKnora 自身有 PostgreSQL，用于平台数据、用户、知识库、任务、索引相关元数据等。家庭营养师不直接在 WeKnora 内部库里建业务表，而是部署一个独立的同机 Docker Postgres，并通过 MCP 服务暴露受控工具。
 
 原因：
 
 ```text
-1. 直接改 WeKnora 数据库需要理解表结构和迁移机制；
-2. 后续升级 WeKnora 可能和自定义表/字段冲突；
-3. 当前 POV 的核心是验证家庭饮食知识闭环，不是开发完整业务系统；
-4. Markdown 文件更容易人工审核、备份、迁移和回滚；
-5. WeKnora 的价值先作为知识检索、Wiki 和 Agent 执行层。
+1. WeKnora 内部数据库属于平台实现细节，直接改表会影响升级和维护；
+2. 库存、菜单、反馈是高频动态状态，需要事务、幂等和审计；
+3. Markdown 文件适合稳定知识、人工审阅和归档，不适合频繁扣减库存；
+4. MCP 工具可以限制 Agent 只能执行业务动作，不能执行任意 SQL；
+5. 同机 Docker Postgres 成本低、网络简单，后续可迁移到托管 Postgres。
 ```
 
-第一版状态存储建议：
+动态状态 source of truth：
 
 ```text
-强状态仍放 Markdown：
-- inventory/current-inventory.md
-- inventory/purchase-log.md
-- meals/recent-menu-log.md
-- meals/meal-feedback-log.md
-
-WeKnora 负责索引、检索、Wiki 页面、Agent 执行和可视化编辑。
+独立 Postgres：
+- inventory_items
+- inventory_events
+- purchase_records
+- purchase_items
+- meal_plans
+- meal_plan_items
+- planned_consumptions
+- meal_events
+- meal_feedback
+- preference_observations
+- audit_log
 ```
 
-什么时候再考虑 PostgreSQL：
+Markdown 文件的新定位：
 
 ```text
-库存变成高频结构化数据；
-需要多用户并发更新库存；
-需要精确数量、单位换算、保质期提醒；
-需要自动统计营养、成本、浪费率；
-需要和微信机器人、采购系统或日历系统做可靠事务集成。
+inventory/current-inventory.md
+inventory/purchase-log.md
+inventory/planned-consumption-log.md
+meals/recent-menu-log.md
+meals/meal-feedback-log.md
 ```
 
-第二阶段可以增加一个独立轻量服务，而不是直接改 WeKnora 内部库：
+这些文件保留，但作为 Postgres 导出的可读快照、Git 归档和 WeKnora 索引摘要，不再作为实时事务状态源。
+
+MCP 工具第一版：
 
 ```text
-family_nutrition_service
-  - inventory_items
-  - purchase_records
-  - meal_plans
-  - meal_events
-  - recipe_feedback
-  - member_preferences_delta
+get_current_inventory
+get_inventory_risks
+list_recent_meals
+list_pending_planned_consumptions
+get_meal_feedback_summary
+record_purchase_after_confirmation
+create_planned_consumption
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
+export_state_snapshot_to_markdown
 ```
 
-然后通过 API / MCP 提供给 WeKnora Agent 调用。
+所有写入工具必须要求用户确认、结构化参数、`idempotency_key` 和审计记录。
 
 ## 9. P0 验收清单
 

@@ -1,0 +1,35 @@
+# 示例文件：不要直接放生产密码。
+# 服务器部署建议复制到 /opt/family-nutrition-state/docker-compose.yml 后再按实际环境调整。
+
+services:
+  family-nutrition-postgres:
+    image: postgres:16
+    container_name: family-nutrition-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FAMILY_NUTRITION_POSTGRES_DB}
+      POSTGRES_USER: ${FAMILY_NUTRITION_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${FAMILY_NUTRITION_POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - family-nutrition-state
+    # 不暴露公网端口。需要本机调试时再临时绑定 127.0.0.1。
+
+  family-nutrition-mcp-server:
+    image: family-nutrition-mcp-server:latest
+    container_name: family-nutrition-mcp-server
+    restart: unless-stopped
+    depends_on:
+      - family-nutrition-postgres
+    environment:
+      DATABASE_URL: ${FAMILY_NUTRITION_DATABASE_URL}
+      MCP_AUTH_TOKEN: ${FAMILY_NUTRITION_MCP_AUTH_TOKEN}
+    networks:
+      - family-nutrition-state
+    # 具体端口需按 WeKnora MCP 接入方式确定。
+
+networks:
+  family-nutrition-state:
+    driver: bridge

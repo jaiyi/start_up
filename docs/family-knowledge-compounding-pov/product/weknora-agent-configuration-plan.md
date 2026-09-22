@@ -9,7 +9,9 @@
 ```text
 一个前台 Agent：家庭营养师 Agent
 +
-多个后台 Skill：推荐、库存、菜谱收集、反馈学习、知识维护
+Prompt/知识库能力模块：推荐、库存、菜谱收集、反馈学习、知识维护
++
+MCP 动态状态工具：库存、采购、计划消耗、近期菜单、饭后反馈
 ```
 
 用户只使用一个入口：
@@ -18,16 +20,16 @@
 家庭营养师 Agent
 ```
 
-后台 Skill 不要求用户手动选择，而是由前台 Agent 根据意图在 Prompt 内路由：
+后台能力不要求用户手动选择，而是由前台 Agent 根据意图在 Prompt 内路由，并在需要读写动态状态时调用 MCP：
 
 ```text
-今晚吃什么？ → meal-recommender
-周末清库存 → meal-recommender + inventory-manager
-今天买了这些菜 → inventory-manager
-今天用了这些菜 → inventory-manager
-宝宝今天没怎么吃 → feedback-learner
+今晚吃什么？ → meal-recommender + get_current_inventory / list_recent_meals
+周末清库存 → meal-recommender + inventory-manager + get_inventory_risks
+今天买了这些菜 → inventory-manager + record_purchase_after_confirmation
+今天用了这些菜 → inventory-manager + adjust_inventory_after_feedback
+宝宝今天没怎么吃 → feedback-learner + record_meal_feedback
 这个菜谱能不能收 → recipe-collector
-确认写入 → knowledge-maintainer
+确认写入 → knowledge-maintainer 或对应 MCP 写入工具
 ```
 
 ## 2. WeKnora 能力映射
@@ -70,10 +72,12 @@ memory_enabled = true
 nutrition-agent-pov/family/
 nutrition-agent-pov/recipes/
 nutrition-agent-pov/sources/
-nutrition-agent-pov/inventory/
-nutrition-agent-pov/meals/
 nutrition-agent-pov/agent-rules/
+nutrition-agent-pov/prompts/
+nutrition-agent-pov/skills/
 ```
+
+`inventory/` 和 `meals/` 可以上传由 Postgres 导出的摘要快照，但不作为实时状态源。实时库存、采购、计划消耗、近期菜单和饭后反馈通过 MCP 查询独立 Postgres。
 
 如果后续拆分多个知识库，可以拆成：
 
@@ -99,6 +103,7 @@ Agent 类型：Custom 或 RAG QA
 绑定知识库：家庭营养师知识库
 Memory：开启
 Web Search：开启，但只允许菜谱收集场景使用
+MCP：接入 Family Nutrition MCP Service
 ```
 
 ### 4.2 推荐工具权限
@@ -127,6 +132,8 @@ wiki_replace_text
 wiki_delete_page
 wiki_rename_page
 shell_exec
+任意 SQL 执行工具
+无鉴权 MCP 工具
 ```
 
 原因：
@@ -166,38 +173,38 @@ retain_retrieval_history：开启
 2. 库存管理：处理每周采购后的库存新增、每天做饭后的库存扣减、临期提醒、周末清库存和少量补买建议。
 3. 菜谱收集：处理用户提供的新菜谱链接、截图、文案，判断家庭适配，生成标准菜谱 Markdown。
 4. 反馈学习：处理饭后反馈，生成菜谱注意事项、成员偏好、推荐权重和库存消耗的更新建议。
-5. 知识维护：仅在用户明确确认后，把建议更新写入 Wiki / 知识库。
+5. 知识维护：仅在用户明确确认后，把稳定知识写入 Wiki / Markdown，把动态状态写入交给 MCP 工具。
 
 推荐前必须优先读取：
 - 家庭成员画像；
 - 成员偏好和敏感食物；
 - 家庭饮食规则；
-- 当前库存；
-- 采购记录；
-- 近 2 周菜单记录；
+- 通过 MCP 读取的当前库存；
+- 通过 MCP 读取的采购和计划消耗记录；
+- 通过 MCP 读取的近 2 周菜单记录；
 - 菜谱库；
 - 最近用餐反馈；
 - 推荐规则。
 
 库存规则：
-- 库存是强状态，必须以 current-inventory 或用户最新输入为准。
+- 库存是强状态，必须以 MCP 从独立 Postgres 返回的数据或用户最新输入为准。
 - 不要假设家里有某个食材。
 - 推荐菜品时，必须同步生成预计库存消耗。
-- 如果用户确认“就按这个做、确认执行、今天就做这个”，可以生成计划消耗记录。
-- 饭后如果用户没有反馈，视为本餐执行正常，默认按计划消耗自动扣减库存。
-- 饭后如果用户有反馈，以用户反馈为准修正实际消耗和剩余库存。
+- 如果用户确认“就按这个做、确认执行、今天就做这个”，可以通过 MCP 生成计划消耗记录。
+- 饭后如果用户没有反馈，视为本餐执行正常，默认通过 MCP 按计划消耗扣减库存。
+- 饭后如果用户有反馈，以用户反馈为准通过 MCP 修正实际消耗和剩余库存。
 - 每天做完饭后应尝试询问或整理库存消耗。
 - 每周采购后应更新库存。
 - 周五晚到周日默认进入清库存优先模式，目标是优先消耗上周采购剩余食材。
 - 清库存不能牺牲食品安全、宝宝适配和老人健康约束。
 
 近期菜单规则：
-- 必须读取 recent-menu-log 或等价记录。
+- 必须通过 MCP 读取 recent meal 记录，或读取等价导出快照。
 - 近 3 天实际吃过的菜默认不推荐，除非用户明确要求。
 - 近 7 天实际吃过的菜降低推荐。
 - 近 14 天多次推荐或执行的菜明显降低推荐。
 - 推荐过但未确认执行的菜只轻微降低，不等同于实际吃过。
-- 每次推荐后要生成菜单记录建议。
+- 每次推荐后要生成 planned consumption 建议，用户确认后通过 MCP 写入。
 
 推荐规则：
 - 优先高蛋白、少油、少盐、不要肥肉。
@@ -241,7 +248,7 @@ retain_retrieval_history：开启
 库存更新时输出：
 1. 新增/消耗/剩余
 2. 优先消耗顺序
-3. 建议更新的 Markdown
+3. MCP 动态状态变更 payload 摘要
 4. 是否确认写入
 
 反馈学习时输出：
@@ -286,9 +293,12 @@ retain_retrieval_history：开启
 family-profile.md
 member-preferences.md
 dietary-rules.md
-current-inventory.md
-recent-menu-log.md
-meal-feedback-log.md
+get_current_inventory
+get_inventory_risks
+list_recent_meals
+get_meal_feedback_summary
+recipes/*.md
+recommendation-rules.md
 recipes/*.md
 recommendation-rules.md
 ```
@@ -329,17 +339,17 @@ recommendation-rules.md
 状态规则：
 
 ```text
-推荐后生成计划消耗。
-用户确认执行后，如果饭后无反馈，默认按计划扣减实际库存。
-用户有反馈时，以反馈修正实际消耗。
-每周采购后更新库存新增和优先消耗顺序。
+推荐后通过 create_planned_consumption 生成计划消耗。
+用户确认执行后，通过 confirm_meal_execution 转为实际消耗并扣库存。
+用户有反馈时，通过 record_meal_feedback 和 adjust_inventory_after_feedback 修正实际消耗。
+每周采购后，通过 record_purchase_after_confirmation 更新库存新增和优先消耗顺序。
 ```
 
 输出要求：
 
 ```text
 库存识别：新增、消耗、剩余、临期。
-建议更新：current-inventory.md、purchase-log.md、recent-menu-log.md。
+结构化变更：可传给 MCP 工具的参数摘要。
 确认问题：是否按以上内容更新库存？
 ```
 
@@ -418,7 +428,7 @@ Web Search：
 职责：
 
 ```text
-只负责把用户已确认的更新写入 Wiki / Markdown。
+负责把用户已确认的稳定知识写入 Wiki / Markdown；动态状态写入由对应 MCP 工具处理。
 ```
 
 触发语句：
@@ -437,6 +447,12 @@ wiki_read_page
 wiki_write_page
 wiki_replace_text
 wiki_flag_issue
+record_purchase_after_confirmation
+create_planned_consumption
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
+export_state_snapshot_to_markdown
 ```
 
 暂不开启：
@@ -454,87 +470,81 @@ wiki_rename_page
 只做最小必要修改；
 尽量追加，不整页覆盖；
 写完返回更新摘要；
-目标页面不确定时先问。
+目标页面或状态对象不确定时先问；
+动态状态写入必须携带确认、幂等和审计字段。
 ```
 
-## 7. 菜单和库存记录文件
+## 7. 菜单和库存动态状态
 
-建议新增或维护：
+库存、计划消耗、近期菜单和饭后反馈由独立 Postgres 维护，并通过 MCP 工具读写。
+
+核心 MCP 工具：
+
+```text
+get_current_inventory
+get_inventory_risks
+list_recent_meals
+list_pending_planned_consumptions
+get_meal_feedback_summary
+record_purchase_after_confirmation
+create_planned_consumption
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
+export_state_snapshot_to_markdown
+```
+
+### 7.1 current inventory
+
+用途：记录当前真实库存，是推荐和清库存的强状态来源。
+
+读取方式：
+
+```text
+get_current_inventory
+get_inventory_risks
+```
+
+### 7.2 planned consumption
+
+用途：记录推荐后形成的计划消耗，不直接等同于实际库存扣减。
+
+写入方式：
+
+```text
+create_planned_consumption
+```
+
+### 7.3 meal events / recent menu
+
+用途：滚动记录最近 14 天推荐和实际执行菜单，避免近期重复。
+
+读写方式：
+
+```text
+list_recent_meals
+confirm_meal_execution
+```
+
+### 7.4 Markdown 快照
+
+`inventory/` 和 `meals/` 目录保留，但作为 Postgres 导出的可读快照：
 
 ```text
 inventory/current-inventory.md
 inventory/purchase-log.md
+inventory/planned-consumption-log.md
 meals/recent-menu-log.md
 meals/meal-feedback-log.md
-meals/planned-consumption-log.md
 ```
 
-### 7.1 current-inventory.md
+这些文件可用于 Git 归档、人工审阅和 WeKnora 索引摘要，不作为事务 source of truth。
 
-用途：记录当前真实库存。
+## 8. PostgreSQL 与 MCP
 
-```markdown
-# 当前库存
+第一版正式 MVP 直接部署独立同机 Docker Postgres + MCP 服务。
 
-## 优先消耗
-- 豆腐：1 盒，建议 1 天内使用
-- 西兰花：半颗，建议 2 天内使用
-
-## 蛋白质
-- 鸡蛋：8 个
-- 虾仁：约 300g，冷冻
-
-## 耐放食材
-- 土豆：4 个
-- 胡萝卜：3 根
-```
-
-### 7.2 planned-consumption-log.md
-
-用途：记录推荐后形成的计划消耗，不直接等同于实际库存扣减。
-
-```markdown
-# 计划消耗记录
-
-## 2026-09-20 晚餐
-
-状态：planned
-
-推荐菜单：
-- 虾仁豆腐羹
-- 西兰花鸡蛋
-
-预计消耗：
-- 虾仁：150g
-- 豆腐：1 盒
-- 西兰花：半颗
-- 鸡蛋：2 个
-```
-
-### 7.3 recent-menu-log.md
-
-用途：滚动记录最近 14 天菜单，避免近期重复。
-
-```markdown
-# 近期菜单记录
-
-## 滚动规则
-
-- 只保留最近 14 天详细记录。
-- 超过 14 天的详细记录可归档到 monthly-menu-summary.md。
-- 推荐过但未确认执行的菜，记为 recommended。
-- 确认执行或饭后无反馈默认正常的菜，记为 cooked。
-
-## 菜品最近状态
-
-| 菜品 | 最近推荐日期 | 最近执行日期 | 最近反馈 | 近期推荐策略 |
-|---|---|---|---|---|
-| 虾仁豆腐羹 | 2026-09-20 | 2026-09-20 | 正常 | 7 天内降低推荐 |
-```
-
-## 8. PostgreSQL 是否需要建表
-
-第一版不建议直接在 WeKnora PostgreSQL 里建业务表。
+不建议直接在 WeKnora PostgreSQL 里建业务表。
 
 原因：
 
@@ -542,29 +552,31 @@ meals/planned-consumption-log.md
 WeKnora 自身的 PostgreSQL 主要服务平台数据、用户、知识库、任务和索引元数据。
 直接改内部数据库需要理解迁移机制。
 未来升级 WeKnora 可能与自定义表冲突。
-当前 POV 更需要可人工审核、可迁移、可回滚的状态文件。
+家庭营养状态需要独立备份、迁移、审计和权限边界。
 ```
 
-第一版建议：
+建议服务：
 
 ```text
-Markdown 文件作为 source of truth。
-WeKnora 负责索引、检索、Wiki、Agent 执行和可视化编辑。
-```
-
-第二阶段如果库存和菜单变成高频结构化数据，再独立做一个轻量服务：
-
-```text
-family_nutrition_service
+family-nutrition-state-mcp
   - inventory_items
+  - inventory_events
   - purchase_records
   - meal_plans
+  - planned_consumptions
   - meal_events
-  - recipe_feedback
-  - member_preferences_delta
+  - meal_feedback
+  - preference_observations
+  - audit_log
 ```
 
-然后通过 API / MCP 暴露给 WeKnora Agent。
+部署建议：
+
+```text
+/opt/family-nutrition-state
+```
+
+与 WeKnora 的 `/opt/WeKnora` 分离。
 
 ## 9. 平台配置步骤
 
@@ -585,6 +597,7 @@ family_nutrition_service
 绑定：家庭营养师知识库
 Memory：开启
 Web Search：开启，但只允许菜谱收集场景使用
+MCP：接入 Family Nutrition MCP Service
 ```
 
 ### 9.3 选择工具
@@ -600,11 +613,22 @@ wiki_read_page
 wiki_flag_issue
 ```
 
-确认写入工具：
+确认后 Wiki 写入工具：
 
 ```text
 wiki_write_page
 wiki_replace_text
+```
+
+确认后 MCP 写入工具：
+
+```text
+record_purchase_after_confirmation
+create_planned_consumption
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
+export_state_snapshot_to_markdown
 ```
 
 暂不开启：
@@ -613,6 +637,8 @@ wiki_replace_text
 wiki_delete_page
 wiki_rename_page
 shell_exec
+任意 SQL 执行工具
+无鉴权 MCP 工具
 ```
 
 ### 9.4 配置 Skill
@@ -656,5 +682,5 @@ knowledge-maintainer
 8. 周末能清理上周采购剩余食材。
 9. 能避免近 2 周频繁推荐同一道菜。
 10. 新菜谱能先生成标准卡片，再人工确认入库。
-11. 写入 Wiki 前必须获得明确确认。
+11. 写入 Wiki / Markdown 或通过 MCP 写入动态状态前必须获得明确确认。
 ```

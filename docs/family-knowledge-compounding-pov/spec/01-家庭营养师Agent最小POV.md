@@ -8,7 +8,7 @@
 
 ## 1. POV 一句话定义
 
-**家庭营养师 Agent 最小 POV**：用 Markdown 沉淀家庭成员偏好、菜谱、做菜博主来源、库存和每餐反馈，把这些资料放入 Weknora 知识库，并通过微信完成日常录入、检索、推荐和反馈更新。
+**家庭营养师 Agent 最小 POV**：用 Markdown 沉淀家庭成员偏好、菜谱、做菜博主来源、饮食规则、Prompt 和 Skill 文档；用独立 Docker Postgres 管理当前库存、采购、计划消耗、近期菜单和饭后反馈等动态状态；通过 WeKnora 知识库检索稳定知识，并通过 MCP 工具完成动态状态读写。
 
 它要验证的不是：
 
@@ -36,15 +36,15 @@ POV 的最小闭环是：
   ↓
 家庭做菜博主 / 菜谱来源库
   ↓
-小票 / 采购清单 / 手动文本更新库存
+小票 / 采购清单 / 手动文本通过 MCP 写入 Postgres 库存
   ↓
 微信询问“今晚吃什么”
   ↓
-Agent 基于 Weknora 检索 + 当前库存推荐菜品
+Agent 基于 Weknora 检索 + MCP 当前库存推荐菜品
   ↓
 饭后微信反馈
   ↓
-更新菜谱做法、推荐权重、成员偏好和库存状态
+写入 Postgres 动态状态，并在需要时生成 Markdown / Wiki 摘要
   ↓
 下一次推荐更准
 ```
@@ -64,7 +64,7 @@ Agent 基于 Weknora 检索 + 当前库存推荐菜品
 | 菜谱标签 | 写入每个菜谱文件的 frontmatter 和正文标签 |
 | 博主库 | 维护家庭喜欢和当前 popular 的家庭做菜博主来源 |
 | 新菜谱收集 | 用户通过微信转发链接、文案、截图，Agent 抽取并生成候选菜谱 |
-| 库存 | 维护简单当前库存，以小票识别、采购清单录入、文本修正为主 |
+| 库存 | 通过 MCP 写入独立 Postgres，以小票识别、采购清单录入、文本修正为主 |
 | 推荐 | 基于家庭偏好、库存、菜谱标签、历史反馈推荐下一餐 |
 | 饭后反馈 | 微信自然语言反馈，更新菜谱、权重和家庭偏好 |
 | 知识库 | Markdown 文件进入 Weknora，支撑微信检索与问答 |
@@ -86,30 +86,33 @@ Agent 基于 Weknora 检索 + 当前库存推荐菜品
 
 ## 4. 架构定位
 
-### 4.1 三层分工
+### 4.1 四层分工
 
 ```text
-微信
+微信 / WeKnora 对话入口
   = 日常交互入口
 
-Markdown 文件
-  = 家庭饮食知识和状态的 source of truth
+Git Markdown
+  = 稳定知识、规则、Prompt、Skill、模板和导出快照的 source of truth
 
-Weknora
-  = 知识库检索与语义召回层
+WeKnora
+  = 知识库检索、Wiki 可视化和 Agent 推理入口
+
+独立 Docker Postgres + MCP
+  = 库存、采购、计划消耗、近期菜单和饭后反馈等动态状态的 source of truth
 ```
 
 Agent 服务负责：
 
 ```text
 意图识别；
-读取当前库存和家庭状态；
-检索 Weknora 知识库；
+检索 WeKnora 知识库中的稳定知识；
+通过 MCP 工具读取当前库存和近期菜单；
 生成推荐；
 抽取新菜谱；
-记录反馈；
-更新 Markdown 文件；
-触发或等待 Weknora 同步。
+在用户确认后通过 MCP 写入动态状态；
+在用户确认后生成稳定知识的 Markdown 更新建议；
+定期导出状态 Markdown 快照供 Git 归档和 WeKnora 索引。
 ```
 
 ### 4.2 为什么 recipes/ 不按文件夹细分
@@ -179,6 +182,25 @@ docs/family-knowledge-compounding-pov/spec/family-nutrition-agent-pov/
     meal-feedback-log.md
     weekly-menu-log.md
 
+  state/
+    README.md
+    data-dictionary.md
+    migrations/
+    exports/
+
+  app/
+    README.md
+    src/
+      domain/
+      application/
+      adapters/
+      mcp/
+
+  infra/
+    README.md
+    docker-compose.family-state.example.yml
+    env.example
+
   agent-rules/
     recommendation-rules.md
     feedback-update-rules.md
@@ -193,8 +215,11 @@ docs/family-knowledge-compounding-pov/spec/family-nutrition-agent-pov/
 family/：家庭长期画像和饮食限制；
 recipes/：扁平菜谱 Markdown 库；
 sources/：做菜博主、菜谱来源和来源评价规则；
-inventory/：当前库存和采购记录；
-meals/：每餐反馈和菜单历史；
+inventory/：由 Postgres 导出的库存快照、采购记录摘要和计划消耗摘要；
+meals/：由 Postgres 导出的每餐反馈、近期菜单和历史归档；
+state/：动态状态的数据字典、迁移和导出规范；
+app/：后续 MCP 服务和状态业务代码；
+infra/：同机 Docker Postgres + MCP 服务部署配置；
 agent-rules/：推荐、反馈、库存更新等 Agent 行为规则。
 ```
 
@@ -485,7 +510,30 @@ last_updated: 2026-09-20
 推荐菜时哪些能做、哪些还缺。
 ```
 
-### 9.2 当前库存：inventory/current-inventory.md
+### 9.2 动态状态存储：独立 Postgres + MCP
+
+库存、采购、计划消耗、实际做饭和反馈属于动态状态，第一版正式 MVP 直接使用独立 Docker Postgres 作为 source of truth。Agent 不直接写 SQL，而是通过 MCP 工具读写。
+
+```text
+WeKnora Agent
+  ↓ MCP tools
+Family Nutrition MCP Service
+  ↓
+独立 Docker Postgres
+```
+
+核心原则：
+
+```text
+1. current inventory 以 Postgres 查询结果为准；
+2. purchase log 以 Postgres 采购事件为准；
+3. planned consumption 以 Postgres 计划消耗记录为准；
+4. recent menu 以 Postgres 推荐/执行记录为准；
+5. Markdown 文件只作为导出快照、人工审阅和 Git 归档；
+6. 不直接修改 WeKnora 内部 PostgreSQL。
+```
+
+### 9.3 当前库存导出：inventory/current-inventory.md
 
 示例：
 
@@ -512,7 +560,7 @@ last_updated: 2026-09-20 20:00
 - 数量不确定时，推荐前询问用户确认。
 ```
 
-### 9.3 采购记录：inventory/purchase-log.md
+### 9.4 采购记录导出：inventory/purchase-log.md
 
 示例：
 
@@ -537,17 +585,18 @@ last_updated: 2026-09-20
 | 牛奶 | 2 | 瓶 | 入库 |
 ```
 
-### 9.4 库存作为强状态
+### 9.5 库存作为强状态
 
 需要注意：Weknora 适合检索知识，但当前库存是强状态。
 
 因此：
 
 ```text
-current-inventory.md 是库存 source of truth；
-Weknora 可以索引库存摘要，但推荐前应读取最新 current-inventory.md；
-库存更新必须支持用户确认和撤销；
-不要只依赖 RAG 检索库存，避免召回旧版本。
+Postgres 是库存、采购、计划消耗和实际消耗的 source of truth；
+MCP 工具是 Agent 读写动态状态的唯一受控入口；
+库存更新必须支持用户确认、幂等、防重复扣减和审计；
+不要只依赖 RAG 检索库存，避免召回旧版本；
+current-inventory.md 仅作为 Postgres 导出的可读快照，不作为事务权威。
 ```
 
 ---
@@ -611,12 +660,14 @@ last_updated: 2026-09-20
 每次反馈后，Agent 至少尝试更新：
 
 ```text
-meals/meal-feedback-log.md；
-对应 recipes/*.md 的历史反馈；
-family/member-preferences.md 的长期偏好；
-inventory/current-inventory.md 的主要消耗；
-必要时调整 recommendation_weight。
+Postgres meal_feedback 事件；
+Postgres meal_events / inventory_events 中的实际消耗修正；
+preference_observations 中的偏好观察；
+对应 recipes/*.md 的历史反馈建议；
+family/member-preferences.md 的长期偏好建议。
 ```
+
+其中 Postgres 动态状态通过 MCP 工具写入；菜谱和家庭偏好属于稳定知识，必须经用户确认后再沉淀到 Markdown。
 
 ---
 
@@ -828,15 +879,16 @@ Agent：
 敏感的原始小票或家庭隐私信息。
 ```
 
-这些内容可以写成 Markdown，但 Agent 推荐前应读取最新源文件，而不是只依赖知识库召回。
+这些内容可以导出成 Markdown 摘要，但 Agent 推荐前应通过 MCP 读取 Postgres 最新状态，而不是只依赖知识库召回。
 
 ### 14.3 同步原则
 
 ```text
-Markdown 是 source of truth；
-Weknora 是检索索引；
-微信是交互入口；
-Agent 服务负责读写和同步。
+Git Markdown 是稳定知识、规则、Prompt、Skill、模板和导出快照的 source of truth；
+Postgres 是库存、采购、计划消耗、实际做饭和反馈等动态状态的 source of truth；
+Weknora 是检索索引和 Agent 对话入口；
+MCP 是 Agent 读写动态状态的唯一受控边界；
+微信是低摩擦交互入口。
 ```
 
 ---

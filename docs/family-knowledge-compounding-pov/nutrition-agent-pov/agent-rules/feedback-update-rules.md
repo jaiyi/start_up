@@ -43,11 +43,12 @@ Agent 需要抽取：
 
 每次反馈后，Agent 应考虑更新：
 
-- `meals/meal-feedback-log.md`；
-- 对应 `recipes/*.md` 的历史反馈；
-- `family/member-preferences.md` 的长期偏好；
-- `inventory/current-inventory.md` 的主要消耗；
-- 菜谱的 `recommendation_weight`；
+- Postgres `meal_feedback` 事件；
+- Postgres `meal_events` / `inventory_events` 中的实际消耗修正；
+- Postgres `preference_observations` 中的偏好观察；
+- 对应 `recipes/*.md` 的历史反馈建议；
+- `family/member-preferences.md` 的长期偏好建议；
+- 菜谱的 `recommendation_weight` 建议；
 - 菜谱的宝宝版 / 成人老人共用版注意事项。
 
 ---
@@ -142,7 +143,20 @@ Agent 需要抽取：
 
 ---
 
-## 7. 反馈记录模板
+## 7. 动态状态写入
+
+反馈类动态状态必须通过 MCP 写入 Postgres。
+
+```text
+record_meal_feedback：记录饭后反馈事件；
+adjust_inventory_after_feedback：实际消耗与计划不一致时修正库存；
+confirm_meal_execution：无负面反馈且确认执行时记录实际做饭；
+export_state_snapshot_to_markdown：按需导出 Markdown 快照。
+```
+
+长期偏好和菜谱规则的改变需要用户确认后再写入 Markdown / Wiki。
+
+## 8. 反馈记录模板
 
 ```markdown
 ## YYYY-MM-DD 餐次：菜名
