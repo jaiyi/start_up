@@ -1,6 +1,6 @@
 # 示例文件：不要直接放生产密码。
 # 服务器部署建议复制到 /opt/family-nutrition-state/docker-compose.yml 后再按实际环境调整。
-# 本示例只启动独立 Postgres；MCP 服务连接数据库属于 Milestone 2。
+# 本示例启动独立 Postgres 和 Family Nutrition MCP 服务；不要修改 /opt/WeKnora/docker-compose.yml。
 
 services:
   family-nutrition-postgres:
@@ -16,6 +16,7 @@ services:
       - ./backups:/backups
       - ./state/migrations:/migrations:ro
       - ./state/seeds:/seeds:ro
+      - ./infra/postgres:/postgres-admin:ro
     healthcheck:
       test:
         - CMD-SHELL
@@ -30,6 +31,36 @@ services:
     # 如只在服务器本机调试，可临时打开下一行：
     # ports:
     #   - "127.0.0.1:5432:5432"
+
+  family-nutrition-mcp-server:
+    build:
+      context: ./app
+    container_name: family-nutrition-mcp-server
+    restart: unless-stopped
+    depends_on:
+      family-nutrition-postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      MCP_AUTH_TOKEN: ${FAMILY_NUTRITION_MCP_AUTH_TOKEN}
+      DATABASE_URL: ${FAMILY_NUTRITION_DATABASE_URL}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-2}
+      DATABASE_CONNECTION_TIMEOUT_MS: ${DATABASE_CONNECTION_TIMEOUT_MS:-2000}
+      DATABASE_IDLE_TIMEOUT_MS: ${DATABASE_IDLE_TIMEOUT_MS:-10000}
+      DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-3000}
+    ports:
+      - "127.0.0.1:3030:3030"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3030)+'/health',{headers:{authorization:'Bearer '+process.env.MCP_AUTH_TOKEN}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - family-nutrition-state
 
 networks:
   family-nutrition-state:

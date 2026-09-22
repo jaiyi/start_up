@@ -34,8 +34,9 @@ MCP 工具调用幂等记录
    - 只有确认做饭后的 `meal_events` 和对应库存事件才会改变库存。
 6. 写入工具必须幂等。
 7. 写入工具必须可审计。
-8. 长期偏好沉淀回 Markdown 前必须人工确认。
-9. 示例数据只能使用 demo 数据，不记录真实健康、家庭、账号或密钥信息。
+8. 运行时数据库账号必须最小权限；Milestone 2 默认只能执行健康检查函数。
+9. 长期偏好沉淀回 Markdown 前必须人工确认。
+10. 示例数据只能使用 demo 数据，不记录真实健康、家庭、账号或密钥信息。
 
 ## 3. Schema
 
@@ -287,13 +288,23 @@ Cookie
 
 ## 7. 与后续 Milestone 的关系
 
-Milestone 1 只保证数据库结构能被创建和验证。
+Milestone 1 保证数据库结构能被创建和验证。
+
+Milestone 2 新增运行时权限边界和 MCP 数据库健康检查：
+
+```text
+1. 通过 0002_runtime_permissions.sql 创建 family_nutrition_runtime no-login group role；
+2. 通过 infra/postgres/create-runtime-app-role.sql 创建实际登录 app/runtime 用户；
+3. app/runtime 用户默认只授予 `family_state.check_runtime_health(text[])` 的 `EXECUTE` 权限；
+4. MCP 服务使用 app/runtime 用户连接数据库，不使用 owner/bootstrap 用户；
+5. app/runtime 用户不能直接 `SELECT`、`INSERT`、`UPDATE` 或 `DELETE` 业务表；
+6. /health 和 health_check 只做只读 schema readiness 检查。
+```
 
 后续阶段：
 
 ```text
-Milestone 2：MCP 服务连接 Postgres
-Milestone 3：只读工具
+Milestone 3：只读业务工具
 Milestone 4：写入工具 + 幂等 + 审计事务
 Milestone 5：WeKnora Agent 接入
 Milestone 6：备份、导出、上线检查

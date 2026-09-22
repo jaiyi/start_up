@@ -2,16 +2,16 @@ import http, { type IncomingMessage, type ServerResponse } from 'node:http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
+import { checkServiceHealth } from '../application/check-service-health.js';
 import type { AppConfig } from '../config/load-config.js';
+import type { DatabaseHealthChecker } from '../ports/database-health.js';
 import { authenticateRequest } from './auth.js';
 import { createErrorResponse, createSuccessResponse, type ResponseMetadata } from './response.js';
 import { listRegisteredTools } from './tool-registry.js';
 
-const HEALTH_CHECK_RESPONSE = {
-  status: 'ok',
-  service: 'family-nutrition-state-mcp',
-  milestone: '0'
-} as const;
+export type AppContext = {
+  readonly databaseHealthChecker: DatabaseHealthChecker;
+};
 
 const jsonHeaders = { 'content-type': 'application/json; charset=utf-8' } as const;
 
@@ -73,22 +73,27 @@ const metadataFromNodeRequest = (req: IncomingMessage): ResponseMetadata => {
   };
 };
 
-export const createMcpServer = (): McpServer => {
+export const createMcpServer = (context: AppContext): McpServer => {
   const server = new McpServer({
     name: 'family-nutrition-state-mcp',
-    version: '0.1.0'
+    version: '0.2.0'
   });
 
   server.registerTool(
     'health_check',
     {
       title: 'Health check',
-      description: 'Checks whether the Family Nutrition MCP service is running.',
+      description: 'Checks whether the Family Nutrition MCP service and Postgres state database are running.',
       inputSchema: {},
       outputSchema: {
-        status: z.literal('ok'),
+        status: z.enum(['ok', 'degraded']),
         service: z.literal('family-nutrition-state-mcp'),
-        milestone: z.literal('0')
+        milestone: z.literal('2'),
+        database: z.object({
+          status: z.enum(['ok', 'unavailable']),
+          schema: z.enum(['ready', 'missing', 'unknown']),
+          latencyMs: z.number().nonnegative()
+        })
       },
       annotations: {
         readOnlyHint: true,
@@ -97,16 +102,20 @@ export const createMcpServer = (): McpServer => {
         openWorldHint: false
       }
     },
-    async () => ({
-      structuredContent: HEALTH_CHECK_RESPONSE,
-      content: [{ type: 'text', text: JSON.stringify(HEALTH_CHECK_RESPONSE) }]
-    })
+    async () => {
+      const health = await checkServiceHealth(context.databaseHealthChecker);
+
+      return {
+        structuredContent: health,
+        content: [{ type: 'text', text: JSON.stringify(health) }]
+      };
+    }
   );
 
   return server;
 };
 
-export const createHttpHandler = (config: AppConfig) => {
+export const createHttpHandler = (config: AppConfig, context: AppContext) => {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     const metadata = metadataFromHeaders(request.headers);
@@ -117,7 +126,10 @@ export const createHttpHandler = (config: AppConfig) => {
     }
 
     if (url.pathname === '/health' && request.method === 'GET') {
-      return createJsonResponse(200, createSuccessResponse(HEALTH_CHECK_RESPONSE, metadata));
+      const health = await checkServiceHealth(context.databaseHealthChecker);
+      const statusCode = health.status === 'ok' ? 200 : 503;
+
+      return createJsonResponse(statusCode, createSuccessResponse(health, metadata));
     }
 
     if (url.pathname === '/tools' && request.method === 'GET') {
@@ -128,8 +140,8 @@ export const createHttpHandler = (config: AppConfig) => {
   };
 };
 
-export const createNodeHttpHandler = (config: AppConfig) => {
-  const fetchHandler = createHttpHandler(config);
+export const createNodeHttpHandler = (config: AppConfig, context: AppContext) => {
+  const fetchHandler = createHttpHandler(config, context);
 
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const requestUrl = req.url ?? '/';
@@ -144,7 +156,7 @@ export const createNodeHttpHandler = (config: AppConfig) => {
 
       try {
         const parsedBody = await readJsonBody(req);
-        const server = createMcpServer();
+        const server = createMcpServer(context);
         const transport = new StreamableHTTPServerTransport({});
         await server.connect(transport as never);
         await transport.handleRequest(req, res, parsedBody);
@@ -167,8 +179,8 @@ export const createNodeHttpHandler = (config: AppConfig) => {
   };
 };
 
-export const startHttpServer = (config: AppConfig): http.Server => {
-  const handler = createNodeHttpHandler(config);
+export const startHttpServer = (config: AppConfig, context: AppContext): http.Server => {
+  const handler = createNodeHttpHandler(config, context);
   const server = http.createServer((req, res) => {
     handler(req, res).catch((error: unknown) => {
       const message = error instanceof Error ? error.message : 'Unexpected server failure';

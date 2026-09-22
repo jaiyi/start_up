@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
-    exclude: ['tests/integration/migrations.postgres.test.ts'],
+    exclude: ['tests/integration/*.postgres.test.ts'],
     coverage: {
       reporter: ['text', 'lcov'],
       thresholds: {

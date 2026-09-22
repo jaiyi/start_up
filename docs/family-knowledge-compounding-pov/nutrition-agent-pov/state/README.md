@@ -32,10 +32,37 @@ inventory adjustment audit
 3. planned 不等于 cooked；
 4. 写入必须幂等；
 5. 所有写入必须可审计；
-6. 长期偏好沉淀到 Markdown 前必须人工确认。
+6. 长期偏好沉淀到 Markdown 前必须人工确认；
+7. runtime app role 使用最小权限，Milestone 2 默认只能执行健康检查函数。
 ```
 
-## 4. 规划目录
+## 4. 当前 Milestone 状态
+
+Milestone 1 已完成：
+
+```text
+- data-dictionary.md
+- migrations/0001_init_family_state.sql
+- seeds/0001_demo_family.sql
+- fixtures/demo-family-state.json
+```
+
+Milestone 2 新增：
+
+```text
+- migrations/0002_runtime_permissions.sql
+- runtime no-login group role: family_nutrition_runtime
+- runtime login app role 创建脚本：../infra/postgres/create-runtime-app-role.sql
+```
+
+Milestone 2 的权限策略：
+
+```text
+owner/bootstrap 用户：只用于初始化数据库、执行 migration、创建 runtime app role。
+runtime app 用户：只给 MCP 服务运行时使用，Milestone 2 只允许执行 `family_state.check_runtime_health(text[])`，不能直接读取或写入业务表。
+```
+
+## 5. 规划目录
 
 ```text
 state/
@@ -43,10 +70,12 @@ state/
 ├── data-dictionary.md
 ├── schemas/
 ├── migrations/
+│   ├── 0001_init_family_state.sql
+│   └── 0002_runtime_permissions.sql
 ├── seeds/
 ├── fixtures/
 └── exports/
     └── markdown/
 ```
 
-当前阶段已经进入 Milestone 1：维护数据字典、初始 SQL migration、demo seed 和测试 fixture。MCP 服务连接数据库会在 Milestone 2 实现。
+后续 Milestone 3 会在 MCP 服务中实现只读业务工具；Milestone 4 才会按工具逐步加入写权限、事务、幂等和审计逻辑。

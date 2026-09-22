@@ -1,9 +1,26 @@
 import http from 'node:http';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadConfig, type AppConfig } from '../../src/config/load-config.js';
 import { startHttpServer } from '../../src/mcp/server.js';
+import type { DatabaseHealthChecker } from '../../src/ports/database-health.js';
 
 const servers: http.Server[] = [];
+
+const config: AppConfig = {
+  mcpAuthToken: 'test-token-value',
+  nodeEnv: 'test',
+  port: 0,
+  databaseUrl: 'postgresql://family_nutrition_app:secret-password@127.0.0.1:5432/family_nutrition',
+  databasePoolMax: 2,
+  databaseConnectionTimeoutMs: 2000,
+  databaseIdleTimeoutMs: 10000,
+  databaseStatementTimeoutMs: 3000
+};
+
+const createHealthyChecker = (): DatabaseHealthChecker => ({
+  check: vi.fn(async () => ({ status: 'ok' as const, schema: 'ready' as const, latencyMs: 5 })),
+  close: vi.fn(async () => undefined)
+});
 
 const closeServer = async (server: http.Server): Promise<void> =>
   new Promise((resolve, reject) => {
@@ -17,13 +34,8 @@ const closeServer = async (server: http.Server): Promise<void> =>
     });
   });
 
-const startTestServer = async (): Promise<number> => {
-  const config: AppConfig = {
-    mcpAuthToken: 'test-token-value',
-    nodeEnv: 'test',
-    port: 0
-  };
-  const server = startHttpServer(config);
+const startTestServer = async (checker: DatabaseHealthChecker = createHealthyChecker()): Promise<number> => {
+  const server = startHttpServer(config, { databaseHealthChecker: checker });
   servers.push(server);
 
   await new Promise<void>((resolve) => server.once('listening', resolve));
@@ -40,8 +52,8 @@ afterEach(async () => {
   await Promise.all(closingServers);
 });
 
-describe('Milestone 0 HTTP server runtime', () => {
-  it('starts a real HTTP server and serves authenticated health checks', async () => {
+describe('Milestone 2 HTTP server runtime', () => {
+  it('starts a real HTTP server and serves authenticated DB-backed health checks', async () => {
     const port = await startTestServer();
 
     const response = await fetch(`http://127.0.0.1:${port}/health`, {
@@ -50,7 +62,16 @@ describe('Milestone 0 HTTP server runtime', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.data.status).toBe('ok');
+    expect(body.data).toEqual({
+      status: 'ok',
+      service: 'family-nutrition-state-mcp',
+      milestone: '2',
+      database: {
+        status: 'ok',
+        schema: 'ready',
+        latencyMs: 5
+      }
+    });
   });
 
   it('rejects unauthenticated MCP requests before parsing request bodies', async () => {

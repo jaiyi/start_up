@@ -267,23 +267,32 @@ sudo chown -R lijiayi:lijiayi /opt/family-nutrition-state
 cd /opt/family-nutrition-state
 ```
 
-创建服务器专用 `.env`：
+创建服务器专用 `.env`。
+
+如果服务器没有 `nano`，可以用 `vi`，也可以直接用 heredoc 生成文件。真实密码和 token 只放在服务器，不发给 Claude，不写进 Markdown，不提交 Git：
 
 ```bash
-nano .env
-```
+cd /opt/family-nutrition-state
+OWNER_PASSWORD="$(openssl rand -base64 32)"
+APP_PASSWORD="$(openssl rand -base64 32)"
+MCP_TOKEN="$(openssl rand -base64 32)"
 
-示例内容如下，真实密码和 token 只放在服务器，不发给 Claude，不写进 Markdown，不提交 Git：
-
-```env
+cat > .env <<EOF
 FAMILY_NUTRITION_POSTGRES_DB=family_nutrition
 FAMILY_NUTRITION_POSTGRES_OWNER_USER=family_nutrition_owner
-FAMILY_NUTRITION_POSTGRES_OWNER_PASSWORD=请在服务器上换成强密码
+FAMILY_NUTRITION_POSTGRES_OWNER_PASSWORD=${OWNER_PASSWORD}
 FAMILY_NUTRITION_POSTGRES_APP_USER=family_nutrition_app
-FAMILY_NUTRITION_POSTGRES_APP_PASSWORD=请在服务器上换成另一个强密码
-FAMILY_NUTRITION_MIGRATION_DATABASE_URL=只在服务器上填写
-FAMILY_NUTRITION_DATABASE_URL=只在服务器上填写
-FAMILY_NUTRITION_MCP_AUTH_TOKEN=请在服务器上换成强token
+FAMILY_NUTRITION_POSTGRES_APP_PASSWORD=${APP_PASSWORD}
+FAMILY_NUTRITION_MIGRATION_DATABASE_URL=postgresql://family_nutrition_owner:${OWNER_PASSWORD}@family-nutrition-postgres:5432/family_nutrition
+FAMILY_NUTRITION_DATABASE_URL=postgresql://family_nutrition_app:${APP_PASSWORD}@family-nutrition-postgres:5432/family_nutrition
+FAMILY_NUTRITION_MCP_AUTH_TOKEN=${MCP_TOKEN}
+DATABASE_POOL_MAX=2
+DATABASE_CONNECTION_TIMEOUT_MS=2000
+DATABASE_IDLE_TIMEOUT_MS=10000
+DATABASE_STATEMENT_TIMEOUT_MS=3000
+EOF
+
+chmod 600 .env
 ```
 
 启动服务：
@@ -312,7 +321,10 @@ Postgres 没有暴露公网端口
 ```text
 服务启动
 数据库连接成功
-健康检查能返回 db: ok
+使用 app/runtime 用户连接 Postgres
+app/runtime 用户默认只能执行健康检查函数，不直接读取或写入业务表
+健康检查能返回 database.status: ok 和 database.schema: ready
+/tools 仍只暴露 health_check
 ```
 
 服务器上最终要能看到：
@@ -422,11 +434,12 @@ Agent system prompt
 第 1 次开发：完成 Milestone 0 本地骨架和测试
 第 2 次开发：完成 Milestone 1 Postgres compose、migration、data dictionary
 第 3 次操作：登录腾讯云，创建 /opt/family-nutrition-state 并启动 Postgres
-第 4 次开发：完成 MCP 连接 Postgres 和只读工具
-第 5 次操作：部署 MCP 服务到腾讯云
-第 6 次开发：完成写入工具、幂等、审计
-第 7 次操作：接入 WeKnora Agent
-第 8 次：备份、导出、上线验收
+第 4 次开发：完成 MCP 连接 Postgres、DB-backed health_check 和只能执行健康检查函数的 runtime role
+第 5 次操作：部署 MCP 服务到腾讯云并验证 /health、/tools
+第 6 次开发：完成只读业务工具
+第 7 次开发：完成写入工具、幂等、审计
+第 8 次操作：接入 WeKnora Agent
+第 9 次：备份、导出、上线验收
 ```
 
 ## TDD 执行顺序

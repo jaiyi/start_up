@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { listRegisteredTools } from '../../src/mcp/tool-registry.js';
 
-const allowedMilestoneZeroTools = ['health_check'] as const;
+const allowedMilestoneTwoTools = ['health_check'] as const;
 const forbiddenToolNames = ['sql', 'raw_sql', 'query_database', 'execute_sql', 'shell_exec'];
 
-describe('Milestone 0 MCP tool registry', () => {
-  it('exposes only the Milestone 0 tool allowlist', () => {
+describe('Milestone 2 MCP tool registry', () => {
+  it('exposes only the Milestone 2 tool allowlist', () => {
     const tools = listRegisteredTools();
     const toolNames = tools.map((tool) => tool.name).sort();
 
-    expect(toolNames).toEqual([...allowedMilestoneZeroTools].sort());
+    expect(toolNames).toEqual([...allowedMilestoneTwoTools].sort());
   });
 
   it('does not expose arbitrary SQL or shell execution tools', () => {

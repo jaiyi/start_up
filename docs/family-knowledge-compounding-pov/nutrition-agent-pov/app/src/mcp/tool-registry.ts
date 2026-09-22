@@ -9,7 +9,7 @@ const REGISTERED_TOOLS = [
   {
     name: 'health_check',
     title: 'Health check',
-    description: 'Checks whether the Family Nutrition MCP service is running.',
+    description: 'Checks whether the Family Nutrition MCP service and Postgres state database are running.',
     readOnly: true
   }
 ] as const satisfies readonly RegisteredTool[];
