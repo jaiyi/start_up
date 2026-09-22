@@ -1,0 +1,87 @@
+{
+  "family": {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "displayName": "Demo Family",
+    "timezone": "Asia/Shanghai"
+  },
+  "actors": [
+    {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "type": "human",
+      "displayName": "Demo Caregiver"
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222223",
+      "type": "agent",
+      "displayName": "Demo Nutrition Agent"
+    }
+  ],
+  "members": [
+    {
+      "id": "33333333-3333-3333-3333-333333333331",
+      "displayName": "Demo Adult",
+      "role": "adult"
+    },
+    {
+      "id": "33333333-3333-3333-3333-333333333332",
+      "displayName": "Demo Baby",
+      "role": "baby"
+    }
+  ],
+  "inventoryItems": [
+    {
+      "id": "44444444-4444-4444-4444-444444444441",
+      "itemName": "菠菜",
+      "category": "vegetable",
+      "quantity": 500,
+      "unit": "g",
+      "storageLocation": "fridge",
+      "purchasedAt": "2026-09-20",
+      "expiresAt": "2026-09-24"
+    },
+    {
+      "id": "44444444-4444-4444-4444-444444444442",
+      "itemName": "鸡蛋",
+      "category": "protein",
+      "quantity": 12,
+      "unit": "个",
+      "storageLocation": "fridge",
+      "purchasedAt": "2026-09-20",
+      "expiresAt": "2026-10-05"
+    }
+  ],
+  "mealPlan": {
+    "id": "77777777-7777-7777-7777-777777777771",
+    "planDate": "2026-09-21",
+    "mealScene": "breakfast",
+    "items": [
+      {
+        "id": "77777777-7777-7777-7777-777777777772",
+        "recipeRef": "recipes/demo-spinach-egg.md",
+        "recipeTitle": "菠菜鸡蛋快手菜",
+        "dishRole": "main",
+        "plannedConsumptions": [
+          {
+            "itemName": "菠菜",
+            "plannedQuantity": 150,
+            "unit": "g",
+            "note": "Planned only; this does not decrease inventory."
+          }
+        ]
+      }
+    ]
+  },
+  "mealEvent": {
+    "id": "88888888-8888-8888-8888-888888888881",
+    "mealScene": "breakfast",
+    "status": "cooked",
+    "feedback": {
+      "rating": "liked",
+      "feedbackText": "Demo feedback: tasted fine."
+    }
+  },
+  "notes": [
+    "This fixture is synthetic demo data only.",
+    "It must not be replaced with real family health data, passwords, tokens, or database URLs."
+  ]
+}

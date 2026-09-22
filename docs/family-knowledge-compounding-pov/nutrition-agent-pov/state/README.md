@@ -49,4 +49,4 @@ state/
     └── markdown/
 ```
 
-当前阶段先维护设计文档；真正实现 MCP 服务时再补迁移和 schema。
+当前阶段已经进入 Milestone 1：维护数据字典、初始 SQL migration、demo seed 和测试 fixture。MCP 服务连接数据库会在 Milestone 2 实现。

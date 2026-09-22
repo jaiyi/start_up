@@ -77,6 +77,7 @@
 13. 认知流程层如何落地：流程分层、BPMN 门槛与供应链数字员工
 14. 本体 Ontology：让 AI 理解业务世界的概念、关系与约束
 15. Agent 记忆管理：决定上下文、经验与长期知识如何沉淀
+16. MCP 服务与动态状态：从 Agent 工具调用到 Postgres 部署
 ```
 
 原因是：
@@ -109,7 +110,8 @@ docs/technology/
 ├── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
 ├── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
 ├── 14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
-└── 15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
+├── 15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
+└── 16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -145,7 +147,7 @@ docs/technology/
 
 ---
 
-## 5. 十五个模块的学习目标与框架候选
+## 5. 十六个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
@@ -678,6 +680,45 @@ docs/technology/
 - Graph Memory：Neo4j、Apache AGE、Graphiti；
 - Session / Cache：Redis；
 - Trace / Audit：Langfuse、LangSmith、OpenTelemetry。
+
+---
+
+### 5.16 MCP 服务与动态状态
+
+对应文件：
+
+```text
+16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
+```
+
+核心问题：
+
+- 为什么知识库 / RAG 不适合直接承担动态业务状态？
+- MCP 服务在 Agent、工具、权限、数据库之间扮演什么角色？
+- 如何理解服务、端口、`.env`、Docker、Docker Compose、Postgres？
+- Agent 调用工具时，后端如何做鉴权、参数校验、事务、幂等和审计？
+- 家庭营养师 Agent 如何从 Milestone 0 的 `health_check` 演进到库存、餐食、反馈和状态导出？
+
+重点关注：
+
+- Agent Tool Boundary；
+- MCP Server / MCP Client；
+- Dynamic State Management；
+- Postgres Source of Truth；
+- Transaction / Idempotency / Audit Log；
+- Docker Compose 单机部署；
+- `.env` 与密钥管理；
+- 读工具与写工具分层；
+- 从最小服务骨架到生产可维护服务的演进路线。
+
+开源框架 / 工具候选：
+
+- MCP：Model Context Protocol SDK；
+- 后端运行时：Node.js、TypeScript、Zod、Vitest、Pino；
+- 数据库：Postgres、pg、pgvector；
+- 部署：Docker、Docker Compose、Nginx / Caddy；
+- 可观测性：OpenTelemetry、Langfuse、Grafana、Prometheus；
+- 迁移与备份：SQL migrations、pg_dump、Litestream 类备份思路。
 
 ---
 
