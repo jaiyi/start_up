@@ -11,7 +11,7 @@
 +
 Prompt/知识库能力模块：推荐、库存、菜谱收集、反馈学习、知识维护
 +
-MCP 动态状态工具：库存、采购、计划消耗、近期菜单、饭后反馈
+MCP 动态状态工具：库存、菜单计划、近期菜单、饭后反馈
 ```
 
 用户只使用一个入口：
@@ -25,8 +25,8 @@ MCP 动态状态工具：库存、采购、计划消耗、近期菜单、饭后�
 ```text
 今晚吃什么？ → meal-recommender + get_current_inventory / list_recent_meals
 周末清库存 → meal-recommender + inventory-manager + get_inventory_risks
-今天买了这些菜 → inventory-manager + record_purchase_after_confirmation
-今天用了这些菜 → inventory-manager + adjust_inventory_after_feedback
+今天买了这些菜 → inventory-manager + record_inventory_event_after_confirmation
+今天用了这些菜 → inventory-manager + record_inventory_event_after_confirmation
 宝宝今天没怎么吃 → feedback-learner + record_meal_feedback
 这个菜谱能不能收 → recipe-collector
 确认写入 → knowledge-maintainer 或对应 MCP 写入工具
@@ -190,9 +190,9 @@ retain_retrieval_history：开启
 - 库存是强状态，必须以 MCP 从独立 Postgres 返回的数据或用户最新输入为准。
 - 不要假设家里有某个食材。
 - 推荐菜品时，必须同步生成预计库存消耗。
-- 如果用户确认“就按这个做、确认执行、今天就做这个”，可以通过 MCP 生成计划消耗记录。
-- 饭后如果用户没有反馈，视为本餐执行正常，默认通过 MCP 按计划消耗扣减库存。
-- 饭后如果用户有反馈，以用户反馈为准通过 MCP 修正实际消耗和剩余库存。
+- 如果用户只是确认采用推荐菜单，先通过 MCP 记录计划消耗，不扣库存。
+- 只有用户明确说“已经做了、确认执行、就按这个做完了”时，才通过 `confirm_meal_execution` 扣减库存。
+- 对已确认执行的餐食，如果饭后在约定时间内没有反馈，视为本餐执行正常，可通过 MCP 记录默认正常反馈并按计划消耗扣减库存。
 - 每天做完饭后应尝试询问或整理库存消耗。
 - 每周采购后应更新库存。
 - 周五晚到周日默认进入清库存优先模式，目标是优先消耗上周采购剩余食材。
@@ -296,9 +296,6 @@ dietary-rules.md
 get_current_inventory
 get_inventory_risks
 list_recent_meals
-get_meal_feedback_summary
-recipes/*.md
-recommendation-rules.md
 recipes/*.md
 recommendation-rules.md
 ```
@@ -339,10 +336,10 @@ recommendation-rules.md
 状态规则：
 
 ```text
-推荐后通过 create_planned_consumption 生成计划消耗。
-用户确认执行后，通过 confirm_meal_execution 转为实际消耗并扣库存。
-用户有反馈时，通过 record_meal_feedback 和 adjust_inventory_after_feedback 修正实际消耗。
-每周采购后，通过 record_purchase_after_confirmation 更新库存新增和优先消耗顺序。
+推荐后通过 `meal_plans` / `meal_plan_items` 记录菜单计划和预计消耗，不扣库存。
+用户确认执行后，通过 `confirm_meal_execution` 转为实际消耗并扣库存。
+用户有反馈时，通过 `record_meal_feedback` 记录反馈；如需修正库存，通过 `record_inventory_event_after_confirmation` 记录有来源的库存修正。
+每周采购后，通过 `record_inventory_event_after_confirmation` 更新库存新增和优先消耗顺序。
 ```
 
 输出要求：
@@ -447,12 +444,9 @@ wiki_read_page
 wiki_write_page
 wiki_replace_text
 wiki_flag_issue
-record_purchase_after_confirmation
-create_planned_consumption
+record_inventory_event_after_confirmation
 confirm_meal_execution
 record_meal_feedback
-adjust_inventory_after_feedback
-export_state_snapshot_to_markdown
 ```
 
 暂不开启：
@@ -484,15 +478,12 @@ wiki_rename_page
 get_current_inventory
 get_inventory_risks
 list_recent_meals
-list_pending_planned_consumptions
-get_meal_feedback_summary
-record_purchase_after_confirmation
-create_planned_consumption
+record_inventory_event_after_confirmation
 confirm_meal_execution
 record_meal_feedback
-adjust_inventory_after_feedback
-export_state_snapshot_to_markdown
 ```
+
+后续按真实需求再补充采购专用工具、计划消耗查询、反馈统计和 Markdown 导出工具。
 
 ### 7.1 current inventory
 
@@ -507,12 +498,12 @@ get_inventory_risks
 
 ### 7.2 planned consumption
 
-用途：记录推荐后形成的计划消耗，不直接等同于实际库存扣减。
+用途：记录推荐后形成的菜单计划和预计消耗，不直接等同于实际库存扣减。
 
 写入方式：
 
 ```text
-create_planned_consumption
+第一版由 meal_plans / meal_plan_items 表达计划消耗；不单独开放 create_planned_consumption 工具。
 ```
 
 ### 7.3 meal events / recent menu
@@ -561,22 +552,21 @@ WeKnora 自身的 PostgreSQL 主要服务平台数据、用户、知识库、任
 family-nutrition-state-mcp
   - inventory_items
   - inventory_events
-  - purchase_records
   - meal_plans
-  - planned_consumptions
+  - meal_plan_items
   - meal_events
   - meal_feedback
-  - preference_observations
+  - mcp_tool_calls
   - audit_log
 ```
 
 部署建议：
 
 ```text
-/opt/family-nutrition-state
+使用独立家庭营养师状态服务目录，具体路径以部署 runbook 为准。
 ```
 
-与 WeKnora 的 `/opt/WeKnora` 分离。
+与 WeKnora 自身部署目录分离。
 
 ## 9. 平台配置步骤
 
@@ -623,13 +613,12 @@ wiki_replace_text
 确认后 MCP 写入工具：
 
 ```text
-record_purchase_after_confirmation
-create_planned_consumption
+record_inventory_event_after_confirmation
 confirm_meal_execution
 record_meal_feedback
-adjust_inventory_after_feedback
-export_state_snapshot_to_markdown
 ```
+
+采购专用工具、计划消耗查询、反馈统计、库存反馈修正和 Markdown 导出工具暂不作为第一版配置项。
 
 暂不开启：
 
@@ -675,8 +664,8 @@ knowledge-maintainer
 1. 一个入口能处理日常推荐。
 2. 推荐时能读取库存。
 3. 推荐时能生成预计库存消耗。
-4. 用户确认执行后，能默认扣减库存。
-5. 饭后无反馈时，能记录为正常。
+4. 用户确认执行后，能按计划扣减库存。
+5. 已确认执行的餐食如果饭后无反馈，能记录为默认正常；未确认执行的推荐不能自动扣库存。
 6. 饭后有反馈时，能生成偏好和菜谱更新建议。
 7. 每周采购后，能更新库存。
 8. 周末能清理上周采购剩余食材。
