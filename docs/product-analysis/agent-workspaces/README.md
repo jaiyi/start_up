@@ -10,3 +10,10 @@
 - 任务上下文是否可复用；
 - 是否支持文档、表格、页面、轻应用或工作流发布；
 - 是否能从个人 AI 工具升级为团队工作空间。
+
+## 已有调研
+
+| 文档 | 对象 | 核心问题 |
+|---|---|---|
+| `tencent-workbuddy-library-vs-weknora.md` | 腾讯 WorkBuddy 资料库 | AI 原生资料库与 WeKnora 知识库的差异，以及 CSV/Excel/连接器/数仓边界 |
+| `bytedance-feishu-adrive-cloud-docs-vs-workbuddy-weknora.md` | 字节 ADrive / 飞书云文档 | ADrive 命名边界、飞书云文档/知识库/多维表格与 WorkBuddy、WeKnora 的差异 |
