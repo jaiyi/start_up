@@ -20,6 +20,7 @@ product-analysis/
 ├── README.md
 ├── agent-workspaces/          # Agent 工作台、人机协作资料库、任务空间、产物沉淀层
 ├── agent-learning-systems/    # Agent 运行轨迹、记忆评估、经验蒸馏、跨框架 Skill 复用
+├── agent-runtime-harnesses/   # Agent 运行时、工具接入、权限边界、状态管理、流程编排
 ├── ai-native-data-platforms/  # AI 数据基座、AI 原生数据平台、本体语义层、Agent 数据底座
 ├── data-governance-platforms/ # 数据 / AI 资产治理、权限、血缘、质量、审计、合规
 ├── industrial-ai-platforms/   # 工业 AI 平台、行业 Agent 平台、制造质量/工艺类产品
@@ -62,6 +63,22 @@ product-analysis/
 当前样例：
 
 - Asymptote Labs Agent Beacon + Jev
+
+### `agent-runtime-harnesses/`
+
+用于分析 Agent / Workflow / Enterprise Harness 类产品或框架。它关注模型如何被封装成可控的业务执行者，包括上下文装配、工具调用、MCP / API 接入、权限边界、状态管理、审批、人审、审计、失败恢复、多模型路由、评测和成本控制。
+
+典型问题：
+
+- 模型如何进入业务流程，而不只是回答问题？
+- 工具调用是否有权限、schema、审批、幂等和审计？
+- 是否支持长任务、状态管理、workflow 和 multi-agent？
+- 是否能统一接入 DeepSeek / Claude / OpenAI / Qwen / 私有模型？
+- 是否能从个人 demo 走向企业级任务闭环平台？
+
+当前样例：
+
+- DeepSeek Harness
 
 ### `ai-native-data-platforms/`
 
