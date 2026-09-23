@@ -19,6 +19,7 @@
 product-analysis/
 ├── README.md
 ├── agent-workspaces/          # Agent 工作台、人机协作资料库、任务空间、产物沉淀层
+├── agent-learning-systems/    # Agent 运行轨迹、记忆评估、经验蒸馏、跨框架 Skill 复用
 ├── industrial-ai-platforms/   # 工业 AI 平台、行业 Agent 平台、制造质量/工艺类产品
 ├── knowledge-bases/           # 知识库、RAG、Wiki、企业知识管理产品
 ├── coding-agents/             # 编程 Agent、AI IDE、代码协作产品
@@ -43,6 +44,22 @@ product-analysis/
 当前样例：
 
 - 腾讯 WorkBuddy 资料库
+
+### `agent-learning-systems/`
+
+用于分析 Agent 学习系统、自我改进记忆层、运行轨迹评估、经验蒸馏、跨框架 Skill 复用与 Agent 可观测性产品。
+
+典型问题：
+
+- Agent 的完整会话轨迹如何被采集和标准化？
+- 如何判断哪些任务轨迹是高质量、高信号、可复用的？
+- 经验如何经过人审后沉淀为长期记忆、Skill、规则或 SOP？
+- 是否支持跨 Claude Code、Cursor、Codex、OpenCode 等框架迁移？
+- 如何处理 prompt、代码、命令、MCP、secret、客户数据等敏感轨迹？
+
+当前样例：
+
+- Asymptote Labs Agent Beacon + Jev
 
 ### `industrial-ai-platforms/`
 
