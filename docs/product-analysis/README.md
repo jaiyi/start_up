@@ -20,6 +20,7 @@ product-analysis/
 ├── README.md
 ├── agent-workspaces/          # Agent 工作台、人机协作资料库、任务空间、产物沉淀层
 ├── agent-learning-systems/    # Agent 运行轨迹、记忆评估、经验蒸馏、跨框架 Skill 复用
+├── ai-native-data-platforms/  # AI 数据基座、AI 原生数据平台、本体语义层、Agent 数据底座
 ├── data-governance-platforms/ # 数据 / AI 资产治理、权限、血缘、质量、审计、合规
 ├── industrial-ai-platforms/   # 工业 AI 平台、行业 Agent 平台、制造质量/工艺类产品
 ├── knowledge-bases/           # 知识库、RAG、Wiki、企业知识管理产品
@@ -61,6 +62,24 @@ product-analysis/
 当前样例：
 
 - Asymptote Labs Agent Beacon + Jev
+
+### `ai-native-data-platforms/`
+
+用于分析 AI 原生数据平台、AI 数据基座、Data Intelligence Platform、AI Data Cloud、本体语义层与企业 Agent 数据底座。
+
+典型问题：
+
+- 是否以 AI / Agent 为核心消费对象重新组织数据平台？
+- 是否统一纳管表、文档、向量、特征、模型、Prompt、Agent、Skill 和评测集？
+- 是否有业务语义层、本体、知识图谱或 GraphRAG 能力？
+- 是否能把数据治理、模型治理和 Agent 行为治理放在同一控制面？
+- 是否能支持从数据供给到业务行动再到反馈回流的闭环？
+
+当前样例：
+
+- 数澜科技 AI 数据基座 / 本体语义层 / 数据智能体
+- 星环科技 AI 数据平台
+- 明略科技知识图谱与 AI 数据平台
 
 ### `data-governance-platforms/`
 

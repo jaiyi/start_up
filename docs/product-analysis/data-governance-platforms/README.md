@@ -37,6 +37,8 @@ Agent 能看哪些数据？
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
 | `databricks-governance-hub.md` | Databricks Governance Hub / Unity Catalog 治理体系 | 湖仓与 AI 资产治理入口 | 数据、模型、特征、函数、文件、权限、血缘、质量和审计如何统一治理 |
+| `atlan-active-metadata.md` | Atlan Active Metadata Platform | 现代数据目录与主动元数据控制面 | 元数据如何驱动数据发现、协作、治理自动化和 AI 上下文 |
+| `alation-data-intelligence.md` | Alation Data Intelligence Platform | 数据目录、数据搜索与数据智能平台 | 企业如何找到可信数据、理解业务语义并支撑 AI / Agent 选数 |
 
 ---
 
