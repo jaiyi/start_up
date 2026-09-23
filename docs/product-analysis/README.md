@@ -20,6 +20,7 @@ product-analysis/
 ├── README.md
 ├── agent-workspaces/          # Agent 工作台、人机协作资料库、任务空间、产物沉淀层
 ├── agent-learning-systems/    # Agent 运行轨迹、记忆评估、经验蒸馏、跨框架 Skill 复用
+├── data-governance-platforms/ # 数据 / AI 资产治理、权限、血缘、质量、审计、合规
 ├── industrial-ai-platforms/   # 工业 AI 平台、行业 Agent 平台、制造质量/工艺类产品
 ├── knowledge-bases/           # 知识库、RAG、Wiki、企业知识管理产品
 ├── coding-agents/             # 编程 Agent、AI IDE、代码协作产品
@@ -60,6 +61,22 @@ product-analysis/
 当前样例：
 
 - Asymptote Labs Agent Beacon + Jev
+
+### `data-governance-platforms/`
+
+用于分析数据治理平台、湖仓治理、AI 资产治理、数据目录、血缘、质量、权限、合规、数据共享与企业级数据控制平面产品。
+
+典型问题：
+
+- 数据 / AI 资产是否被统一纳管？
+- 权限、血缘、审计、质量、合规是否在同一控制面里？
+- Agent 访问数据库和数仓时是否能继承治理策略？
+- 是否支持表、视图、文件、函数、模型、特征、向量索引等多类资产？
+- 是否能解释业务结论、AI 结果和下游报表的数据来源？
+
+当前样例：
+
+- Databricks Governance Hub / Unity Catalog 治理体系
 
 ### `industrial-ai-platforms/`
 
