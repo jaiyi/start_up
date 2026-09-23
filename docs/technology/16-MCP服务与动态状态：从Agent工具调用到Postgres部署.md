@@ -102,7 +102,7 @@ Postgres = 动态状态 source of truth。
 
 ## 3. 当前最小实现处在什么阶段
 
-当前家庭营养师状态服务还处在 Milestone 0：证明服务骨架可以跑通。
+当前家庭营养师状态服务已经完成 Milestone 0～2 的最小工程闭环：服务骨架可以跑通，Postgres 基础契约已经建立，MCP 服务也能用最小权限 runtime role 连接 Postgres 并返回数据库/schema readiness。
 
 当前已经具备：
 
@@ -114,21 +114,22 @@ Postgres = 动态状态 source of truth。
 5. 统一 response envelope；
 6. 错误信息脱敏；
 7. 工具注册表；
-8. health_check MCP 工具；
+8. DB-backed health_check MCP 工具；
 9. /health、/tools、/mcp 三个 HTTP 入口；
 10. Dockerfile；
-11. 测试覆盖率阈值。
+11. Docker Compose 同时启动 Postgres 和 MCP 服务；
+12. family_state schema 初始 migration；
+13. runtime app role 的最小权限控制；
+14. 测试覆盖率阈值。
 ```
 
-当前还没有接入：
+当前还没有实现：
 
 ```text
-1. 真实 Postgres；
-2. 库存表；
-3. 餐食执行记录；
-4. 写入工具；
-5. WeKnora Agent 真实工具调用；
-6. 备份和导出。
+1. 库存、菜单和反馈业务读写工具；
+2. WeKnora Agent 真实工具调用；
+3. 备份和 Markdown 快照导出；
+4. 生产环境长期运行监控。
 ```
 
 这很正常。
@@ -139,6 +140,8 @@ Postgres = 动态状态 source of truth。
 服务能启动；
 鉴权能挡住未授权请求；
 工具能被注册；
+服务能以最小权限连接 Postgres；
+schema readiness 能被健康检查发现；
 返回结构稳定；
 错误不会泄露密钥；
 测试能覆盖核心边界。
@@ -193,7 +196,7 @@ HTTP / MCP 运行时层
 鉴权逻辑可以单独测试；
 响应格式可以统一演进；
 工具注册可以被 contract test 保护；
-未来接入 Postgres 时，不需要推翻 HTTP / MCP 骨架。
+当前已接入 Postgres 时，这种分层也能继续复用 HTTP / MCP 骨架，只是在底层替换或扩展数据库、repository 和业务工具。
 ```
 
 ---
@@ -233,7 +236,7 @@ Tool。
 
 ```text
 /tools 不是标准 MCP 工具调用入口；
-它只是 Milestone 0 阶段方便调试的 HTTP endpoint。
+它是方便本地开发、部署排查和查看当前白名单工具的调试 endpoint。
 ```
 
 真正接 WeKnora Agent 时，原则上应该让 WeKnora 作为 MCP Client 通过 `/mcp` 发现和调用工具。
@@ -572,15 +575,15 @@ MCP 工具建议分成两类。
 
 ### 10.1 只读工具
 
-只读工具不改变状态，例如：
+只读工具不改变状态。家庭营养师第一版优先实现：
 
 ```text
 get_current_inventory；
 get_inventory_risks；
-list_recent_meals；
-list_pending_planned_consumptions；
-get_meal_feedback_summary。
+list_recent_meals。
 ```
+
+后续可以再补充计划消耗查询和反馈统计。
 
 只读工具也要鉴权和参数校验，但风险较低。
 
@@ -597,16 +600,15 @@ get_meal_feedback_summary。
 
 ### 10.2 写入工具
 
-写入工具会改变状态，例如：
+写入工具会改变状态。家庭营养师第一版优先实现：
 
 ```text
-record_purchase_after_confirmation；
-create_planned_consumption；
+record_inventory_event_after_confirmation；
 confirm_meal_execution；
-record_meal_feedback；
-adjust_inventory_after_feedback；
-export_state_snapshot_to_markdown。
+record_meal_feedback。
 ```
+
+后续可以再补充采购专用工具、计划消耗专用工具、反馈后库存修正工具和 Markdown 导出工具。
 
 写入工具必须更严格：
 
@@ -749,7 +751,7 @@ mcp_tool_calls 保存工具调用 trace。
 
 ## 13. 测试策略：为什么 Milestone 0 也要写测试
 
-哪怕当前只有一个 `health_check`，测试也有价值。
+哪怕早期只有一个 `health_check`，测试也有价值；现在 DB-backed health check 和 Postgres 集成测试已经把这条测试策略延伸到数据库边界。
 
 因为我们真正要保护的不是功能数量，而是系统边界：
 
@@ -770,7 +772,7 @@ mcp_tool_calls 保存工具调用 trace。
 | 契约测试 | 锁定工具名称、工具描述、返回结构和安全边界 |
 | HTTP runtime 测试 | 验证真实请求能否通过服务处理 |
 | 覆盖率测试 | 防止核心路径没有测试就上线 |
-| 后续集成测试 | 验证 MCP 服务和 Postgres 真实交互 |
+| Postgres 集成测试 | 验证 MCP 服务和 Postgres 真实交互、migration、runtime role 权限 |
 
 当前已经做的是：
 
@@ -779,7 +781,9 @@ mcp_tool_calls 保存工具调用 trace。
 看到测试失败；
 实现最小代码；
 运行测试通过；
-再补 typecheck / build / coverage；
+补 typecheck / build / coverage；
+补真实 Postgres 集成测试；
+用 DB-backed health_check 验证 schema readiness 和最小权限 runtime role；
 再让 code review 检查边界。
 ```
 
@@ -840,7 +844,7 @@ Postgres 不应该暴露到公网；
 
 ## 15. 从 Milestone 0 到生产可用的路线
 
-### Milestone 0：服务骨架
+### Milestone 0：服务骨架（已完成）
 
 目标：证明 MCP 服务能跑起来。
 
@@ -853,7 +857,7 @@ Postgres 不应该暴露到公网；
 测试覆盖。
 ```
 
-### Milestone 1：Postgres 能跑起来
+### Milestone 1：Postgres 能跑起来（已完成基础契约）
 
 目标：本地和云服务器上有可用数据库。
 
@@ -866,7 +870,7 @@ Postgres 容器；
 只允许内网访问。
 ```
 
-### Milestone 2：MCP 连接 Postgres
+### Milestone 2：MCP 连接 Postgres（已完成最小闭环）
 
 目标：服务能安全连接数据库。
 
@@ -885,8 +889,7 @@ pg 连接池；
 ```text
 get_current_inventory；
 get_inventory_risks；
-list_recent_meals；
-list_pending_planned_consumptions。
+list_recent_meals。
 ```
 
 ### Milestone 4：写入工具
@@ -894,10 +897,9 @@ list_pending_planned_consumptions。
 目标：在确认、幂等、审计保护下写状态。
 
 ```text
-record_purchase_after_confirmation；
+record_inventory_event_after_confirmation；
 confirm_meal_execution；
-record_meal_feedback；
-adjust_inventory_after_feedback。
+record_meal_feedback。
 ```
 
 ### Milestone 5：接入 WeKnora Agent
@@ -935,7 +937,7 @@ Markdown 快照导出；
 
 ### 16.1 从单个工具到工具模块
 
-当前只有：
+当前对外暴露的业务工具还只有：
 
 ```text
 health_check
