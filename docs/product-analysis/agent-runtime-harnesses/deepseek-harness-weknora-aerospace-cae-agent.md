@@ -7,8 +7,10 @@
 ```text
 WeKnora 负责稳定工程知识、历史报告、规范、案例和经验的检索增强；
 DeepSeek Harness 负责任务理解、Agent 编排、工具调用、人审、状态推进和审计；
+LangGraph 负责 Agent 内部的认知步骤编排；
+Temporal 负责 solver、后处理、报告生成等长任务的可靠执行、等待、恢复和补偿；
 CAE 工具链负责真实模型解析、求解、后处理和数值计算；
-Postgres / 文件存储负责任务动态状态、模型文件、结果文件、报告版本和可复现 trace。
+Postgres 负责任务动态状态；MinIO / 文件存储负责模型文件、结果文件、报告版本和可复现 trace。
 ```
 
 也就是说，WeKnora 是知识底座，不是动态状态库；DeepSeek Harness 是 Agent 能力层和任务执行控制面，不是数值求解器；CAE 求解器和后处理工具才是工程计算事实来源。
@@ -122,17 +124,30 @@ DeepSeek Harness Agent 界面
 └── 工具调用和 trace 查看
         │
         ▼
-Agent Runtime / Harness
-├── Requirement Agent
-├── Load Case Agent
-├── Model Check Agent
-├── Material & Allowable Agent
-├── Solver Setup Agent
-├── Solver Monitor Agent
-├── Post-processing Agent
-├── Margin Agent
-├── V&V Review Agent
-└── Report Agent
+DeepSeek Harness / Agent Runtime
+├── 任务协议与上下文装配
+├── 人审节点与状态推进
+├── 权限、审计、trace、评测
+└── 调用 LangGraph / Temporal / MCP Tool Gateway
+        │
+        ├──────────────► LangGraph：Agent 认知编排
+        │                ├── Requirement Agent
+        │                ├── Load Case Agent
+        │                ├── Model Check Agent
+        │                ├── Material & Allowable Agent
+        │                ├── Solver Setup Agent
+        │                ├── Solver Monitor Agent
+        │                ├── Post-processing Agent
+        │                ├── Margin Agent
+        │                ├── V&V Review Agent
+        │                └── Report Agent
+        │
+        ├──────────────► Temporal：长任务可靠执行
+        │                ├── solver workflow
+        │                ├── postprocess workflow
+        │                ├── report workflow
+        │                ├── retry / timeout / compensation
+        │                └── wait for human approval signal
         │
         ├──────────────► WeKnora 知识底座
         │                ├── 规范 / 指南 / 模板
@@ -144,7 +159,7 @@ Agent Runtime / Harness
         │                ├── parse_model
         │                ├── check_model
         │                ├── validate_load_cases
-        │                ├── run_solver
+        │                ├── submit_solver_run
         │                ├── parse_results
         │                ├── calculate_margin
         │                └── generate_report
@@ -153,6 +168,7 @@ Agent Runtime / Harness
         │                ├── simulation_cases
         │                ├── simulation_runs
         │                ├── simulation_reviews
+        │                ├── temporal_workflow_refs
         │                ├── simulation_tool_calls
         │                └── simulation_audit_log
         │
@@ -164,6 +180,43 @@ Agent Runtime / Harness
                          ├── Markdown / PDF reports
                          └── review packages
 ```
+
+### 3.1 编排层分工：LangGraph、Temporal 与 BPMN
+
+航天 CAE Agent 里会同时出现三类“编排”，不能混在一起。
+
+```text
+LangGraph 管 Agent 怎么思考；
+Temporal 管长任务怎么可靠执行；
+BPMN 管组织流程和正式审签。
+```
+
+| 编排层 | 负责对象 | 典型问题 | MVP 是否需要 |
+|---|---|---|---|
+| LangGraph | Agent 内部状态图 | 需要检索哪些 WeKnora 知识、调用哪个工具、如何解释日志、如何生成报告草稿 | 需要 |
+| Temporal | solver / postprocess / report 等长任务 workflow | 求解跑 2 小时怎么办、worker 挂了怎么办、如何等待人审 signal、如何重试和补偿 | 需要 |
+| BPMN | 企业业务流程和正式审签 | 谁审核、谁签字、超时升级、驳回后回到哪一步、流程是否合规 | MVP 可暂缓，正式工程化阶段引入 |
+
+推荐关系：
+
+```text
+BPMN / 企业流程层
+  └── Service Task 调用 DeepSeek Harness
+        ├── LangGraph 执行 Agent 认知编排
+        ├── Temporal 执行长任务 workflow
+        └── MCP Tool Gateway 执行受控工具
+```
+
+MVP 阶段可以先不上 BPMN，但不建议省掉 Temporal。原因是航天 CAE 求解、后处理和报告生成天然是长任务：可能需要排队、等待 license、等待 HPC 资源、运行数十分钟到数小时，并且必须支持失败恢复和人工确认信号。
+
+因此 MVP 推荐取舍是：
+
+```text
+必须上：LangGraph + Temporal + MCP Tool Gateway + Postgres + MinIO + WeKnora + DeepSeek。
+暂缓上：BPMN、Neo4j、完整 PLM/PDM 集成、全量 HPC 调度。
+```
+
+BPMN 最适合在流程稳定后引入，用于正式审签、SLA、委派、退回和流程可视化；Temporal 则从第一版就进入核心架构，用来承载 solver run、postprocess、report package 这类长任务。
 
 ---
 
@@ -370,24 +423,26 @@ Harness：
 ```text
 Harness：
 1. 调用 generate_solver_deck；
-2. 调用 run_solver；
-3. 创建 simulation_solver_runs；
-4. 长任务进入 running；
-5. Solver Monitor Agent 周期读取日志；
-6. 失败则进入 solver_failed；
-7. 成功则进入 postprocessing。
+2. 启动 Temporal solver_workflow；
+3. workflow 内通过 MCP 调用 run_solver；
+4. 创建 simulation_solver_runs 和 temporal_workflow_refs；
+5. 长任务进入 running；
+6. Solver Monitor Agent 周期读取 workflow 状态和 solver 日志；
+7. 失败则按 Temporal retry / timeout / compensation 策略处理；
+8. 成功则进入 postprocessing。
 ```
 
 ### 6.6 后处理和裕度计算
 
 ```text
 Harness：
-1. 调用 parse_results；
-2. 调用 extract_static_metrics；
-3. 调用 extract_modal_metrics；
-4. 调用 calculate_margin_of_safety；
-5. 保存 simulation_results 和 simulation_margins；
-6. DeepSeek 生成结果解释草稿。
+1. 启动 Temporal postprocess_workflow；
+2. workflow 内调用 parse_results；
+3. 调用 extract_static_metrics；
+4. 调用 extract_modal_metrics；
+5. 调用 calculate_margin_of_safety；
+6. 保存 simulation_results 和 simulation_margins；
+7. DeepSeek 生成结果解释草稿。
 ```
 
 ### 6.7 V&V 和报告
@@ -396,10 +451,11 @@ Harness：
 Harness：
 1. V&V Agent 检索 checklist；
 2. 对照 case 状态、工具结果和报告草稿进行检查；
-3. Report Agent 生成 Markdown / PDF 草稿；
-4. 工程师审核；
-5. 审核通过后归档；
-6. 重要经验作为 knowledge_candidate，提交到 WeKnora 审核发布流程。
+3. 启动 Temporal report_workflow；
+4. Report Agent 生成 Markdown / PDF 草稿；
+5. workflow 等待工程师审核 signal；
+6. 审核通过后归档；
+7. 重要经验作为 knowledge_candidate，提交到 WeKnora 审核发布流程。
 ```
 
 ---
@@ -495,7 +551,35 @@ agent_runs
 └── finished_at
 ```
 
-### 8.4 `file_assets`
+### 8.4 `temporal_workflow_refs`
+
+记录 CAE 长任务在 Temporal 中的 workflow 引用。Postgres 只保存业务状态和索引，不替代 Temporal 的执行历史。
+
+```text
+temporal_workflow_refs
+├── id
+├── case_id
+├── run_id
+├── workflow_type       # solver / postprocess / report / human_review
+├── workflow_id
+├── run_id_temporal
+├── status              # running / completed / failed / canceled / timed_out
+├── last_signal         # plan_approved / solver_cancel_requested / report_reviewed
+├── last_error_summary
+├── started_at
+├── updated_at
+└── closed_at
+```
+
+关键边界：
+
+```text
+Temporal 负责 workflow / activity / retry / timeout / signal；
+Postgres 负责 case 当前业务状态、审计索引和界面查询；
+Agent 不直接改 Temporal 历史，只能通过 Harness 发起 workflow、发送 signal 或查询状态。
+```
+
+### 8.5 `file_assets`
 
 记录文件资产。
 
@@ -657,7 +741,8 @@ list_pending_reviews
 | 状态库 | PostgreSQL | case、run、review、tool call、audit |
 | 文件存储 | MinIO | FEM、结果、日志、报告 |
 | Agent 编排 | LangGraph | 显式多 Agent 状态图，可逐步替换/嵌入 Harness |
-| 长任务 | Celery + Redis；生产升级 Temporal | solver run、后处理、报告生成 |
+| 长任务可靠执行 | Temporal | solver run、后处理、报告生成、人审 signal、retry、timeout、compensation，MVP 直接采用 |
+| 业务流程 / 审签编排 | MVP 暂不上 BPMN；后续 Camunda / Flowable | 等审签流程稳定、需要 SLA / 委派 / 可视化治理时引入 |
 | FEM 解析 | pyNastran | BDF / OP2 优先 |
 | 后处理 | pyNastran + PyVista | 指标和云图 |
 | 报告 | Markdown + Pandoc | 报告草稿和 PDF |
@@ -665,6 +750,52 @@ list_pending_reviews
 | 测试 | pytest + golden cases | 工具和回归测试 |
 
 第一版不建议立刻引入太重的 BPMN、Neo4j、完整 PLM 集成和全量 HPC 调度。等单条 case 闭环跑通后再加。
+
+### 11.1 MVP 的编排取舍
+
+MVP 不再采用“Celery + Redis，生产再升级 Temporal”的长任务路线，而是直接采用 Temporal。原因是航天 CAE 的核心动作不是秒级后台 job，而是带有等待、失败恢复、人审信号和可追溯要求的长周期工程 workflow。
+
+```text
+solver run 可能等待 license / 队列 / HPC 资源；
+postprocess 可能依赖大结果文件和多步解析；
+report package 可能需要等待人工审核、补充材料和重新生成；
+这些都不是普通短任务队列最擅长处理的问题。
+```
+
+推荐 MVP 分工：
+
+| 模块 | MVP 取舍 | 原因 |
+|---|---|---|
+| LangGraph | 采用 | 管 Agent 自动节点内部的认知编排，例如需求解析、知识检索、日志解释、结果摘要、报告草稿生成 |
+| Temporal | 采用 | 管 solver / postprocess / report workflow 的可靠执行、等待、重试、超时、补偿和 human signal |
+| BPMN | 暂缓 | 先不把企业审签流程做重，避免 MVP 被流程建模拖慢；等审签链路稳定后再引入 |
+| Postgres review 表 | 采用 | 记录计划审批、材料确认、结果审核、报告审签等结构化人审结果 |
+| Temporal signal | 采用 | 人审通过、驳回、取消、补充材料等动作通过 signal 推进长任务 workflow |
+| MCP Tool Gateway | 采用 | 所有模型解析、求解提交、结果解析、裕度计算、报告生成都必须走受控工具边界 |
+
+边界要明确：
+
+```text
+LangGraph 不负责 solver 长任务可靠性；
+Temporal 不负责 LLM 推理和 Agent 决策；
+BPMN 不负责具体求解任务执行；
+MCP 不负责业务流程，只负责工具 schema、权限、幂等和审计；
+WeKnora 不负责动态状态，只负责稳定知识检索；
+Postgres 不负责大文件，只负责业务状态和索引；
+MinIO 不负责业务状态，只负责文件资产；
+DeepSeek 不直接操作工程系统，只通过 Harness 和 MCP 调用受控能力。
+```
+
+MVP 的人审实现可以先采用：
+
+```text
+Postgres simulation_reviews
+  + DeepSeek Harness 审核入口
+  + Temporal wait for signal
+  + audit_log
+```
+
+也就是说，计划审批、求解确认、报告审签先不建 BPMN 流程图，而是作为 case 状态机和 review record 管理。当流程稳定、角色复杂度上升、需要 SLA / 委派 / 抄送 / 退回路径 / 可视化流程治理时，再把 BPMN 接到 Harness 外层。
 
 ---
 
@@ -689,7 +820,7 @@ list_pending_reviews
 
 输出物：
 
-1. Postgres 表：case、model、load_case、run、result、margin、review、tool_call、audit、file_asset；
+1. Postgres 表：case、model、load_case、run、result、margin、review、tool_call、audit、file_asset、temporal_workflow_ref；
 2. MinIO 文件存储；
 3. 文件上传、hash、版本登记；
 4. case 状态机。
@@ -700,23 +831,27 @@ list_pending_reviews
 - case 能从 created 推进到 model_uploaded；
 - 所有文件有 sha256。
 
-### Milestone 2：CAE 工具封装
+### Milestone 2：CAE 工具封装与 Temporal 长任务
 
 输出物：
 
 1. `parse_model_file`；
 2. `check_model_integrity`；
 3. `parse_load_case_table`；
-4. `run_solver` 或 mock solver；
-5. `parse_solver_results`；
+4. Temporal `solver_workflow`，内部调用 `run_solver` 或 mock solver；
+5. Temporal `postprocess_workflow`，内部调用 `parse_solver_results`；
 6. `calculate_margin_of_safety`；
-7. `generate_report_draft`。
+7. Temporal `report_workflow`，内部调用 `generate_report_draft`；
+8. `wait_for_human_approval` signal；
+9. retry / timeout / cancellation / compensation 策略。
 
 验收标准：
 
 - 一个样例 case 能从模型解析到报告草稿；
 - 工具调用写入 audit；
-- solver 失败能被记录。
+- solver workflow 能记录 Temporal workflow id；
+- solver 失败能被记录并触发 retry / compensation；
+- 人审动作能通过 Temporal signal 推进 workflow。
 
 ### Milestone 3：DeepSeek Harness 接入
 
@@ -802,8 +937,8 @@ Demo 名称：
 5. Model Check Agent 给出模型检查结果。
 6. Agent 生成仿真计划草稿。
 7. 工程师确认计划。
-8. Harness 调用 solver 工具执行求解。
-9. Solver Monitor Agent 解释日志。
+8. Harness 启动 Temporal solver workflow 执行求解。
+9. Solver Monitor Agent 通过 Temporal workflow 状态和 solver log 解释进展。
 10. Postprocess 工具提取应力、位移、频率。
 11. Margin Agent 计算裕度。
 12. V&V Agent 对照 checklist 检查完整性。
