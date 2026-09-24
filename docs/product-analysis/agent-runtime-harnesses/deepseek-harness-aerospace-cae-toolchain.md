@@ -375,6 +375,39 @@ import model
 
 ## 5. 开源 CAE 工具链可行性
 
+### 5.0 开源项目 Git 链接总览
+
+下面这些链接优先服务于“航天结构静力 + 模态 MVP”的工具链选型。第一版建议优先验证 `pyNastran + MYSTRAN / CalculiX + meshio + PyVista`，再扩展到 Code_Aster / SALOME / ParaView 等更重的开源平台。
+
+| 工具 | Git 链接 | 主要用途 | MVP 价值判断 |
+|---|---|---|---|
+| pyNastran | https://github.com/SteveDoyle2/pyNastran | Nastran BDF / OP2 / F06 解析 | 最适合作为 BDF 检查、模型摘要、OP2 结果读取的第一优先级组件 |
+| MYSTRAN | https://github.com/MYSTRANsolver/MYSTRAN | 开源 Nastran-like 求解器 | 适合验证 Nastran 风格静力 / 模态开源闭环，需进一步验证求解能力和工程适配范围 |
+| CalculiX | https://github.com/Dhondtguido/CalculiX | Abaqus-like INP 结构求解器 | 无商业 license 时适合端到端 demo；与航天常见 Nastran 资产存在格式差异 |
+| Code_Aster | https://gitlab.com/codeaster/src | EDF 开源有限元求解器 | 求解能力强，适合结构、热、非线性验证；部署和学习成本较高 |
+| SALOME Platform | https://git.salome-platform.org/gitweb/ | 几何、网格、前后处理平台 | 更偏工业级开源前后处理，适合和 Code_Aster 配套，但 MVP 成本较高 |
+| SALOME GitHub org | https://github.com/SalomePlatform | SALOME 相关镜像和组件 | 可作为源码浏览和组件索引入口，仍需以官方 GitLab / gitweb 为准 |
+| FreeCAD | https://github.com/FreeCAD/FreeCAD | 开源 CAD / CAE 工作台 | 可用于 STEP / 几何基础处理和轻量参数化，第一版不建议主攻自动建模 |
+| Gmsh | https://gitlab.onelab.info/gmsh/gmsh | 开源网格生成器 | 适合 demo 和简单模型网格化，不建议第一版覆盖复杂航天 FEM |
+| meshio | https://github.com/nschloe/meshio | 网格格式转换 | 适合作为格式桥接层，连接 Gmsh、CalculiX、VTK / PyVista 等工具 |
+| PyVista | https://github.com/pyvista/pyvista | Python VTK 封装、云图和截图 | 适合报告图、热点可视化、结果截图生成 |
+| VTK | https://gitlab.kitware.com/vtk/vtk | 科学可视化底层库 | PyVista / ParaView 的底层能力来源，通常不直接作为 MVP 接口层 |
+| ParaView | https://gitlab.kitware.com/paraview/paraview | 工业级后处理和可视化 | 适合复杂可视化和后处理流水线，MVP 可先用 PyVista 简化 |
+| pyYeti | https://github.com/twmacro/pyyeti | 结构动力学、Nastran 数据处理 | 对航天结构动力学和 Nastran 结果处理有参考价值，可作为第二阶段后处理候选 |
+| OOFEM | https://github.com/oofem/oofem | 开源有限元求解器 | 可作为结构求解备选，但与航天主流资产贴合度需验证 |
+| SU2 | https://github.com/su2code/SU2 | 开源 CFD / 优化平台 | 航空航天相关度高，但更适合后续流体 / 气动扩展，不建议结构 MVP 首批纳入 |
+| OpenFOAM | https://develop.openfoam.com/Development/openfoam | 开源 CFD 工具链 | 更适合流体方向，中长期可调研，不建议第一版结构 Agent 主链路采用 |
+| OpenMDAO | https://github.com/OpenMDAO/OpenMDAO | NASA 发起的多学科设计优化框架 | 适合后续参数化仿真、多学科优化和设计空间探索 |
+| OpenVSP | https://github.com/OpenVSP/OpenVSP | NASA 开源飞行器几何建模工具 | 适合后续飞行器外形 / 气动前处理调研，不是结构静力 MVP 核心依赖 |
+
+建议把这些开源项目分成三类使用：
+
+```text
+第一优先级：pyNastran、MYSTRAN、CalculiX、meshio、PyVista
+第二优先级：Code_Aster、SALOME、Gmsh、ParaView、pyYeti
+后续扩展：SU2、OpenFOAM、OpenMDAO、OpenVSP、OOFEM
+```
+
 ### 5.1 pyNastran
 
 | 能力 | 评价 |
@@ -568,7 +601,7 @@ known_limitations
 航天结构件静力 + 模态
 已有 Nastran BDF / Abaqus INP 文件
 优先 Nastran BDF + OP2/F06 路线
-无商业 license 时用 mock solver / golden result / CalculiX 兜底
+无商业 license 时用 mock solver / golden result / MYSTRAN / CalculiX 兜底
 ```
 
 MVP 不做：
@@ -591,7 +624,7 @@ MVP 不做：
 | 状态 | Postgres | case、run、review、tool_call、workflow_ref |
 | 文件 | MinIO / NAS | FEM、solver output、log、plots、reports |
 | FEM 解析 | pyNastran | BDF / OP2 优先 |
-| 开源求解兜底 | CalculiX | 无商业 license 时做 demo |
+| 开源求解兜底 | MYSTRAN / CalculiX / Code_Aster | MYSTRAN 适合 Nastran-like 静力 / 模态验证；CalculiX 适合 Abaqus-like INP demo；Code_Aster 能力强但更重 |
 | 后处理 | pyNastran + PyVista | 指标和云图 |
 | 报告 | Markdown + Pandoc | 报告草稿和 PDF |
 | GUI 兜底 | VNC + Playwright / RPA / pyautogui | 只做受控 fallback |
@@ -632,19 +665,19 @@ BDF 上传
 优点：最贴近航天结构工程真实流程。
 缺点：依赖 license、solver 环境、结果解析适配。
 
-#### 路径 C：开源可运行 MVP，CalculiX / Code_Aster
+#### 路径 C：开源可运行 MVP，MYSTRAN / CalculiX / Code_Aster
 
 适用：希望完全开源跑通端到端。
 
 ```text
-INP / mesh 上传
-  → CalculiX / Code_Aster batch solve
+BDF / INP / mesh 上传
+  → MYSTRAN / CalculiX / Code_Aster batch solve
   → 结果转换 / 解析
   → PyVista 可视化
   → 报告草稿
 ```
 
-优点：无商业 license，端到端可控。
+优点：无商业 license，端到端可控；MYSTRAN 更贴近 Nastran 文件流，CalculiX / Code_Aster 更适合完全开源求解闭环。
 缺点：与航天团队真实 Nastran 资产有差距。
 
 ### 8.4 推荐优先级
