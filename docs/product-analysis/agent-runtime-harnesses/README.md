@@ -47,6 +47,7 @@
 |---|---|---|---|
 | `deepseek-harness.md` | DeepSeek Harness | DeepSeek 模型进入工具、工作流、权限、状态和评测体系的运行时形态 | DeepSeek 类模型如何从 API 调用走向企业级任务闭环 |
 | `deepseek-harness-aerospace-cae-simulation-agent.md` | 航天 CAE Simulation Agent | DeepSeek Harness 的应用侧样板 | DeepSeek Harness 如何支撑航天仿真任务的模型检查、工具调用、求解、裕度计算、人审和审计闭环 |
+| `deepseek-harness-weknora-aerospace-cae-agent.md` | WeKnora + DeepSeek Harness 航天 CAE Agent | 以 WeKnora 为知识底座、DeepSeek Harness 为 Agent 能力层界面的整体方案 | WeKnora、DeepSeek Harness、CAE 工具链、Postgres 和文件存储如何分工支撑航天 CAE 任务闭环 |
 
 ---
 
