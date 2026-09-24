@@ -130,17 +130,17 @@ DeepSeek Harness / Agent Runtime
 ├── 权限、审计、trace、评测
 └── 调用 LangGraph / Temporal / MCP Tool Gateway
         │
-        ├──────────────► LangGraph：Agent 认知编排
-        │                ├── Requirement Agent
-        │                ├── Load Case Agent
-        │                ├── Model Check Agent
-        │                ├── Material & Allowable Agent
-        │                ├── Solver Setup Agent
-        │                ├── Solver Monitor Agent
-        │                ├── Post-processing Agent
-        │                ├── Margin Agent
-        │                ├── V&V Review Agent
-        │                └── Report Agent
+        ├──────────────► LangGraph：前台 Agent 的认知编排 / Skill 状态图
+        │                ├── Requirement Understanding Skill
+        │                ├── Load Case Validation Skill
+        │                ├── Model Check Skill
+        │                ├── Material & Allowable Check Skill
+        │                ├── Solver Setup Skill
+        │                ├── Solver Monitor / Diagnosis Skill
+        │                ├── Post-processing Skill
+        │                ├── Margin Calculation Skill
+        │                ├── V&V Review Skill / Expert Sub-Agent
+        │                └── Report Generation Skill / Expert Sub-Agent
         │
         ├──────────────► Temporal：长任务可靠执行
         │                ├── solver workflow
@@ -228,14 +228,14 @@ BPMN 最适合在流程稳定后引入，用于正式审签、SLA、委派、退
 
 | 知识分区 | 内容 | 主要使用者 |
 |---|---|---|
-| `cae-guidelines` | 结构、热、模态、随机振动、报告编写指南 | Requirement / V&V / Report Agent |
-| `material-guides` | 材料牌号说明、许用值使用规则、温度适用范围说明 | Material Agent |
-| `load-case-rules` | 发射段载荷、准静态、随机振动、冲击、热工况定义说明 | Load Case Agent |
-| `solver-error-knowledge` | Nastran / Abaqus / Ansys 常见错误、warning 和处理经验 | Solver Monitor Agent |
-| `historical-cases` | 历史仿真报告、复盘、审查意见 | Planner / Report / V&V Agent |
-| `report-templates` | 报告模板、章节模板、审签包模板 | Report Agent |
-| `vv-checklists` | V&V 检查表、审查问题清单 | V&V Agent |
-| `modeling-patterns` | 典型支架、板壳、连接、RBE/MPC、螺栓简化模式 | Model Check / Solver Setup Agent |
+| `cae-guidelines` | 结构、热、模态、随机振动、报告编写指南 | Requirement / V&V / Report Skill |
+| `material-guides` | 材料牌号说明、许用值使用规则、温度适用范围说明 | Material & Allowable Check Skill |
+| `load-case-rules` | 发射段载荷、准静态、随机振动、冲击、热工况定义说明 | Load Case Validation Skill |
+| `solver-error-knowledge` | Nastran / Abaqus / Ansys 常见错误、warning 和处理经验 | Solver Monitor / Diagnosis Skill |
+| `historical-cases` | 历史仿真报告、复盘、审查意见 | Planning / Report / V&V Skill |
+| `report-templates` | 报告模板、章节模板、审签包模板 | Report Generation Skill |
+| `vv-checklists` | V&V 检查表、审查问题清单 | V&V Review Skill |
+| `modeling-patterns` | 典型支架、板壳、连接、RBE/MPC、螺栓简化模式 | Model Check / Solver Setup Skill |
 
 ### 4.2 文档元数据
 
@@ -257,17 +257,17 @@ sensitivity: internal / restricted / confidential
 
 ### 4.3 WeKnora 检索策略
 
-不同 Agent 应使用不同检索策略。
+不同能力模块应使用不同检索策略。多数模块在工程实现上是 Skill / LangGraph Node，只有需要多轮自主判断的审查和报告类能力才考虑升级为专家子 Agent。
 
-| Agent | 检索内容 | 检索约束 |
-|---|---|---|
-| Requirement Agent | 需求模板、分析类型说明、验收准则 | 当前专业域、当前对象类型 |
-| Load Case Agent | 工况定义、载荷表模板、历史相似工况 | analysis_type + object_type |
-| Material Agent | 材料说明、许用值使用规则 | 材料牌号 + 温度范围 + approved 状态 |
-| Model Check Agent | 建模规范、常见建模问题 | solver + element_type + structure_type |
-| Solver Monitor Agent | solver error 知识 | solver + error_code |
-| V&V Agent | checklist、审查标准、历史审查意见 | analysis_type + review_type |
-| Report Agent | 报告模板、历史优秀报告 | report_type + analysis_type |
+| 能力模块 | 推荐形态 | 检索内容 | 检索约束 |
+|---|---|---|---|
+| Requirement Understanding | Skill / LangGraph Node | 需求模板、分析类型说明、验收准则 | 当前专业域、当前对象类型 |
+| Load Case Validation | Skill | 工况定义、载荷表模板、历史相似工况 | analysis_type + object_type |
+| Material & Allowable Check | Skill + 受控材料库查询 | 材料说明、许用值使用规则 | 材料牌号 + 温度范围 + approved 状态 |
+| Model Check | Skill + CAE Tool | 建模规范、常见建模问题 | solver + element_type + structure_type |
+| Solver Monitor / Diagnosis | Temporal Activity + Skill | solver error 知识 | solver + error_code |
+| V&V Review | Review Skill / Expert Sub-Agent | checklist、审查标准、历史审查意见 | analysis_type + review_type |
+| Report Generation | Report Skill / Expert Sub-Agent | 报告模板、历史优秀报告 | report_type + analysis_type |
 
 ### 4.4 WeKnora 与正式数据库的边界
 
@@ -310,7 +310,7 @@ CAE Simulation Agent
 └── 提交审核 / 归档经验
 ```
 
-后台由 Harness 根据状态调用不同 Agent / Skill。
+后台由 Harness 根据状态调用不同 Skill / LangGraph Node；其中 V&V Review、Report Generation、Solver Diagnosis 这类需要多轮自主判断的能力，后续可以升级为专家子 Agent。
 
 ### 5.2 工作台核心页面
 
@@ -346,9 +346,48 @@ CAE Simulation Agent
 - reviews；
 - reports。
 
+### 5.4 Agent、Skill、Tool 的工程边界
+
+文档中出现的 Requirement、Load Case、Model Check、Material、Solver、V&V、Report 等名称，首先应理解为“后台能力模块”，而不是都要拆成独立 Agent。第一版更推荐：
+
+```text
+一个前台 CAE Simulation Agent
+  + 多个后台 Skill / LangGraph Node
+  + 少量专家子 Agent
+  + Temporal Workflow
+  + MCP Tool
+```
+
+判断标准：
+
+| 形态 | 适合承载 | 示例 |
+|---|---|---|
+| 前台 Agent | 面向工程师的统一入口、任务理解、对话、状态解释、下一步建议 | CAE Simulation Agent |
+| Skill / LangGraph Node | 输入输出清晰、可复用、可被状态图编排的能力 | requirement_parse、load_case_validate、model_check、solver_log_interpret |
+| 专家子 Agent | 需要综合多源上下文、多轮判断和审查意见的能力 | V&V Review、Report Revision、Solver Diagnosis |
+| Temporal Workflow / Activity | 长任务、可恢复任务、等待人审 signal 的任务 | solver_workflow、postprocess_workflow、report_workflow |
+| MCP Tool | 真实系统调用和确定性工具能力 | parse_model_file、run_solver、calculate_margin_of_safety、generate_report_draft |
+
+推荐第一版后台能力拆分：
+
+| 后台能力 | MVP 形态 | 是否建议做成独立 Agent |
+|---|---|---|
+| Requirement Understanding | Skill / LangGraph Node | 暂不需要，先做结构化解析 Skill |
+| Load Case Validation | Skill | 不需要，规则和表格校验优先 |
+| Model Check | Skill + CAE Tool | 不需要，工具检查为主，LLM 做摘要 |
+| Material & Allowable Check | Skill + 受控材料库查询 | 不需要，正式许用值不能由 Agent 判断 |
+| Solver Setup | Skill / LangGraph Node | 暂不需要，生成建议后必须规则校验和人审 |
+| Solver Monitor / Diagnosis | Temporal Activity + Skill，后续可升级子 Agent | MVP 先不常驻 Agent，只在异常或关键日志时触发诊断 |
+| Post-processing | Temporal Activity + Tool | 不需要，确定性后处理为主 |
+| Margin Calculation | Deterministic Skill / Tool | 不需要，裕度必须确定性、可审计 |
+| V&V Review | Review Skill，后续可升级专家子 Agent | 可以后续升级，因为需要综合 checklist、结果和报告 |
+| Report Generation | Report Skill，后续可升级专家子 Agent | 可以后续升级，因为可能涉及多轮修订和引用追溯 |
+
+这样做的好处是：产品上仍然可以对外叫“CAE Simulation Agent”，但工程上不会为了概念完整而拆出十几个独立 Agent，避免状态、权限、trace 和评测复杂度过早膨胀。
+
 ---
 
-## 6. Agent 编排流程
+## 6. Skill / Agent 编排流程
 
 ### 6.1 创建 case
 
@@ -357,7 +396,7 @@ CAE Simulation Agent
 “我要对这个卫星支架做 X/Y/Z 三向准静态和模态分析，一阶频率大于 100Hz，MS 大于 0。”
 
 DeepSeek Harness：
-1. Requirement Agent 解析需求；
+1. Requirement Understanding Skill 解析需求；
 2. 调用 WeKnora 检索相关分析模板和 checklist；
 3. 创建 simulation_case；
 4. 返回缺失输入清单。
@@ -374,7 +413,7 @@ Harness：
 3. 调用 parse_model；
 4. 调用 parse_load_case_table；
 5. 写入 simulation_models 和 simulation_load_cases；
-6. Model Check Agent 生成模型检查摘要。
+6. Model Check Skill 生成模型检查摘要。
 ```
 
 ### 6.3 生成仿真计划
@@ -427,7 +466,7 @@ Harness：
 3. workflow 内通过 MCP 调用 run_solver；
 4. 创建 simulation_solver_runs 和 temporal_workflow_refs；
 5. 长任务进入 running；
-6. Solver Monitor Agent 周期读取 workflow 状态和 solver 日志；
+6. Solver Monitor / Diagnosis Skill 周期读取 workflow 状态和 solver 日志；
 7. 失败则按 Temporal retry / timeout / compensation 策略处理；
 8. 成功则进入 postprocessing。
 ```
@@ -449,10 +488,10 @@ Harness：
 
 ```text
 Harness：
-1. V&V Agent 检索 checklist；
+1. V&V Review Skill 检索 checklist；
 2. 对照 case 状态、工具结果和报告草稿进行检查；
 3. 启动 Temporal report_workflow；
-4. Report Agent 生成 Markdown / PDF 草稿；
+4. Report Generation Skill / Expert Sub-Agent 生成 Markdown / PDF 草稿；
 5. workflow 等待工程师审核 signal；
 6. 审核通过后归档；
 7. 重要经验作为 knowledge_candidate，提交到 WeKnora 审核发布流程。
@@ -857,20 +896,21 @@ Postgres simulation_reviews
 
 输出物：
 
-1. Requirement Agent；
-2. Model Check Agent；
-3. Solver Log Agent；
-4. Result Interpreter Agent；
-5. Report Agent；
-6. WeKnora 检索上下文注入；
-7. agent_runs trace。
+1. Requirement Understanding Skill；
+2. Model Check Skill；
+3. Solver Log Interpretation Skill；
+4. Result Interpretation Skill；
+5. Report Generation Skill；
+6. V&V Review Skill / Expert Sub-Agent；
+7. WeKnora 检索上下文注入；
+8. agent_runs trace。
 
 验收标准：
 
-- Agent 能根据用户需求创建 case；
-- Agent 能引用 WeKnora 文档生成计划草稿；
-- Agent 能解释 solver log；
-- Agent 生成的报告草稿包含工具结果和引用来源。
+- 前台 Agent 能根据用户需求创建 case；
+- Skill 能引用 WeKnora 文档生成计划草稿；
+- Solver Log Interpretation Skill 能解释 solver log；
+- Report Generation Skill 生成的报告草稿包含工具结果和引用来源。
 
 ### Milestone 4：人审闭环
 
@@ -934,15 +974,15 @@ Demo 名称：
 2. Agent 解析需求并调用 WeKnora 检索相关指南。
 3. 工程师上传 FEM 和载荷表。
 4. Tool Gateway 解析模型和载荷。
-5. Model Check Agent 给出模型检查结果。
-6. Agent 生成仿真计划草稿。
+5. Model Check Skill 给出模型检查结果。
+6. 前台 Agent 生成仿真计划草稿。
 7. 工程师确认计划。
 8. Harness 启动 Temporal solver workflow 执行求解。
-9. Solver Monitor Agent 通过 Temporal workflow 状态和 solver log 解释进展。
-10. Postprocess 工具提取应力、位移、频率。
-11. Margin Agent 计算裕度。
-12. V&V Agent 对照 checklist 检查完整性。
-13. Report Agent 生成报告草稿。
+9. Solver Monitor / Diagnosis Skill 通过 Temporal workflow 状态和 solver log 解释进展。
+10. Post-processing Skill 提取应力、位移、频率。
+11. Margin Calculation Skill 计算裕度。
+12. V&V Review Skill 对照 checklist 检查完整性。
+13. Report Generation Skill 生成报告草稿。
 14. 工程师审核并签署。
 15. Agent 总结经验，生成候选知识。
 16. 知识管理员审核后发布到 WeKnora。
@@ -1020,15 +1060,15 @@ WeKnora 只能提供说明和引用；
 
 | 航天 CAE 需求 | DeepSeek Harness 应提供的能力 | WeKnora 的角色 | 仍需外部组件 |
 |---|---|---|---|
-| 长任务求解 | 状态机、等待、恢复、重试 | 提供求解经验 | Celery / Temporal / HPC adapter |
+| 长任务求解 | 状态机、等待、恢复、重试 | 提供求解经验 | Temporal / HPC adapter |
 | 模型和结果文件 | 文件资产上下文和引用 | 存报告说明，不存大文件 source of truth | MinIO / NAS / file_assets |
 | 工具调用 | Tool Registry、MCP、权限、审计 | 提供工具使用说明 | FastAPI / MCP Server |
-| 需求和规范理解 | Agent prompt、上下文装配 | 检索规范和 checklist | Postgres case state |
-| 材料和载荷确认 | 人审节点、审批状态 | 检索材料说明和工况规则 | 材料库 / review tables |
-| 求解日志解释 | Solver Monitor Agent | 检索 error 经验 | solver log parser |
+| 需求和规范理解 | 前台 Agent + Requirement Understanding Skill | 检索规范和 checklist | Postgres case state |
+| 材料和载荷确认 | 人审节点、审批状态、校验 Skill | 检索材料说明和工况规则 | 材料库 / review tables |
+| 求解日志解释 | Solver Monitor / Diagnosis Skill | 检索 error 经验 | solver log parser |
 | 裕度计算 | 调用受控计算工具 | 提供准则说明 | margin calculator |
-| 报告生成 | Report Agent、模板上下文 | 检索报告模板和历史报告 | Markdown / PDF generator |
-| V&V | checklist Agent | 存 checklist | review workflow |
+| 报告生成 | Report Generation Skill、模板上下文 | 检索报告模板和历史报告 | Markdown / PDF generator |
+| V&V | V&V Review Skill / Expert Sub-Agent | 存 checklist | review workflow |
 | 经验沉淀 | knowledge candidate workflow | 发布审核后的知识 | 知识审核流程 |
 
 ---
@@ -1042,8 +1082,9 @@ WeKnora
   - 存规范、模板、历史 case、solver error、checklist。
 
 DeepSeek Harness
-  - 一个 CAE Simulation Agent 入口。
-  - 5 个后台 Agent：Requirement、Model Check、Solver Log、Result Interpreter、Report。
+  - 一个 CAE Simulation Agent 前台入口。
+  - 后台 Skill / LangGraph Node：Requirement Understanding、Model Check、Solver Log Interpretation、Result Interpretation、Report Generation。
+  - 可选专家子 Agent：V&V Review、Report Revision、Solver Diagnosis。
 
 Tool Gateway
   - parse_model_file
