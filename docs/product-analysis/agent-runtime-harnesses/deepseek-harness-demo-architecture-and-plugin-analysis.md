@@ -238,6 +238,491 @@ Engine 自身不调用 HTTP、不跑脚本、不操作数据库之外的外部�
 
 这些能力对于航天 CAE 是刚需。solver 提交、后处理、报告生成都可能耗时很长，而且失败场景复杂，不能靠一次同步 tool call 解决。
 
+### 3.4 自研迁移重点：Definition / Compiler / Signal / Receipt / Outbox
+
+如果新项目不直接复用 demo 代码，而是在 Postgres + Temporal + MCP Gateway 上自研一层 CAE Harness Workflow，最应该迁移的不是类名，而是下面五个机制。
+
+```text
+Definition 负责“流程长什么样”；
+Compiler 负责“流程发布前是否合法”；
+Signal 负责“外部人或系统如何恢复等待节点”；
+Receipt 负责“重复请求如何幂等”；
+Outbox 负责“状态变更和外部副作用如何可靠衔接”。
+```
+
+#### 3.4.1 Definition：把高风险任务流程变成版本化工程制品
+
+Definition 是固定流程的源定义。自研时建议把它设计成“可审查、可发布、可回滚”的工程制品，而不是 prompt 片段。
+
+最小字段建议：
+
+```text
+workflow_definition
+├── workflow_id             # cae_static_modal_case
+├── version                 # 1.0.0
+├── status                  # draft / published / retired
+├── input_schema            # JSON Schema
+├── variables_schema        # JSON Schema
+├── output_schema           # JSON Schema
+├── steps                   # StepDefinition[]
+├── terminals               # completed / failed / cancelled 等终态
+├── policy                  # 角色、case 状态、审批要求、风险等级
+├── metadata                # owner、reviewer、适用范围、限制条件
+├── definition_digest       # 对 canonical JSON 计算 hash
+├── created_by
+├── reviewed_by
+├── published_at
+└── retired_at
+```
+
+每个 step 至少要描述：
+
+```text
+step
+├── id
+├── type                    # tool / temporal / wait_signal / agent_review / deterministic
+├── executor_kind           # cae.model_inspect / temporal.solver / core.wait_signal
+├── input_mapping           # 从 workflow inputs / variables 取数
+├── output_schema
+├── assign                  # 成功后写入哪些 variables
+├── allowed_case_statuses
+├── required_role
+├── retry_policy
+├── timeout_policy
+├── redelivery_safety       # idempotent / manual_reconcile
+├── transitions
+└── audit_policy
+```
+
+航天 CAE 的一个简化 definition 可以是：
+
+```text
+cae_static_modal_case@1.0.0
+├── parse_requirements
+├── inspect_model_file
+├── validate_load_cases
+├── check_material_allowables
+├── generate_simulation_plan
+├── wait_plan_approval
+├── start_temporal_solver_workflow
+├── wait_solver_completed
+├── parse_solver_results
+├── calculate_margin
+├── generate_report_draft
+├── wait_report_approval
+└── completed / needs_revision / rejected / failed
+```
+
+Definition 的关键原则：
+
+1. **LLM 不能创建或修改正式 definition**：模型最多生成流程改进建议，正式 definition 必须走代码评审 / 工程评审。
+2. **run 必须钉住 definition 版本和 digest**：后续发布新版本不能改变已启动 case 的执行语义。
+3. **高风险 step 必须显式标注 required_role 和 human_review**：例如 `wait_plan_approval`、`wait_report_approval`。
+4. **每个 step 的输入输出必须 schema 化**：不能靠自然语言约定工具入参。
+5. **每个执行器都要声明 redeliverySafety**：无法确认副作用是否发生的动作必须 `manual_reconcile`。
+
+#### 3.4.2 Compiler：把“不安全流程”挡在发布前
+
+Compiler 的价值是让 workflow 在发布前失败，而不是在工程任务执行中失败。自研时建议把 Compiler 做成独立模块，输入 definition，输出 immutable compiled plan。
+
+推荐校验项：
+
+| 校验项 | 目的 |
+|---|---|
+| schemaVersion / 顶层字段白名单 | 防止隐藏字段绕过执行策略 |
+| workflow_id / version 非空且唯一 | 保证版本化发布 |
+| input / output / variables schema 合法 | 保证系统边界可验证 |
+| start step 存在 | 防止无法启动 |
+| step id 唯一 | 防止状态歧义 |
+| transition 目标存在 | 防止运行时断链 |
+| terminal 可达 | 防止永不结束 |
+| 不允许未声明 executor | 防止流程调用未知能力 |
+| executor config 通过 schema | 防止非法工具配置进入运行时 |
+| retry / timeout 在预算内 | 防止无限重试或无限等待 |
+| wait_signal 必须有 signalSchema | 防止人工输入不可验证 |
+| 高风险 step 必须有人审或角色约束 | 防止模型直接执行危险动作 |
+| 子流程引用必须固定版本和 digest | 防止动态依赖漂移 |
+| 所有 expression / mapping 引用合法 | 防止运行时取不到变量 |
+
+Compiler 输出的 compiled plan 建议包含：
+
+```text
+compiled_workflow
+├── workflow_id
+├── version
+├── definition_digest
+├── plan_digest
+├── step_by_id
+├── terminal_by_id
+├── executor_requirements
+├── feature_requirements
+├── policy_digest
+└── compiled_at
+```
+
+`definition_digest` 用于证明原始 definition 未变；`plan_digest` 用于证明编译结果未变；`policy_digest` 用于证明发布时的权限和安全策略未变。
+
+CAE 场景里的 compiler 还应增加领域校验：
+
+```text
+- 没有 plan approval，不允许出现 solver start step；
+- 没有 result parser，不允许出现 margin step；
+- 没有 approved allowable source，不允许生成 final margin；
+- report publish 前必须存在 report approval；
+- GUI fallback step 必须标记 requires_screenshot / fail_closed；
+- solver step 必须绑定 Temporal workflow type，而不是直接 shell；
+- 所有文件输入输出必须使用 file_ref，不允许把大文件塞进 prompt。
+```
+
+迁移建议：第一版不一定要做完整 DSL，但至少要把 workflow definition 存成 JSON / YAML，并在 CI 或启动时编译校验。不要在用户请求到达后再临时拼 workflow。
+
+#### 3.4.3 Signal：把人审和外部事件变成可验证输入
+
+Signal 解决的是“流程正在等一个外部输入，外部输入如何安全进入流程”。在 CAE 里，signal 主要来自工程师审批，也可能来自 Temporal completion callback、HPC 状态回调或外部审签系统。
+
+等待节点建议生成 pending action：
+
+```text
+pending_action
+├── id
+├── case_id
+├── workflow_run_id
+├── step_id
+├── wait_token              # 高熵随机值，不可猜测
+├── title
+├── description
+├── signal_schema           # JSON Schema
+├── required_role
+├── assigned_to             # 可选
+├── status                  # active / consumed / expired / cancelled
+├── expires_at
+├── created_at
+└── consumed_at
+```
+
+Signal 请求建议包含：
+
+```text
+signal_request
+├── run_id
+├── wait_token
+├── event_id                # 调用方生成的幂等事件 ID
+├── payload                 # 必须通过 signal_schema
+├── actor                   # 宿主可信身份，不由模型填写
+├── actor_role
+└── trace_id
+```
+
+处理 signal 的顺序建议固定：
+
+```text
+1. 根据 run_id 加载 workflow run；
+2. 校验 actor 是否有权限 signal 该 run；
+3. 根据 wait_token 查找 active pending action；
+4. 校验 pending action 未过期、未消费、未取消；
+5. 查 signal receipt，处理 event_id 幂等；
+6. 校验 payload 符合 signal_schema；
+7. 校验 actor_role 满足 required_role；
+8. 在同一个事务里：
+   - pending action 标记 consumed；
+   - 写 signal receipt；
+   - 推进 run state；
+   - 写 audit event；
+   - 生成下一批 outbox command。
+```
+
+仿真计划审批的 signal schema 示例：
+
+```json
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approved", "comments"],
+  "properties": {
+    "approved": { "type": "boolean" },
+    "comments": { "type": "string" },
+    "required_changes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
+```
+
+关键原则：
+
+- `wait_token` 是能力令牌，必须不可猜测，且只对当前 run / step / action 有效。
+- `event_id` 是幂等键，不是授权凭据。
+- `actor` 必须来自登录态 / SSO / session binding，不能来自 LLM 参数。
+- signal payload 只能表达审批结果和结构化意见，不能携带任意 workflow 修改指令。
+- 同一个 `event_id` 重放相同 payload 返回相同结果；同一个 `event_id` 携带不同 payload 必须冲突失败。
+
+#### 3.4.4 Receipt：所有写动作都要可重放、可冲突检测
+
+Receipt 是幂等的落地点。它解决的是“同一个业务请求因为网络、Agent 重试、用户重复点击而被调用多次时，系统应该返回同一个结果，而不是重复产生副作用”。
+
+建议至少设计三类 receipt。
+
+第一类是 start receipt：
+
+```text
+workflow_start_receipt
+├── tenant_id
+├── subject_id
+├── idempotency_key
+├── request_fingerprint
+├── workflow_id
+├── workflow_version
+├── definition_digest
+├── run_id
+├── status                  # active / retired
+├── retain_until
+└── created_at
+```
+
+第二类是 signal receipt：
+
+```text
+workflow_signal_receipt
+├── run_id
+├── event_id
+├── request_fingerprint
+├── accepted_snapshot
+├── status                  # active / retired
+├── retain_until
+└── created_at
+```
+
+第三类是外部动作 receipt：
+
+```text
+external_action_receipt
+├── action_kind             # submit_solver / generate_report / publish_package
+├── idempotency_key
+├── request_fingerprint
+├── external_ref            # temporal_workflow_id / hpc_job_id / artifact_id
+├── outcome                 # started / succeeded / failed / unknown
+├── evidence_ref
+├── created_at
+└── updated_at
+```
+
+Fingerprint 建议对 canonical JSON 计算 hash，内容包含：
+
+```text
+workflow selector / version / digest
+normalized inputs
+case_id
+plan_version
+actor subject
+关键 file hash
+deadline / solver_profile
+```
+
+处理规则：
+
+| 场景 | 行为 |
+|---|---|
+| 找不到 receipt | 创建新 run / 新 signal / 新外部动作 |
+| 找到 receipt 且 fingerprint 相同 | 返回原 run / 原 accepted snapshot / 原 external_ref |
+| 找到 receipt 但 fingerprint 不同 | 返回 idempotency conflict，不执行动作 |
+| receipt 已 retired | 拒绝或要求创建新 idempotency key |
+
+CAE 中典型 idempotencyKey：
+
+```text
+start case workflow: case_id + workflow_version
+start solver: case_id + plan_version + solver_profile + input_deck_hash
+approve plan: case_id + plan_version + reviewer_id + decision_round
+generate report: case_id + result_version + report_template_version
+```
+
+不要使用纯时间戳或随机数作为业务幂等键，否则无法防止重复副作用。
+
+#### 3.4.5 Outbox：状态提交和外部副作用之间的缓冲层
+
+Outbox 解决的是“数据库状态已经变了，但外部动作还没执行，或者外部动作执行了但进程崩溃”的一致性问题。
+
+推荐事务边界：
+
+```text
+业务状态变更
++ workflow state 变更
++ audit event
++ receipt
++ outbox command
+在同一个数据库事务里提交。
+```
+
+Outbox 表建议：
+
+```text
+workflow_outbox
+├── command_id
+├── run_id
+├── step_id
+├── operation_id
+├── command_type            # execute_step / resume_step / start_temporal / publish_event / cancel
+├── payload
+├── status                  # pending / leased / dispatched / confirmed / failed / reconcile_required
+├── available_at
+├── attempt_count
+├── max_attempts
+├── lease_owner
+├── lease_until
+├── fencing_token
+├── last_error
+├── created_at
+└── updated_at
+```
+
+Worker 执行顺序建议：
+
+```text
+1. 扫描 available_at <= now 且 status=pending 的 outbox；
+2. 获取 lease，写入 lease_owner / lease_until / fencing_token；
+3. 在调用外部 executor 前，写 operation intent：dispatch_started；
+4. 调用 executor / Temporal client / MCP tool；
+5. 根据结果提交：
+   - succeeded：确认 command，推进 step；
+   - failed 且可重试：计算 backoff，重新 pending；
+   - failed 且不可重试：推进 failure transition；
+   - waiting：生成 pending action；
+   - unknown：进入 reconcile_required。
+```
+
+对于不同动作，要区分 redelivery safety：
+
+| 动作 | 建议 redeliverySafety | 说明 |
+|---|---|---|
+| 纯查询 / deterministic calculation | idempotent | 可安全重试 |
+| parse existing file | idempotent | 输入 file hash 不变即可重跑 |
+| submit solver job | manual_reconcile | 不确认是否提交成功时不能盲目重跑 |
+| start Temporal workflow | idempotent + business id | Temporal workflowId 应使用业务幂等 ID |
+| publish report | manual_reconcile | 可能已经对外发布，需人工核对 |
+| GUI automation | manual_reconcile | 截图和日志不足以证明完全可重放 |
+
+Outbox 与 Temporal 的推荐关系：
+
+```text
+Harness outbox command: start_temporal_solver_workflow
+  ↓
+Temporal workflowId = case_id + plan_version + input_hash
+  ↓
+Temporal 负责长任务内部 retry / timeout / activity state
+  ↓
+Temporal completion callback 或 polling 结果再 signal / update Harness workflow
+```
+
+也就是说，Harness outbox 不需要自己轮询每一个 solver 细节；它负责可靠地启动和绑定 Temporal workflow，并接收完成事件。
+
+#### 3.4.6 最小 Postgres 表设计
+
+如果自研第一版，可以从这些表开始：
+
+```text
+workflow_definitions
+workflow_runs
+workflow_run_events
+workflow_pending_actions
+workflow_start_receipts
+workflow_signal_receipts
+workflow_outbox
+workflow_operations
+workflow_reconciliation_tasks
+cae_cases
+cae_case_files
+cae_solver_runs
+cae_review_decisions
+cae_audit_events
+```
+
+其中 `workflow_runs` 保存当前快照：
+
+```text
+workflow_runs
+├── run_id
+├── workflow_id
+├── workflow_version
+├── definition_digest
+├── plan_digest
+├── case_id
+├── subject_id
+├── status
+├── current_step_id
+├── variables_json
+├── revision
+├── created_at
+└── updated_at
+```
+
+`workflow_run_events` 保存 append-only 事件：
+
+```text
+workflow_run_events
+├── event_id
+├── run_id
+├── sequence
+├── event_type
+├── payload_json
+├── actor_id
+├── trace_id
+└── created_at
+```
+
+`workflow_operations` 保存外部副作用意图和结果：
+
+```text
+workflow_operations
+├── operation_id
+├── run_id
+├── step_id
+├── attempt_number
+├── operation_kind
+├── idempotency_key
+├── status                  # pending / running / succeeded / failed / unknown
+├── redelivery_safety
+├── request_fingerprint
+├── external_ref
+├── evidence_ref
+├── error_code
+├── error_message
+├── started_at
+└── finished_at
+```
+
+第一版即使不实现完整 compiler，也建议先实现：
+
+1. definition version + digest；
+2. run 钉住 version + digest；
+3. pending action + signalSchema；
+4. start/signal receipt；
+5. outbox + operation intent；
+6. revision / fencing；
+7. reconciliation task。
+
+这些是后续迁移到更完整 workflow runtime 时最难补的语义。
+
+#### 3.4.7 自研落地顺序
+
+推荐按下面顺序实现，不要一开始追求完整流程引擎：
+
+```text
+Step 1：定义 CAE case 状态机和允许状态转移
+Step 2：定义 domain tool 的 allowed_status / required_role / idempotency
+Step 3：实现 start receipt，防止重复创建 workflow run
+Step 4：实现 pending action + signal receipt，支撑人审
+Step 5：实现 outbox + worker，所有外部动作从 outbox 发出
+Step 6：实现 operation intent + manual reconciliation
+Step 7：再把 workflow definition 抽象为可发布 JSON / YAML
+Step 8：再实现 compiler 和 plan digest
+Step 9：最后考虑子流程、版本迁移、可视化和更复杂的并发控制
+```
+
+MVP 可以先固定一条 `cae_static_modal_case@1.0.0`，但数据结构要按可扩展 workflow 设计，避免后续把业务状态散落在 session history、prompt 或临时 JSON 文件里。
+
+---
+
 ---
 
 ## 4. Executor 边界设计
