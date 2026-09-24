@@ -46,6 +46,7 @@
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
 | `deepseek-harness.md` | DeepSeek Harness | DeepSeek 模型进入工具、工作流、权限、状态和评测体系的运行时形态 | DeepSeek 类模型如何从 API 调用走向企业级任务闭环 |
+| `deepseek-harness-aerospace-cae-simulation-agent.md` | 航天 CAE Simulation Agent | DeepSeek Harness 的应用侧样板 | DeepSeek Harness 如何支撑航天仿真任务的模型检查、工具调用、求解、裕度计算、人审和审计闭环 |
 
 ---
 
