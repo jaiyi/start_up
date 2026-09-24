@@ -49,6 +49,7 @@
 | `deepseek-harness-aerospace-cae-simulation-agent.md` | 航天 CAE Simulation Agent | DeepSeek Harness 的应用侧样板 | DeepSeek Harness 如何支撑航天仿真任务的模型检查、工具调用、求解、裕度计算、人审和审计闭环 |
 | `deepseek-harness-weknora-aerospace-cae-agent.md` | WeKnora + DeepSeek Harness 航天 CAE Agent | 以 WeKnora 为知识底座、DeepSeek Harness 为 Agent 能力层界面的整体方案 | WeKnora、DeepSeek Harness、CAE 工具链、Postgres 和文件存储如何分工支撑航天 CAE 任务闭环 |
 | `deepseek-harness-aerospace-cae-toolchain.md` | 航天 CAE 工具链可行性调研 | 航天 CAE Agent 中工程不确定性最大的工具链部分 | DeepSeek Harness 插件边界、商业 CAE API、开源仿真栈、GUI 自动化兜底与 MVP 落地方案 |
+| `deepseek-harness-demo-architecture-and-plugin-analysis.md` | DeepSeek Harness demo 实现原理与插件机制拆解 | 本地 demo 的 FixedWorkflow、DSH 插件、混合对话、长期记忆和 Skill 演进分析 | 哪些 runtime / plugin / security / memory evolution 模式可借鉴到航天 CAE Agent |
 
 ---
 
