@@ -1,6 +1,6 @@
 # 家庭营养状态 MCP 服务
 
-> 本目录实现 `family-nutrition-state-mcp`，负责为 WeKnora Agent 提供受控的动态状态工具。Milestone 3 已在独立 Postgres 上开放首批只读业务工具。
+> 本目录实现 `family-nutrition-state-mcp`，负责为 WeKnora Agent 提供受控的动态状态工具。Milestone 4 已在独立 Postgres 上开放首批只读业务工具和确认后写入工具。
 
 ## 1. 服务职责
 
@@ -76,7 +76,17 @@ Milestone 3 已完成首批只读业务工具：
 - get_inventory_risks 使用专用数据库候选函数先按风险优先级筛选，避免普通库存分页漏掉高风险食材
 ```
 
-仍未实现采购、库存扣减、菜单计划创建和反馈写入等写工具。Milestone 3 只让 Agent 能安全读取动态状态，不允许 Agent 直接修改强状态。
+Milestone 4 已完成首批确认后写入工具：
+
+```text
+- record_purchase_after_confirmation：确认后记录采购并增加库存
+- confirm_meal_execution：确认实际做饭/跳过，并在做饭时扣减库存
+- record_meal_feedback：确认后记录饭后反馈和待人工审阅的偏好候选
+- adjust_inventory_after_feedback：确认后执行库存调整、丢弃或过期处理
+- 写入工具必须携带 confirmed=true、confirmation_text、actor_id 和 idempotency_key
+- 数据库通过 mcp_tool_calls 记录幂等调用，通过 audit_log 记录审计事件
+- runtime app role 仍不能直接 SELECT / INSERT / UPDATE / DELETE 业务表，只能 EXECUTE 已批准函数
+```
 
 当前可用工具清单见第 7 节。
 
@@ -138,7 +148,7 @@ curl -i -H 'Authorization: Bearer local-dev-secret-token-for-family-nutrition' h
 不带 token：401
 带正确 token 且数据库 ready：200
 带正确 token 但数据库不可用或 schema 缺失：503
-/tools 返回 health_check 和 5 个只读业务工具
+- /tools 返回 health_check、5 个只读业务工具和 4 个确认后写入工具
 ```
 
 健康检查成功时，响应数据会包含：
@@ -147,7 +157,7 @@ curl -i -H 'Authorization: Bearer local-dev-secret-token-for-family-nutrition' h
 {
   "status": "ok",
   "service": "family-nutrition-state-mcp",
-  "milestone": "3",
+  "milestone": "4",
   "database": {
     "status": "ok",
     "schema": "ready",
@@ -218,13 +228,22 @@ domain/inventory-risk.ts
 mcp/schemas/read-only-state-schemas.ts
   定义五个只读业务工具的 Zod 输入边界。
 
-mcp/tools/register-read-only-state-tools.ts
-  注册五个只读业务 MCP 工具。
+ports/family-state-writer.ts
+  定义采购记录、确认做饭、饭后反馈、库存调整等写入状态接口。
+
+adapters/postgres/postgres-family-state-writer.ts
+  只调用 family_state schema 中已授权的 SECURITY DEFINER 写入函数，不直接写业务表。
+
+mcp/schemas/write-state-schemas.ts
+  定义四个确认后写入工具的 Zod 输入边界，强制 confirmed=true、confirmation_text 和 idempotency_key。
+
+mcp/tools/register-write-state-tools.ts
+  注册四个写入业务 MCP 工具。
 ```
 
 ## 7. 第一版 MCP 工具规划
 
-Milestone 3 当前暴露：
+Milestone 4 当前暴露：
 
 ```text
 health_check
@@ -233,18 +252,18 @@ get_inventory_risks
 list_recent_meals
 list_pending_planned_consumptions
 get_meal_feedback_summary
-```
-
-这些工具只读、幂等、非破坏性；数据库 runtime role 通过 `0003_read_only_business_functions.sql` 中的 `SECURITY DEFINER` 函数读取批准字段，不具备业务表直接读写权限。
-
-后续写入工具：
-
-```text
 record_purchase_after_confirmation
-create_planned_consumption
 confirm_meal_execution
 record_meal_feedback
 adjust_inventory_after_feedback
+```
+
+其中 5 个业务读取工具只读、幂等、非破坏性；4 个业务写入工具必须显式确认、幂等并记录审计。数据库 runtime role 通过 `0003_read_only_business_functions.sql` 和 `0004_write_business_functions.sql` 中的 `SECURITY DEFINER` 函数访问批准字段，不具备业务表直接读写权限。
+
+后续工具：
+
+```text
+create_planned_consumption
 export_state_snapshot_to_markdown
 ```
 
@@ -255,7 +274,7 @@ export_state_snapshot_to_markdown
 ```text
 family_id
 actor_id
-confirmation_id 或明确确认文本
+confirmation_text
 idempotency_key
 request_id / trace_id
 结构化 payload
@@ -268,7 +287,7 @@ mcp_tool_calls
 audit_log
 ```
 
-Milestone 3 不实现写入工具，runtime app role 也默认不具备写权限。写权限会在后续业务工具实现时按工具逐步授权。
+Milestone 4 写入工具通过已批准数据库函数执行事务、幂等和审计；runtime app role 仍没有业务表级直接读写权限。成功写入会记录 `mcp_tool_calls` 和 `audit_log`；畸形输入或业务约束失败会随事务整体回滚，不保留部分业务副作用。
 
 ## 9. 数据库与部署文件
 
@@ -279,6 +298,7 @@ Milestone 3 不实现写入工具，runtime app role 也默认不具备写权限
 ../state/migrations/0001_init_family_state.sql
 ../state/migrations/0002_runtime_permissions.sql
 ../state/migrations/0003_read_only_business_functions.sql
+../state/migrations/0004_write_business_functions.sql
 ../state/seeds/0001_demo_family.sql
 ../state/fixtures/demo-family-state.json
 ../infra/docker-compose.family-state.example.yml

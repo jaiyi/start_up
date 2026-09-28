@@ -2,7 +2,8 @@
 -- This migration creates the first Postgres contract for inventory, meal planning,
 -- meal execution, feedback, idempotency, and audit logging.
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE SCHEMA IF NOT EXISTS extensions;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE SCHEMA IF NOT EXISTS family_state;
 
 CREATE TABLE IF NOT EXISTS family_state.families (

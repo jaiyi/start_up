@@ -4,6 +4,7 @@ import { loadConfig, type AppConfig } from '../../src/config/load-config.js';
 import { startHttpServer } from '../../src/mcp/server.js';
 import type { DatabaseHealthChecker } from '../../src/ports/database-health.js';
 import { createEmptyFamilyStateReader } from '../support/family-state-reader.js';
+import { createEmptyFamilyStateWriter } from '../support/family-state-writer.js';
 
 const servers: http.Server[] = [];
 
@@ -40,6 +41,7 @@ const startTestServer = async (checker: DatabaseHealthChecker = createHealthyChe
   const server = startHttpServer(config, {
     databaseHealthChecker: checker,
     familyStateReader: createEmptyFamilyStateReader(),
+    familyStateWriter: createEmptyFamilyStateWriter(),
     allowedFamilyIds: config.allowedFamilyIds
   });
   servers.push(server);
@@ -58,7 +60,7 @@ afterEach(async () => {
   await Promise.all(closingServers);
 });
 
-describe('Milestone 3 HTTP server runtime', () => {
+describe('Milestone 4 HTTP server runtime', () => {
   it('starts a real HTTP server and serves authenticated DB-backed health checks', async () => {
     const port = await startTestServer();
 
@@ -71,7 +73,7 @@ describe('Milestone 3 HTTP server runtime', () => {
     expect(body.data).toEqual({
       status: 'ok',
       service: 'family-nutrition-state-mcp',
-      milestone: '3',
+      milestone: '4',
       database: {
         status: 'ok',
         schema: 'ready',
@@ -118,7 +120,7 @@ describe('Milestone 3 HTTP server runtime', () => {
 
     expect(response.status).toBe(200);
     expect(body.metadata).toEqual({ request_id: 'req-1', trace_id: 'trace-1' });
-    expect(body.data.tools).toHaveLength(6);
+    expect(body.data.tools).toHaveLength(10);
   });
 
   it('returns sanitized not found responses', async () => {

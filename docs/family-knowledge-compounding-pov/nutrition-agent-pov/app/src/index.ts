@@ -1,5 +1,6 @@
 import { createPostgresPool } from './adapters/postgres/create-postgres-pool.js';
 import { createPostgresFamilyStateReader } from './adapters/postgres/postgres-family-state-reader.js';
+import { createPostgresFamilyStateWriter } from './adapters/postgres/postgres-family-state-writer.js';
 import { createPostgresHealthChecker } from './adapters/postgres/postgres-health-checker.js';
 import { loadConfig } from './config/load-config.js';
 import { checkServiceHealth } from './application/check-service-health.js';
@@ -17,6 +18,7 @@ const config = configResult.value;
 const pool = createPostgresPool(config);
 const databaseHealthChecker = createPostgresHealthChecker(pool);
 const familyStateReader = createPostgresFamilyStateReader(pool);
+const familyStateWriter = createPostgresFamilyStateWriter(pool);
 const startupHealth = await checkServiceHealth(databaseHealthChecker);
 
 if (startupHealth.status !== 'ok') {
@@ -32,6 +34,7 @@ if (startupHealth.status !== 'ok') {
 const server = startHttpServer(config, {
   databaseHealthChecker,
   familyStateReader,
+  familyStateWriter,
   allowedFamilyIds: config.allowedFamilyIds
 });
 
@@ -61,7 +64,7 @@ server.on('listening', () => {
       data: {
         status: 'listening',
         service: 'family-nutrition-state-mcp',
-        milestone: '3',
+        milestone: '4',
         port: config.port,
         database: startupHealth.database
       },

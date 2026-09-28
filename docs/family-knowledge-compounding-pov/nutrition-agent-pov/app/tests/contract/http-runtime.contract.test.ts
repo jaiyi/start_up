@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createHttpHandler } from '../../src/mcp/server.js';
 import type { DatabaseHealthChecker } from '../../src/ports/database-health.js';
 import { createEmptyFamilyStateReader } from '../support/family-state-reader.js';
+import { createEmptyFamilyStateWriter } from '../support/family-state-writer.js';
 
 const config = {
   mcpAuthToken: 'test-token-value',
@@ -15,7 +16,7 @@ const config = {
   allowedFamilyIds: ['11111111-1111-1111-1111-111111111111']
 };
 
-const expectedMilestoneThreeTools = [
+const expectedMilestoneFourTools = [
   {
     name: 'get_current_inventory',
     title: 'Get current inventory',
@@ -51,6 +52,30 @@ const expectedMilestoneThreeTools = [
     title: 'List recent meals',
     description: 'Returns recent cooked meal records and their dish items for a family.',
     readOnly: true
+  },
+  {
+    name: 'record_purchase_after_confirmation',
+    title: 'Record purchase after confirmation',
+    description: 'Records confirmed grocery purchases, updates inventory, and writes audit/idempotency records.',
+    readOnly: false
+  },
+  {
+    name: 'confirm_meal_execution',
+    title: 'Confirm meal execution',
+    description: 'Records a confirmed cooked/skipped meal and consumes inventory when applicable.',
+    readOnly: false
+  },
+  {
+    name: 'record_meal_feedback',
+    title: 'Record meal feedback',
+    description: 'Records confirmed meal feedback without directly changing markdown-backed preferences.',
+    readOnly: false
+  },
+  {
+    name: 'adjust_inventory_after_feedback',
+    title: 'Adjust inventory after feedback',
+    description: 'Applies confirmed inventory adjustments, discards, or expirations after user feedback.',
+    readOnly: false
   }
 ] as const;
 
@@ -62,12 +87,13 @@ const createHealthyChecker = (): DatabaseHealthChecker => ({
 const createAppContext = (databaseHealthChecker: DatabaseHealthChecker = createHealthyChecker()) => ({
   databaseHealthChecker,
   familyStateReader: createEmptyFamilyStateReader(),
+  familyStateWriter: createEmptyFamilyStateWriter(),
   allowedFamilyIds: config.allowedFamilyIds
 });
 
 const createRequest = (path: string, init: RequestInit = {}): Request => new Request(`http://localhost${path}`, init);
 
-describe('Milestone 3 HTTP runtime', () => {
+describe('Milestone 4 HTTP runtime', () => {
   it('rejects unauthenticated health checks before database checks', async () => {
     const checker = createHealthyChecker();
     const handler = createHttpHandler(config, createAppContext(checker));
@@ -90,7 +116,7 @@ describe('Milestone 3 HTTP runtime', () => {
     expect(body.data).toEqual({
       status: 'ok',
       service: 'family-nutrition-state-mcp',
-      milestone: '3',
+      milestone: '4',
       database: {
         status: 'ok',
         schema: 'ready',
@@ -129,7 +155,7 @@ describe('Milestone 3 HTTP runtime', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.data.tools).toEqual(expectedMilestoneThreeTools);
+    expect(body.data.tools).toEqual(expectedMilestoneFourTools);
     expect(JSON.stringify(body.data.tools)).not.toMatch(/password|token|postgresql:\/\//i);
   });
 

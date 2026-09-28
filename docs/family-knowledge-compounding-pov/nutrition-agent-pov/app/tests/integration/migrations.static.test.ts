@@ -9,6 +9,7 @@ const migrationsDir = join(stateDir, 'migrations');
 const migrationPath = join(migrationsDir, '0001_init_family_state.sql');
 const runtimePermissionsPath = join(migrationsDir, '0002_runtime_permissions.sql');
 const readOnlyBusinessFunctionsPath = join(migrationsDir, '0003_read_only_business_functions.sql');
+const writeBusinessFunctionsPath = join(migrationsDir, '0004_write_business_functions.sql');
 const seedPath = join(stateDir, 'seeds', '0001_demo_family.sql');
 const fixturePath = join(stateDir, 'fixtures', 'demo-family-state.json');
 const composePath = join(infraDir, 'docker-compose.family-state.example.yml');
@@ -67,6 +68,7 @@ describe('Milestone 1 and 2 migration static contract', () => {
     expect(migrationFiles).toContain('0001_init_family_state.sql');
     expect(migrationFiles).toContain('0002_runtime_permissions.sql');
     expect(migrationFiles).toContain('0003_read_only_business_functions.sql');
+    expect(migrationFiles).toContain('0004_write_business_functions.sql');
     expect(migrationFiles).toEqual([...migrationFiles].sort());
     migrationFiles.forEach((fileName) => {
       expect(fileName).toMatch(/^\d{4}_[a-z0-9_]+\.sql$/);
@@ -180,13 +182,46 @@ describe('Milestone 1 and 2 migration static contract', () => {
     expect(readOnlyFunctions).not.toMatch(/grant\s+(insert|update|delete|truncate|create|all)\b/i);
   });
 
+  it('adds Milestone 4 confirmed write functions with idempotency, audit, and execute-only grants', () => {
+    const writeFunctions = readText(writeBusinessFunctionsPath);
+    const expectedFunctions = [
+      'record_purchase_after_confirmation',
+      'confirm_meal_execution',
+      'record_meal_feedback',
+      'adjust_inventory_after_feedback'
+    ];
+
+    expectedFunctions.forEach((functionName) => {
+      expect(writeFunctions).toMatch(new RegExp(`create\\s+or\\s+replace\\s+function\\s+family_state\\.${functionName}`, 'i'));
+      expect(writeFunctions).toMatch(new RegExp(`grant\\s+execute\\s+on\\s+function\\s+family_state\\.${functionName}`, 'i'));
+    });
+    expect(writeFunctions).toMatch(/security\s+definer/i);
+    expect(writeFunctions).toMatch(/perform\s+family_state\.assert_runtime_family_access\(target_family_id\)/i);
+    expect(writeFunctions).toMatch(/confirmed\s+is\s+not\s+true/i);
+    expect(writeFunctions).toMatch(/require_json_array\(input_payload,\s*'items',\s*1\)/i);
+    expect(writeFunctions).toMatch(/require_json_array\(input_payload,\s*'consumptions',\s*1\)/i);
+    expect(writeFunctions).toMatch(/invalid\s+meal\s+feedback\s+rating/i);
+    expect(writeFunctions).toMatch(/invalid\s+inventory\s+adjustment\s+type/i);
+    expect(writeFunctions).toMatch(/mcp_tool_calls/i);
+    expect(writeFunctions).toMatch(/idempotency_key/i);
+    expect(writeFunctions).toMatch(/request_hash/i);
+    expect(writeFunctions).toMatch(/extensions\.digest\s*\(/i);
+    expect(writeFunctions).toMatch(/coalesce\(input_payload\s*->>\s*'cookedAt',\s*input_payload\s*->>\s*'cooked_at'\)::timestamptz/i);
+    expect(writeFunctions).toMatch(/inventory unit mismatch/i);
+    expect(writeFunctions).toMatch(/audit_log/i);
+    expect(writeFunctions).toMatch(/quantity\s*<\s*0/i);
+    expect(writeFunctions).toMatch(/revoke\s+all\s+on\s+function[\s\S]*from\s+public/i);
+    expect(writeFunctions).not.toMatch(/grant\s+(select|insert|update|delete|truncate|create|all)\b/i);
+  });
+
   it('keeps migration, seed, and role SQL free from dangerous operations and real secrets', () => {
     const migration = readText(migrationPath);
     const runtimePermissions = readText(runtimePermissionsPath);
     const readOnlyFunctions = readText(readOnlyBusinessFunctionsPath);
+    const writeFunctions = readText(writeBusinessFunctionsPath);
     const runtimeRoleScript = readText(runtimeRoleScriptPath);
     const seed = readText(seedPath);
-    const combinedSql = `${migration}\n${runtimePermissions}\n${readOnlyFunctions}\n${runtimeRoleScript}\n${seed}`;
+    const combinedSql = `${migration}\n${runtimePermissions}\n${readOnlyFunctions}\n${writeFunctions}\n${runtimeRoleScript}\n${seed}`;
 
     dangerousSqlPatterns.forEach((pattern) => {
       expect(combinedSql).not.toMatch(pattern);

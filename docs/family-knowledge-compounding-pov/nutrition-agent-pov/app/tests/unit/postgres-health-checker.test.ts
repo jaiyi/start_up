@@ -23,32 +23,32 @@ const createPool = (row: Record<string, unknown>) => {
 };
 
 describe('Postgres health checker', () => {
-  it('requires Milestone 3 tables and read-only functions to report ready', async () => {
-    const { pool, calls } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 5 });
+  it('requires Milestone 4 tables and runtime functions to report ready', async () => {
+    const { pool, calls } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 9 });
     const checker = createPostgresHealthChecker(pool);
 
     await expect(checker.check()).resolves.toEqual(expect.objectContaining({ status: 'ok', schema: 'ready' }));
     expect(calls[0]?.values[0]).toContain('runtime_family_access');
-    expect(calls[0]?.values[1]).toContain('family_state.read_inventory_risk_candidates(uuid, date, boolean, integer)');
+    expect(calls[0]?.values[1]).toContain('family_state.record_purchase_after_confirmation(uuid, uuid, jsonb)');
     expect(calls[0]?.text).toContain('has_function_privilege');
   });
 
-  it('reports missing schema when Milestone 3 functions are absent', async () => {
-    const { pool } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 4 });
+  it('reports missing schema when Milestone 4 functions are absent', async () => {
+    const { pool } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 8 });
     const checker = createPostgresHealthChecker(pool);
 
     await expect(checker.check()).resolves.toEqual(expect.objectContaining({ status: 'unavailable', schema: 'missing' }));
   });
 
-  it('reports missing schema when Milestone 3 access table is absent', async () => {
-    const { pool } = createPool({ schema_exists: true, existing_table_count: 15, executable_function_count: 5 });
+  it('reports missing schema when Milestone 4 access table is absent', async () => {
+    const { pool } = createPool({ schema_exists: true, existing_table_count: 15, executable_function_count: 9 });
     const checker = createPostgresHealthChecker(pool);
 
     await expect(checker.check()).resolves.toEqual(expect.objectContaining({ status: 'unavailable', schema: 'missing' }));
   });
 
   it('closes the underlying pool', async () => {
-    const { pool } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 5 });
+    const { pool } = createPool({ schema_exists: true, existing_table_count: 16, executable_function_count: 9 });
     const checker = createPostgresHealthChecker(pool);
 
     await checker.close();

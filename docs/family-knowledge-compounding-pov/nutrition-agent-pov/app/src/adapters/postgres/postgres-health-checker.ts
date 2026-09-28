@@ -20,12 +20,16 @@ const REQUIRED_TABLES = [
   'runtime_family_access'
 ] as const;
 
-const REQUIRED_READ_FUNCTIONS = [
+const REQUIRED_RUNTIME_FUNCTIONS = [
   'family_state.read_current_inventory(uuid, boolean, integer)',
   'family_state.read_inventory_risk_candidates(uuid, date, boolean, integer)',
   'family_state.read_recent_meals(uuid, integer)',
   'family_state.read_pending_planned_consumptions(uuid, date, date, integer)',
-  'family_state.read_meal_feedback_rows(uuid, integer)'
+  'family_state.read_meal_feedback_rows(uuid, integer)',
+  'family_state.record_purchase_after_confirmation(uuid, uuid, jsonb)',
+  'family_state.confirm_meal_execution(uuid, uuid, jsonb)',
+  'family_state.record_meal_feedback(uuid, uuid, jsonb)',
+  'family_state.adjust_inventory_after_feedback(uuid, uuid, jsonb)'
 ] as const;
 
 type HealthRow = QueryResultRow & {
@@ -68,14 +72,14 @@ export const createPostgresHealthChecker = (pool: QueryablePool): DatabaseHealth
     const startedAt = process.hrtime.bigint();
 
     try {
-      const result = await pool.query<HealthRow>(HEALTH_QUERY, [[...REQUIRED_TABLES], [...REQUIRED_READ_FUNCTIONS]]);
+      const result = await pool.query<HealthRow>(HEALTH_QUERY, [[...REQUIRED_TABLES], [...REQUIRED_RUNTIME_FUNCTIONS]]);
       const row = result.rows[0];
       const existingTableCount = Number(row?.existing_table_count ?? 0);
       const executableFunctionCount = Number(row?.executable_function_count ?? 0);
       const schemaReady =
         Boolean(row?.schema_exists) &&
         existingTableCount === REQUIRED_TABLES.length &&
-        executableFunctionCount === REQUIRED_READ_FUNCTIONS.length;
+        executableFunctionCount === REQUIRED_RUNTIME_FUNCTIONS.length;
 
       return {
         status: schemaReady ? 'ok' : 'unavailable',
