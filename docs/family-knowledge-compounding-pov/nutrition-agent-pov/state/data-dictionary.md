@@ -301,7 +301,19 @@ Milestone 2 新增运行时权限边界和 MCP 数据库健康检查：
 6. /health 和 health_check 只做只读 schema readiness 检查。
 ```
 
-后续阶段：
+Milestone 3 新增只读业务函数边界：
+
+```text
+1. 通过 0003_read_only_business_functions.sql 创建已批准的 SECURITY DEFINER 只读函数；
+2. runtime app 用户只获得这些函数的 EXECUTE 权限；
+3. runtime app 用户仍不能直接 SELECT / INSERT / UPDATE / DELETE 业务表；
+4. 0003 还创建 runtime_family_access 映射表，数据库函数会按 session_user 校验允许读取的 family_id；
+5. get_inventory_risks 通过专用 read_inventory_risk_candidates 函数先按风险优先级筛选候选项，再由应用层生成风险说明；
+6. list_recent_meals 只返回 cooked / partially_cooked，跳过 skipped 记录；
+7. MCP 只读工具通过函数读取当前库存、库存风险、近期餐食、计划消耗执行状态和反馈摘要。
+```
+
+后续阶段:
 
 ```text
 Milestone 3：只读业务工具

@@ -11,14 +11,14 @@ const healthyChecker: DatabaseHealthChecker = {
   close: async () => undefined
 };
 
-describe('Milestone 2 service health', () => {
+describe('Milestone 3 service health', () => {
   it('returns ok when the database is ready', async () => {
     const health = await checkServiceHealth(healthyChecker);
 
     expect(health).toEqual({
       status: 'ok',
       service: 'family-nutrition-state-mcp',
-      milestone: '2',
+      milestone: '3',
       database: {
         status: 'ok',
         schema: 'ready',

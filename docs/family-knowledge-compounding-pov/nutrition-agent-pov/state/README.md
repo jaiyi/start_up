@@ -33,7 +33,7 @@ inventory adjustment audit
 4. 写入必须幂等；
 5. 所有写入必须可审计；
 6. 长期偏好沉淀到 Markdown 前必须人工确认；
-7. runtime app role 使用最小权限，Milestone 2 默认只能执行健康检查函数。
+7. runtime app role 使用最小权限；Milestone 3 允许执行健康检查和已批准只读业务函数，仍不能直接读写业务表。
 ```
 
 ## 4. 当前 Milestone 状态
@@ -55,11 +55,20 @@ Milestone 2 新增：
 - runtime login app role 创建脚本：../infra/postgres/create-runtime-app-role.sql
 ```
 
-Milestone 2 的权限策略：
+Milestone 3 新增：
+
+```text
+- migrations/0003_read_only_business_functions.sql
+- get_current_inventory / get_inventory_risks / list_recent_meals / list_pending_planned_consumptions / get_meal_feedback_summary 的只读数据库函数边界
+- runtime_family_access 按 runtime 登录角色绑定允许读取的 family_id
+- read_inventory_risk_candidates 在数据库侧按风险优先级筛选库存风险候选项
+```
+
+Milestone 3 的权限策略：
 
 ```text
 owner/bootstrap 用户：只用于初始化数据库、执行 migration、创建 runtime app role。
-runtime app 用户：只给 MCP 服务运行时使用，Milestone 2 只允许执行 `family_state.check_runtime_health(text[])`，不能直接读取或写入业务表。
+runtime app 用户：只给 MCP 服务运行时使用，Milestone 3 只允许执行 `family_state.check_runtime_health(text[])` 和 0003 中批准的只读业务函数，不能直接读取或写入业务表。
 ```
 
 ## 5. 规划目录
@@ -71,11 +80,12 @@ state/
 ├── schemas/
 ├── migrations/
 │   ├── 0001_init_family_state.sql
-│   └── 0002_runtime_permissions.sql
+│   ├── 0002_runtime_permissions.sql
+│   └── 0003_read_only_business_functions.sql
 ├── seeds/
 ├── fixtures/
 └── exports/
     └── markdown/
 ```
 
-后续 Milestone 3 会在 MCP 服务中实现只读业务工具；Milestone 4 才会按工具逐步加入写权限、事务、幂等和审计逻辑。
+Milestone 3 已在 MCP 服务中实现首批只读业务工具；Milestone 4 才会按工具逐步加入写权限、事务、幂等和审计逻辑。

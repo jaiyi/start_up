@@ -7,6 +7,7 @@ export type AppConfig = {
   readonly databaseConnectionTimeoutMs: number;
   readonly databaseIdleTimeoutMs: number;
   readonly databaseStatementTimeoutMs: number;
+  readonly allowedFamilyIds: readonly string[];
 };
 
 type ConfigError = {
@@ -26,6 +27,11 @@ type NumberResult =
   | { readonly ok: true; readonly value: number }
   | { readonly ok: false; readonly error: ConfigError };
 
+type StringListResult =
+  | { readonly ok: true; readonly value: readonly string[] }
+  | { readonly ok: false; readonly error: ConfigError };
+
+const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const DEFAULT_PORT = 3030;
 const DEFAULT_DATABASE_POOL_MAX = 2;
 const DEFAULT_DATABASE_CONNECTION_TIMEOUT_MS = 2000;
@@ -131,6 +137,29 @@ const parseAuthToken = (value: string | undefined, nodeEnv: string): DatabaseUrl
   return { ok: true, value };
 };
 
+const parseAllowedFamilyIds = (value: string | undefined): StringListResult => {
+  if (!value) {
+    return {
+      ok: false,
+      error: createConfigError('Missing required environment variable: FAMILY_NUTRITION_ALLOWED_FAMILY_IDS')
+    };
+  }
+
+  const ids = value
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => item.length > 0);
+
+  if (ids.length === 0 || ids.some((id) => !uuidPattern.test(id))) {
+    return {
+      ok: false,
+      error: createConfigError('Invalid environment variable: FAMILY_NUTRITION_ALLOWED_FAMILY_IDS must be a comma-separated list of UUIDs')
+    };
+  }
+
+  return { ok: true, value: [...new Set(ids)] };
+};
+
 export const loadConfig = (env: NodeJS.ProcessEnv): ConfigResult => {
   const nodeEnv = env.NODE_ENV?.trim() || 'development';
   const authTokenResult = parseAuthToken(
@@ -190,6 +219,11 @@ export const loadConfig = (env: NodeJS.ProcessEnv): ConfigResult => {
     return statementTimeoutResult;
   }
 
+  const allowedFamilyIdsResult = parseAllowedFamilyIds(env.FAMILY_NUTRITION_ALLOWED_FAMILY_IDS);
+  if (!allowedFamilyIdsResult.ok) {
+    return allowedFamilyIdsResult;
+  }
+
   return {
     ok: true,
     value: {
@@ -200,7 +234,8 @@ export const loadConfig = (env: NodeJS.ProcessEnv): ConfigResult => {
       databasePoolMax: poolMaxResult.value,
       databaseConnectionTimeoutMs: connectionTimeoutResult.value,
       databaseIdleTimeoutMs: idleTimeoutResult.value,
-      databaseStatementTimeoutMs: statementTimeoutResult.value
+      databaseStatementTimeoutMs: statementTimeoutResult.value,
+      allowedFamilyIds: allowedFamilyIdsResult.value
     }
   };
 };

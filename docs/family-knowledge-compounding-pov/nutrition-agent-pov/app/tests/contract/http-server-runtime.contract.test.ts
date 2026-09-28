@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { loadConfig, type AppConfig } from '../../src/config/load-config.js';
 import { startHttpServer } from '../../src/mcp/server.js';
 import type { DatabaseHealthChecker } from '../../src/ports/database-health.js';
+import { createEmptyFamilyStateReader } from '../support/family-state-reader.js';
 
 const servers: http.Server[] = [];
 
@@ -14,7 +15,8 @@ const config: AppConfig = {
   databasePoolMax: 2,
   databaseConnectionTimeoutMs: 2000,
   databaseIdleTimeoutMs: 10000,
-  databaseStatementTimeoutMs: 3000
+  databaseStatementTimeoutMs: 3000,
+  allowedFamilyIds: ['11111111-1111-1111-1111-111111111111']
 };
 
 const createHealthyChecker = (): DatabaseHealthChecker => ({
@@ -35,7 +37,11 @@ const closeServer = async (server: http.Server): Promise<void> =>
   });
 
 const startTestServer = async (checker: DatabaseHealthChecker = createHealthyChecker()): Promise<number> => {
-  const server = startHttpServer(config, { databaseHealthChecker: checker });
+  const server = startHttpServer(config, {
+    databaseHealthChecker: checker,
+    familyStateReader: createEmptyFamilyStateReader(),
+    allowedFamilyIds: config.allowedFamilyIds
+  });
   servers.push(server);
 
   await new Promise<void>((resolve) => server.once('listening', resolve));
@@ -52,7 +58,7 @@ afterEach(async () => {
   await Promise.all(closingServers);
 });
 
-describe('Milestone 2 HTTP server runtime', () => {
+describe('Milestone 3 HTTP server runtime', () => {
   it('starts a real HTTP server and serves authenticated DB-backed health checks', async () => {
     const port = await startTestServer();
 
@@ -65,7 +71,7 @@ describe('Milestone 2 HTTP server runtime', () => {
     expect(body.data).toEqual({
       status: 'ok',
       service: 'family-nutrition-state-mcp',
-      milestone: '2',
+      milestone: '3',
       database: {
         status: 'ok',
         schema: 'ready',
@@ -112,7 +118,7 @@ describe('Milestone 2 HTTP server runtime', () => {
 
     expect(response.status).toBe(200);
     expect(body.metadata).toEqual({ request_id: 'req-1', trace_id: 'trace-1' });
-    expect(body.data.tools).toHaveLength(1);
+    expect(body.data.tools).toHaveLength(6);
   });
 
   it('returns sanitized not found responses', async () => {

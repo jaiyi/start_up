@@ -1,11 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { loadConfig } from '../../src/config/load-config.js';
 
+const familyId = '11111111-1111-1111-1111-111111111111';
+const secondFamilyId = '11111111-1111-1111-1111-111111111112';
 const validDatabaseUrl = 'postgresql://family_nutrition_app:secret-password@127.0.0.1:5432/family_nutrition';
 
-describe('Milestone 2 configuration validation', () => {
+const withRequiredEnv = (env: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
+  NODE_ENV: 'test',
+  MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
+  FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
+  FAMILY_NUTRITION_ALLOWED_FAMILY_IDS: familyId,
+  ...env
+});
+
+describe('Milestone 3 configuration validation', () => {
   it('requires MCP auth token', () => {
-    const result = loadConfig({ NODE_ENV: 'test', FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl });
+    const result = loadConfig({
+      NODE_ENV: 'test',
+      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
+      FAMILY_NUTRITION_ALLOWED_FAMILY_IDS: familyId
+    });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -15,7 +29,11 @@ describe('Milestone 2 configuration validation', () => {
   });
 
   it('requires a Postgres database URL', () => {
-    const result = loadConfig({ NODE_ENV: 'test', MCP_AUTH_TOKEN: 'test-token-value-with-safe-length' });
+    const result = loadConfig({
+      NODE_ENV: 'test',
+      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
+      FAMILY_NUTRITION_ALLOWED_FAMILY_IDS: familyId
+    });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -24,12 +42,30 @@ describe('Milestone 2 configuration validation', () => {
     }
   });
 
-  it('rejects placeholder database URLs', () => {
+  it('requires configured family scope for read-only tools', () => {
     const result = loadConfig({
       NODE_ENV: 'test',
       MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: 'set-on-server-only'
+      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl
     });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toContain('FAMILY_NUTRITION_ALLOWED_FAMILY_IDS');
+    }
+  });
+
+  it('rejects invalid family scope values', () => {
+    const result = loadConfig(withRequiredEnv({ FAMILY_NUTRITION_ALLOWED_FAMILY_IDS: 'not-a-uuid' }));
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.message).toContain('FAMILY_NUTRITION_ALLOWED_FAMILY_IDS');
+    }
+  });
+
+  it('rejects placeholder database URLs', () => {
+    const result = loadConfig(withRequiredEnv({ FAMILY_NUTRITION_DATABASE_URL: 'set-on-server-only' }));
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -39,16 +75,8 @@ describe('Milestone 2 configuration validation', () => {
   });
 
   it('rejects malformed or non-Postgres database URLs', () => {
-    const malformed = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: 'not-a-url'
-    });
-    const nonPostgres = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: 'https://example.com/db'
-    });
+    const malformed = loadConfig(withRequiredEnv({ FAMILY_NUTRITION_DATABASE_URL: 'not-a-url' }));
+    const nonPostgres = loadConfig(withRequiredEnv({ FAMILY_NUTRITION_DATABASE_URL: 'https://example.com/db' }));
 
     expect(malformed.ok).toBe(false);
     expect(nonPostgres.ok).toBe(false);
@@ -62,9 +90,7 @@ describe('Milestone 2 configuration validation', () => {
       'example-server-token',
       'change-me',
       'replace-me'
-    ].map((token) =>
-      loadConfig({ NODE_ENV: 'test', MCP_AUTH_TOKEN: token, FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl })
-    );
+    ].map((token) => loadConfig(withRequiredEnv({ MCP_AUTH_TOKEN: token })));
 
     for (const result of placeholderResults) {
       expect(result.ok).toBe(false);
@@ -77,11 +103,7 @@ describe('Milestone 2 configuration validation', () => {
   });
 
   it('rejects production MCP auth tokens that are too short', () => {
-    const result = loadConfig({
-      NODE_ENV: 'production',
-      MCP_AUTH_TOKEN: 'short-token',
-      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl
-    });
+    const result = loadConfig(withRequiredEnv({ NODE_ENV: 'production', MCP_AUTH_TOKEN: 'short-token' }));
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -95,6 +117,7 @@ describe('Milestone 2 configuration validation', () => {
       NODE_ENV: 'test',
       FAMILY_NUTRITION_MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
       FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
+      FAMILY_NUTRITION_ALLOWED_FAMILY_IDS: `${familyId}, ${secondFamilyId}, ${familyId.toUpperCase()}`,
       PORT: '3099',
       DATABASE_POOL_MAX: '4',
       DATABASE_CONNECTION_TIMEOUT_MS: '2500',
@@ -112,13 +135,14 @@ describe('Milestone 2 configuration validation', () => {
         databasePoolMax: 4,
         databaseConnectionTimeoutMs: 2500,
         databaseIdleTimeoutMs: 12000,
-        databaseStatementTimeoutMs: 3500
+        databaseStatementTimeoutMs: 3500,
+        allowedFamilyIds: [familyId, secondFamilyId]
       }
     });
   });
 
   it('loads safe test configuration with local variable aliases and defaults', () => {
-    const result = loadConfig({ NODE_ENV: 'test', MCP_AUTH_TOKEN: 'test-token-value-with-safe-length', DATABASE_URL: validDatabaseUrl });
+    const result = loadConfig(withRequiredEnv({ DATABASE_URL: validDatabaseUrl, FAMILY_NUTRITION_DATABASE_URL: undefined }));
 
     expect(result).toEqual({
       ok: true,
@@ -130,18 +154,14 @@ describe('Milestone 2 configuration validation', () => {
         databasePoolMax: 2,
         databaseConnectionTimeoutMs: 2000,
         databaseIdleTimeoutMs: 10000,
-        databaseStatementTimeoutMs: 3000
+        databaseStatementTimeoutMs: 3000,
+        allowedFamilyIds: [familyId]
       }
     });
   });
 
   it('rejects invalid explicit ports instead of silently falling back', () => {
-    const result = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
-      PORT: '99999'
-    });
+    const result = loadConfig(withRequiredEnv({ PORT: '99999' }));
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -150,29 +170,15 @@ describe('Milestone 2 configuration validation', () => {
   });
 
   it('rejects invalid pool and timeout values', () => {
-    const invalidPool = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
-      DATABASE_POOL_MAX: '0'
-    });
-    const invalidTimeout = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: 'test-token-value-with-safe-length',
-      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl,
-      DATABASE_CONNECTION_TIMEOUT_MS: 'abc'
-    });
+    const invalidPool = loadConfig(withRequiredEnv({ DATABASE_POOL_MAX: '0' }));
+    const invalidTimeout = loadConfig(withRequiredEnv({ DATABASE_CONNECTION_TIMEOUT_MS: 'abc' }));
 
     expect(invalidPool.ok).toBe(false);
     expect(invalidTimeout.ok).toBe(false);
   });
 
   it('does not include secret values in validation errors', () => {
-    const result = loadConfig({
-      NODE_ENV: 'test',
-      MCP_AUTH_TOKEN: '',
-      FAMILY_NUTRITION_DATABASE_URL: validDatabaseUrl
-    });
+    const result = loadConfig(withRequiredEnv({ MCP_AUTH_TOKEN: '' }));
 
     expect(result.ok).toBe(false);
     expect(JSON.stringify(result)).not.toContain('secret-password');

@@ -5,12 +5,16 @@ import { z } from 'zod';
 import { checkServiceHealth } from '../application/check-service-health.js';
 import type { AppConfig } from '../config/load-config.js';
 import type { DatabaseHealthChecker } from '../ports/database-health.js';
+import type { FamilyStateReader } from '../ports/family-state-reader.js';
 import { authenticateRequest } from './auth.js';
 import { createErrorResponse, createSuccessResponse, type ResponseMetadata } from './response.js';
+import { registerReadOnlyStateTools } from './tools/register-read-only-state-tools.js';
 import { listRegisteredTools } from './tool-registry.js';
 
 export type AppContext = {
   readonly databaseHealthChecker: DatabaseHealthChecker;
+  readonly familyStateReader: FamilyStateReader;
+  readonly allowedFamilyIds: readonly string[];
 };
 
 const jsonHeaders = { 'content-type': 'application/json; charset=utf-8' } as const;
@@ -76,7 +80,7 @@ const metadataFromNodeRequest = (req: IncomingMessage): ResponseMetadata => {
 export const createMcpServer = (context: AppContext): McpServer => {
   const server = new McpServer({
     name: 'family-nutrition-state-mcp',
-    version: '0.2.0'
+    version: '0.3.0'
   });
 
   server.registerTool(
@@ -88,7 +92,7 @@ export const createMcpServer = (context: AppContext): McpServer => {
       outputSchema: {
         status: z.enum(['ok', 'degraded']),
         service: z.literal('family-nutrition-state-mcp'),
-        milestone: z.literal('2'),
+        milestone: z.literal('3'),
         database: z.object({
           status: z.enum(['ok', 'unavailable']),
           schema: z.enum(['ready', 'missing', 'unknown']),
@@ -111,6 +115,8 @@ export const createMcpServer = (context: AppContext): McpServer => {
       };
     }
   );
+
+  registerReadOnlyStateTools(server, context.familyStateReader, { allowedFamilyIds: context.allowedFamilyIds });
 
   return server;
 };

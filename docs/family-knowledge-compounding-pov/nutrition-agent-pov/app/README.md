@@ -1,6 +1,6 @@
 # 家庭营养状态 MCP 服务
 
-> 本目录实现 `family-nutrition-state-mcp`，负责为 WeKnora Agent 提供受控的动态状态工具。Milestone 2 已接入独立 Postgres，并把 `health_check` 改为数据库就绪检查。
+> 本目录实现 `family-nutrition-state-mcp`，负责为 WeKnora Agent 提供受控的动态状态工具。Milestone 3 已在独立 Postgres 上开放首批只读业务工具。
 
 ## 1. 服务职责
 
@@ -63,7 +63,22 @@ Milestone 2 已完成 MCP 服务连接 Postgres 的最小闭环：
 - Docker Compose 同时启动 Postgres 和 MCP 服务
 ```
 
-当前仍未实现库存、采购、菜单和反馈业务工具。Milestone 2 只证明：MCP 服务能以最小权限 app 用户连接 Postgres，并确认 schema 已经可用。
+Milestone 3 已完成首批只读业务工具：
+
+```text
+- get_current_inventory：读取当前有效库存
+- get_inventory_risks：基于库存和过期时间计算风险
+- list_recent_meals：读取近期实际做饭记录
+- list_pending_planned_consumptions：读取计划消耗及其执行状态
+- get_meal_feedback_summary：读取饭后反馈摘要
+- runtime app role 仍不能直接 SELECT / INSERT / UPDATE / DELETE 业务表，只能 EXECUTE 已批准的只读函数
+- 数据库函数会通过 runtime_family_access 按 session_user 二次校验 family_id
+- get_inventory_risks 使用专用数据库候选函数先按风险优先级筛选，避免普通库存分页漏掉高风险食材
+```
+
+仍未实现采购、库存扣减、菜单计划创建和反馈写入等写工具。Milestone 3 只让 Agent 能安全读取动态状态，不允许 Agent 直接修改强状态。
+
+当前可用工具清单见第 7 节。
 
 ## 4. 本地运行
 
@@ -102,6 +117,7 @@ Milestone 2 以后，服务启动必须能连接 Postgres，所以本地启动�
 
 ```bash
 MCP_AUTH_TOKEN=local-dev-secret-token-for-family-nutrition \
+FAMILY_NUTRITION_ALLOWED_FAMILY_IDS=11111111-1111-1111-1111-111111111111 \
 DATABASE_URL=postgresql://family_nutrition_app:local-password@127.0.0.1:5432/family_nutrition \
 npm run dev
 ```
@@ -122,7 +138,7 @@ curl -i -H 'Authorization: Bearer local-dev-secret-token-for-family-nutrition' h
 不带 token：401
 带正确 token 且数据库 ready：200
 带正确 token 但数据库不可用或 schema 缺失：503
-/tools 只返回 health_check
+/tools 返回 health_check 和 5 个只读业务工具
 ```
 
 健康检查成功时，响应数据会包含：
@@ -131,7 +147,7 @@ curl -i -H 'Authorization: Bearer local-dev-secret-token-for-family-nutrition' h
 {
   "status": "ok",
   "service": "family-nutrition-state-mcp",
-  "milestone": "2",
+  "milestone": "3",
   "database": {
     "status": "ok",
     "schema": "ready",
@@ -187,23 +203,39 @@ application/check-service-health.ts
   把数据库健康状态聚合成服务健康状态。
 ```
 
+MCP 服务源代码新增：
+
+```text
+ports/family-state-reader.ts
+  定义当前库存、库存风险候选项、近期餐食、计划消耗、饭后反馈等只读状态接口。
+
+adapters/postgres/postgres-family-state-reader.ts
+  只调用 family_state schema 中已授权的 SECURITY DEFINER 读取函数。
+
+domain/inventory-risk.ts
+  基于当前库存计算过期、临期、积压等风险信号。
+
+mcp/schemas/read-only-state-schemas.ts
+  定义五个只读业务工具的 Zod 输入边界。
+
+mcp/tools/register-read-only-state-tools.ts
+  注册五个只读业务 MCP 工具。
+```
+
 ## 7. 第一版 MCP 工具规划
 
-Milestone 2 当前只暴露：
+Milestone 3 当前暴露：
 
 ```text
 health_check
-```
-
-后续只读工具：
-
-```text
 get_current_inventory
 get_inventory_risks
 list_recent_meals
 list_pending_planned_consumptions
 get_meal_feedback_summary
 ```
+
+这些工具只读、幂等、非破坏性；数据库 runtime role 通过 `0003_read_only_business_functions.sql` 中的 `SECURITY DEFINER` 函数读取批准字段，不具备业务表直接读写权限。
 
 后续写入工具：
 
@@ -236,7 +268,7 @@ mcp_tool_calls
 audit_log
 ```
 
-Milestone 2 不实现写入工具，runtime app role 也默认不具备写权限。写权限会在后续业务工具实现时按工具逐步授权。
+Milestone 3 不实现写入工具，runtime app role 也默认不具备写权限。写权限会在后续业务工具实现时按工具逐步授权。
 
 ## 9. 数据库与部署文件
 
@@ -246,6 +278,7 @@ Milestone 2 不实现写入工具，runtime app role 也默认不具备写权限
 ../state/data-dictionary.md
 ../state/migrations/0001_init_family_state.sql
 ../state/migrations/0002_runtime_permissions.sql
+../state/migrations/0003_read_only_business_functions.sql
 ../state/seeds/0001_demo_family.sql
 ../state/fixtures/demo-family-state.json
 ../infra/docker-compose.family-state.example.yml
@@ -288,6 +321,7 @@ state_exports
 
 ```text
 MCP_AUTH_TOKEN 或 FAMILY_NUTRITION_MCP_AUTH_TOKEN
+FAMILY_NUTRITION_ALLOWED_FAMILY_IDS
 DATABASE_URL 或 FAMILY_NUTRITION_DATABASE_URL
 DATABASE_POOL_MAX
 DATABASE_CONNECTION_TIMEOUT_MS

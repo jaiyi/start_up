@@ -3,7 +3,7 @@ import type { DatabaseHealth, DatabaseHealthChecker } from '../ports/database-he
 export type ServiceHealth = {
   readonly status: 'ok' | 'degraded';
   readonly service: 'family-nutrition-state-mcp';
-  readonly milestone: '2';
+  readonly milestone: '3';
   readonly database: DatabaseHealth;
 };
 
@@ -20,14 +20,14 @@ export const checkServiceHealth = async (databaseHealthChecker: DatabaseHealthCh
     return {
       status: database.status === 'ok' && database.schema === 'ready' ? 'ok' : 'degraded',
       service: 'family-nutrition-state-mcp',
-      milestone: '2',
+      milestone: '3',
       database
     };
   } catch {
     return {
       status: 'degraded',
       service: 'family-nutrition-state-mcp',
-      milestone: '2',
+      milestone: '3',
       database: UNAVAILABLE_DATABASE_HEALTH
     };
   }

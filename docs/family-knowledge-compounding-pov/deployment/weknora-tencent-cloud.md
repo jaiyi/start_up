@@ -194,3 +194,152 @@ printf '\nWEKNORA_MODEL_MAX_CONCURRENCY=5\nWEKNORA_WIKI_ASYNQ_CONCURRENCY=1\n' |
 3. 如果仍出现 429，再考虑修改 WeKnora 源码里的 429 retry/backoff 识别逻辑。
 4. 如需要长期稳定运行，后续补充备份脚本、日志位置、版本升级流程和回滚流程。
 ```
+
+## 8. Family Nutrition State MCP 部署状态
+
+> 更新日期：2026-09-28。本文只记录非敏感运维事实，不记录 token、数据库密码、完整 DATABASE_URL 或 `.env` 内容。
+
+### 8.1 部署目录
+
+家庭营养动态状态服务部署在独立目录：
+
+```bash
+/opt/family-nutrition-state
+```
+
+该目录与 WeKnora 主服务目录分离：
+
+```text
+/opt/WeKnora                  # WeKnora 主服务
+/opt/family-nutrition-state   # 家庭营养师动态状态 Postgres + MCP 服务
+```
+
+### 8.2 当前容器
+
+已确认运行中的家庭营养状态服务容器：
+
+```text
+family-nutrition-postgres      postgres:16，healthy
+family-nutrition-mcp-server    family-nutrition-state-family-nutrition-mcp-server，healthy
+```
+
+网络与端口边界：
+
+```text
+family-nutrition-postgres：仅暴露容器内 5432/tcp，不开放公网端口。
+family-nutrition-mcp-server：绑定 127.0.0.1:3030->3030/tcp，不开放公网端口。
+```
+
+### 8.3 已完成验证
+
+已在服务器本机完成以下验证：
+
+```text
+1. docker compose 已识别服务：
+   - family-nutrition-postgres
+   - family-nutrition-mcp-server
+
+2. Postgres 容器 healthy。
+
+3. MCP server 容器 healthy。
+
+4. app/runtime 数据库用户可以执行健康检查函数：
+   schema_exists = t
+   existing_table_count = 15
+
+5. app/runtime 数据库用户不能直接读取业务表：
+   select count(*) from family_state.families;
+   返回 permission denied，符合最小权限预期。
+
+6. MCP HTTP 健康检查通过：
+   GET http://127.0.0.1:3030/health
+   返回 status=ok，database.schema=ready。
+
+7. MCP 工具清单通过：
+   GET http://127.0.0.1:3030/tools
+   已部署版本当前只暴露 health_check；Milestone 3 代码会在后续部署后扩展为 health_check + 5 个只读业务工具。
+
+8. MCP 协议入口通过：
+   POST http://127.0.0.1:3030/mcp initialize
+   返回 serverInfo.name=family-nutrition-state-mcp。
+
+9. MCP tool 调用通过：
+   tools/call health_check
+   返回 status=ok，database.schema=ready。
+```
+
+### 8.4 已处理的问题
+
+部署 MCP 服务时已处理以下问题：
+
+```text
+1. 服务器初始 docker-compose.yml 只有 family-nutrition-postgres，缺少 MCP 服务定义。
+2. 服务器初始缺少 app/、0002_runtime_permissions.sql 和 create-runtime-app-role.sql。
+3. 旧 Postgres 容器未挂载 /postgres-admin，需要按新 compose 重建容器以加载新只读挂载。
+4. FAMILY_NUTRITION_DATABASE_URL 和 FAMILY_NUTRITION_MIGRATION_DATABASE_URL 初始仍为 set-on-server-only 占位符。
+5. 数据库密码含特殊字符，连接串必须对用户名和密码做 URL encode，避免 psql 把密码片段误解析为 port。
+```
+
+所有修复均未在文档或聊天中记录真实密码、token 或完整连接串。
+
+### 8.5 WeKnora 与 MCP 网络状态
+
+已确认当前 Docker 网络归属初始状态：
+
+```text
+WeKnora-app                  -> weknora_WeKnora-network
+family-nutrition-mcp-server  -> family-nutrition-state_family-nutrition-state
+```
+
+由于 WeKnora MCP 页面可以填写 Bearer Token，但实际保存与调用链路采用了更稳妥的内网 proxy 方案：WeKnora 只配置无鉴权内网 URL，由 proxy 自动注入服务端 token。
+
+已创建并验证：
+
+```text
+family-nutrition-mcp-proxy：nginx:1.27-alpine，不开放公网端口。
+```
+
+当前调用链路：
+
+```text
+WeKnora-app
+  -> http://family-nutrition-mcp-proxy:3030/mcp
+  -> family-nutrition-mcp-server:3030/mcp
+  -> family-nutrition-postgres
+```
+
+WeKnora Agent 中 MCP 服务配置：
+
+```text
+MCP 服务名：agent_pg
+传输类型：HTTP Streamable
+服务 URL：http://family-nutrition-mcp-proxy:3030/mcp
+API Key：留空
+Bearer Token：留空
+```
+
+已完成容器内验证：
+
+```text
+1. WeKnora-app 无 Authorization header 访问 proxy /tools 成功。
+2. WeKnora-app 通过 proxy 调用 /mcp initialize 成功。
+3. WeKnora-app 通过 proxy 调用 tools/call health_check 成功。
+4. WeKnora Agent 已绑定 agent_pg，并在对话中成功调用 health_check。
+```
+
+注意：proxy 的 token 只来自服务器 `/opt/family-nutrition-state/.env`，不写入 WeKnora 页面或本文档。
+
+### 8.6 安全边界
+
+继续保持以下边界：
+
+```text
+1. 不开放 Postgres 5432 公网端口。
+2. 不开放 MCP 3030 公网端口。
+3. 不让 Agent 直接连接 Postgres。
+4. Agent 只调用 MCP 白名单工具。
+5. 已部署版本当前 MCP 只暴露 health_check；部署 Milestone 3 后也只允许白名单内的 5 个只读业务工具。
+6. `.env` 只保存在服务器，权限保持 600。
+7. MCP 只读工具需要配置 `FAMILY_NUTRITION_ALLOWED_FAMILY_IDS` 白名单，只允许读取明确授权的家庭 ID。
+8. 不在 Git、Markdown、聊天记录或 WeKnora 页面中记录 token、数据库密码、完整连接串。
+```

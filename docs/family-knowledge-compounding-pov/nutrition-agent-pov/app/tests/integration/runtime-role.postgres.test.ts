@@ -63,7 +63,8 @@ describe('Milestone 2 runtime Postgres role contract', () => {
     await ownerClient.query(runtimePermissionsSql);
     await runPsqlScriptInContainer(container, '/tmp/create-runtime-app-role.sql', runtimeRoleScriptSql, {
       app_user: appUser,
-      app_password: appPassword
+      app_password: appPassword,
+      app_family_ids: '11111111-1111-1111-1111-111111111111'
     });
 
     appClient = new Client({
