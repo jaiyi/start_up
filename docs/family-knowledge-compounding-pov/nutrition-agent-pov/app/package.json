@@ -1,6 +1,6 @@
 {
   "name": "family-nutrition-state-mcp",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "MCP service for Family Nutrition dynamic state.",
   "type": "module",
   "private": true,

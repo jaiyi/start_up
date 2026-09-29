@@ -1,4 +1,6 @@
 import { createPostgresPool } from './adapters/postgres/create-postgres-pool.js';
+import { createPostgresFamilyStateReader } from './adapters/postgres/postgres-family-state-reader.js';
+import { createPostgresFamilyStateWriter } from './adapters/postgres/postgres-family-state-writer.js';
 import { createPostgresHealthChecker } from './adapters/postgres/postgres-health-checker.js';
 import { loadConfig } from './config/load-config.js';
 import { checkServiceHealth } from './application/check-service-health.js';
@@ -15,6 +17,8 @@ if (!configResult.ok) {
 const config = configResult.value;
 const pool = createPostgresPool(config);
 const databaseHealthChecker = createPostgresHealthChecker(pool);
+const familyStateReader = createPostgresFamilyStateReader(pool);
+const familyStateWriter = createPostgresFamilyStateWriter(pool);
 const startupHealth = await checkServiceHealth(databaseHealthChecker);
 
 if (startupHealth.status !== 'ok') {
@@ -27,7 +31,12 @@ if (startupHealth.status !== 'ok') {
   process.exit(1);
 }
 
-const server = startHttpServer(config, { databaseHealthChecker });
+const server = startHttpServer(config, {
+  databaseHealthChecker,
+  familyStateReader,
+  familyStateWriter,
+  allowedFamilyIds: config.allowedFamilyIds
+});
 
 const shutdown = async (): Promise<void> => {
   await new Promise<void>((resolve) => {
@@ -55,7 +64,7 @@ server.on('listening', () => {
       data: {
         status: 'listening',
         service: 'family-nutrition-state-mcp',
-        milestone: '2',
+        milestone: '4',
         port: config.port,
         database: startupHealth.database
       },

@@ -91,15 +91,16 @@ state/fixtures/
 
 ## 6. Milestone 2 部署目标
 
-Milestone 2 的目标不是实现库存业务工具，而是证明 MCP 服务能安全连接 Postgres：
+Milestone 2 的目标不是实现库存业务工具，而是证明 MCP 服务能安全连接 Postgres。
+Milestone 3 已在此基础上实现首批只读业务工具；部署 Milestone 3 后，runtime app 用户只能执行健康检查函数和已批准的只读业务函数，仍不能直接读取或写入业务表：
 
 ```text
 1. 应用读取 FAMILY_NUTRITION_DATABASE_URL；
 2. MCP 服务使用 runtime app 用户连接数据库；
-3. runtime app 用户默认只能执行健康检查函数；
+3. runtime app 用户只能执行健康检查函数和已批准的只读业务函数；
 4. /health 返回数据库和 schema 状态；
 5. health_check MCP 工具返回相同健康信息；
-6. /tools 仍只暴露 health_check；
+6. /tools 暴露 health_check 和 5 个只读业务工具；
 7. 不暴露 raw_sql、query_database、execute_sql、shell_exec 等危险工具。
 ```
 
@@ -124,7 +125,7 @@ curl -i -H "Authorization: Bearer $FAMILY_NUTRITION_MCP_AUTH_TOKEN" http://127.0
   "data": {
     "status": "ok",
     "service": "family-nutrition-state-mcp",
-    "milestone": "2",
+    "milestone": "3",
     "database": {
       "status": "ok",
       "schema": "ready"
@@ -137,7 +138,7 @@ curl -i -H "Authorization: Bearer $FAMILY_NUTRITION_MCP_AUTH_TOKEN" http://127.0
 ## 7. 后续 Milestone
 
 ```text
-Milestone 3：先实现只读业务工具，让 Agent 能查看库存、近期菜单、计划消耗和反馈摘要。
+Milestone 3：已实现只读业务工具，让 Agent 能查看库存、近期菜单、计划消耗和反馈摘要。
 Milestone 4：再实现写入工具，要求用户确认、幂等、事务和审计。
 Milestone 5：接入 WeKnora Agent。
 Milestone 6：加备份、导出、上线检查。

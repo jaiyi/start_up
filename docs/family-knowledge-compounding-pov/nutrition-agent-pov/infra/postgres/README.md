@@ -34,10 +34,19 @@ Postgres 是保存动态状态的数据库。Docker 容器让它用固定版本 
 
 MCP 服务是 Agent 和数据库之间的安全边界。WeKnora Agent 后续不会直接连数据库，而是调用 MCP 暴露的白名单工具。
 
-Milestone 2 当前只开放：
+Milestone 4 当前开放：
 
 ```text
 health_check
+get_current_inventory
+get_inventory_risks
+list_recent_meals
+list_pending_planned_consumptions
+get_meal_feedback_summary
+record_purchase_after_confirmation
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
 ```
 
 它用于确认 MCP 服务和 Postgres schema 都已经 ready。
@@ -65,24 +74,32 @@ Migration 是数据库结构脚本。当前包括：
 ```text
 state/migrations/0001_init_family_state.sql
 state/migrations/0002_runtime_permissions.sql
+state/migrations/0003_read_only_business_functions.sql
+state/migrations/0004_write_business_functions.sql
 ```
 
 `0001` 创建 schema、表、外键、唯一约束和索引。
 
-`0002` 创建 runtime no-login group role，并授予只读权限。
+`0002` 创建 runtime no-login group role，并授予健康检查函数执行权限。
+
+`0003` 创建已批准只读业务函数，并通过 `runtime_family_access` 绑定 runtime 登录角色允许访问的 `family_id`。
+
+`0004` 创建已批准确认后写入函数，处理采购入库、确认做饭扣库存、饭后反馈和库存调整，并写入幂等记录与审计日志。
 
 ### Runtime app role
 
 MCP 服务运行时不使用 owner/bootstrap 数据库账号，而使用权限更小的 app/runtime 账号。
 
-Milestone 2 中 app/runtime 账号只允许执行健康检查函数：
+Milestone 4 中 app/runtime 账号只允许执行健康检查、已批准只读函数和已批准确认后写入函数：
 
 ```text
-可以：EXECUTE family_state.check_runtime_health(text[])，用于健康检查。
+可以：EXECUTE family_state.check_runtime_health(text[])。
+可以：EXECUTE 0003 中的只读业务函数。
+可以：EXECUTE 0004 中的确认后写入业务函数。
 不可以：直接 SELECT / INSERT / UPDATE / DELETE family_state 业务表。
 ```
 
-后续只读工具上线时，再按具体工具和表逐步增加最小所需权限。
+已批准读写工具上线时，只通过具体 `SECURITY DEFINER` 函数逐步增加最小所需 `EXECUTE` 权限。
 
 创建 app/runtime 登录账号的脚本是：
 
@@ -154,6 +171,7 @@ FAMILY_NUTRITION_POSTGRES_APP_PASSWORD=${APP_PASSWORD}
 FAMILY_NUTRITION_MIGRATION_DATABASE_URL=postgresql://family_nutrition_owner:${OWNER_PASSWORD}@family-nutrition-postgres:5432/family_nutrition
 FAMILY_NUTRITION_DATABASE_URL=postgresql://family_nutrition_app:${APP_PASSWORD}@family-nutrition-postgres:5432/family_nutrition
 FAMILY_NUTRITION_MCP_AUTH_TOKEN=${MCP_TOKEN}
+FAMILY_NUTRITION_ALLOWED_FAMILY_IDS=11111111-1111-1111-1111-111111111111
 DATABASE_POOL_MAX=2
 DATABASE_CONNECTION_TIMEOUT_MS=2000
 DATABASE_IDLE_TIMEOUT_MS=10000
@@ -249,6 +267,7 @@ FAMILY_NUTRITION_POSTGRES_APP_PASSWORD=服务器真实值
 FAMILY_NUTRITION_MIGRATION_DATABASE_URL=postgresql://owner用户:owner密码@family-nutrition-postgres:5432/family_nutrition
 FAMILY_NUTRITION_DATABASE_URL=postgresql://app用户:app密码@family-nutrition-postgres:5432/family_nutrition
 FAMILY_NUTRITION_MCP_AUTH_TOKEN=服务器真实值
+FAMILY_NUTRITION_ALLOWED_FAMILY_IDS=允许读取的 family_id 白名单
 DATABASE_POOL_MAX=2
 DATABASE_CONNECTION_TIMEOUT_MS=2000
 DATABASE_IDLE_TIMEOUT_MS=10000
@@ -296,6 +315,7 @@ sudo docker compose exec family-nutrition-postgres \
   -d "$FAMILY_NUTRITION_POSTGRES_DB" \
   -v app_user="$FAMILY_NUTRITION_POSTGRES_APP_USER" \
   -v app_password="$FAMILY_NUTRITION_POSTGRES_APP_PASSWORD" \
+  -v app_family_ids="$FAMILY_NUTRITION_ALLOWED_FAMILY_IDS" \
   -f /postgres-admin/create-runtime-app-role.sql
 ```
 
@@ -358,7 +378,7 @@ curl -i -H "Authorization: Bearer $FAMILY_NUTRITION_MCP_AUTH_TOKEN" \
 {
   "status": "ok",
   "service": "family-nutrition-state-mcp",
-  "milestone": "2",
+  "milestone": "4",
   "database": {
     "status": "ok",
     "schema": "ready"
@@ -373,10 +393,19 @@ curl -i -H "Authorization: Bearer $FAMILY_NUTRITION_MCP_AUTH_TOKEN" \
   http://127.0.0.1:3030/tools
 ```
 
-预期只看到：
+预期看到 Milestone 4 工具白名单：
 
 ```text
 health_check
+get_current_inventory
+get_inventory_risks
+list_recent_meals
+list_pending_planned_consumptions
+get_meal_feedback_summary
+record_purchase_after_confirmation
+confirm_meal_execution
+record_meal_feedback
+adjust_inventory_after_feedback
 ```
 
 如果看到 `raw_sql`、`query_database`、`execute_sql` 或 `shell_exec`，说明配置错误，必须停止接入。
@@ -390,7 +419,7 @@ health_check
 5. 不要让 Agent 直接执行 SQL。
 6. MCP 工具只能暴露经过 schema 校验的业务操作。
 7. 错误日志不要打印完整连接串。
-8. Milestone 2 的 runtime app 用户只允许执行 `family_state.check_runtime_health(text[])`，不能直接读取或写入业务表。
+8. Milestone 4 的 runtime app 用户只允许执行 `family_state.check_runtime_health(text[])`、0003 中批准的只读业务函数和 0004 中批准的确认后写入函数，不能直接读取或写入业务表。
 9. MCP 服务对外只绑定 `127.0.0.1:3030`，接入 WeKnora 前不要开放公网。
 
 ## 6. 常见问题
@@ -421,7 +450,7 @@ Milestone 2 先只验证本机访问，避免还没接入 WeKnora 时就把工�
 
 owner/bootstrap 用户用于建表和迁移，权限较高。app/runtime 用户只给 MCP 服务运行时使用，应该最小权限。
 
-Milestone 2 只做健康检查，所以 app/runtime 用户只授予 `EXECUTE` `family_state.check_runtime_health(text[])`。它不能直接读取或写入业务表。后续只读/写入工具上线时，再按具体业务操作逐步增加所需权限。
+Milestone 4 上线后，app/runtime 用户只授予 `EXECUTE` `family_state.check_runtime_health(text[])`、0003 中批准的只读业务函数和 0004 中批准的确认后写入函数。它不能直接读取或写入业务表；业务函数还会通过 `runtime_family_access` 按登录角色校验允许访问的 `family_id`。
 
 ### 为什么 planned_consumptions 不扣库存？
 
@@ -431,15 +460,18 @@ Milestone 2 只做健康检查，所以 app/runtime 用户只授予 `EXECUTE` `f
 
 健康检查里虽然不会返回密码，但它会暴露服务是否存在、schema 是否 ready 等运行状态。统一要求 Bearer token 可以减少被外部探测的风险。
 
-## 7. Milestone 2 完成标志
+## 7. Milestone 4 完成标志
 
 1. Postgres 容器健康。
 2. MCP 服务容器健康。
-3. `0002_runtime_permissions.sql` 执行成功。
+3. `0002_runtime_permissions.sql`、`0003_read_only_business_functions.sql` 和 `0004_write_business_functions.sql` 执行成功。
 4. app/runtime 登录角色创建成功。
-5. app/runtime 用户可以执行健康检查函数，但不能直接读取或写入业务表。
-6. `/health` 带 token 返回 `status: ok`、`milestone: 2`、`database.schema: ready`。
-7. `/tools` 只返回 `health_check`。
-8. Postgres 没有暴露公网端口。
-9. `.env` 权限是 `600`。
-10. 仓库和文档中没有真实密码、Token 或连接串。
+5. app/runtime 用户可以执行健康检查函数、0003 中批准的只读业务函数和 0004 中批准的确认后写入函数，但不能直接读取或写入业务表。
+6. `runtime_family_access` 已写入 app/runtime 登录角色允许访问的 `family_id`，未授权 `family_id` 会被数据库函数拒绝。
+7. 写入工具必须要求 `confirmed=true`、`confirmation_text`、`actor_id` 和 `idempotency_key`。
+8. 同一个 `idempotency_key` 的相同请求会 replay，不同请求会被拒绝。
+9. `/health` 带 token 返回 `status: ok`、`milestone: 4`、`database.schema: ready`。
+10. `/tools` 返回 `health_check`、5 个只读业务工具和 4 个确认后写入工具。
+11. Postgres 没有暴露公网端口。
+12. `.env` 权限是 `600`。
+13. 仓库和文档中没有真实密码、Token 或连接串。

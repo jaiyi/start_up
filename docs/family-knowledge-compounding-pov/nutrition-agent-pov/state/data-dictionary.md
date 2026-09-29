@@ -238,7 +238,7 @@ MCP 工具调用幂等表。
 | `status` | `started` / `succeeded` / `failed` / `replayed` |
 | `input_payload` / `output_payload` | 输入输出快照，必须脱敏 |
 
-唯一约束：`(family_id, tool_name, idempotency_key)`。
+唯一约束：`(family_id, tool_name, idempotency_key)`。Milestone 4 的记录与业务写入处于同一事务：成功写入和成功 replay 会留下记录；畸形输入或业务约束失败会整体回滚，不保留部分业务副作用。
 
 ### 4.15 `audit_log`
 
@@ -254,7 +254,7 @@ MCP 工具调用幂等表。
 | `metadata` | 其他上下文 |
 | `request_id` / `trace_id` | 请求追踪 |
 
-原则：后续每个写工具都应该在同一个数据库事务中写业务表和审计日志。
+原则：Milestone 4 的每个写工具都会在同一个数据库事务中写业务表和审计日志。
 
 ## 5. 当前暂缓的表
 
@@ -301,7 +301,31 @@ Milestone 2 新增运行时权限边界和 MCP 数据库健康检查：
 6. /health 和 health_check 只做只读 schema readiness 检查。
 ```
 
-后续阶段：
+Milestone 3 新增只读业务函数边界：
+
+```text
+1. 通过 0003_read_only_business_functions.sql 创建已批准的 SECURITY DEFINER 只读函数；
+2. runtime app 用户只获得这些函数的 EXECUTE 权限；
+3. runtime app 用户仍不能直接 SELECT / INSERT / UPDATE / DELETE 业务表；
+4. 0003 还创建 runtime_family_access 映射表，数据库函数会按 session_user 校验允许读取的 family_id；
+5. get_inventory_risks 通过专用 read_inventory_risk_candidates 函数先按风险优先级筛选候选项，再由应用层生成风险说明；
+6. list_recent_meals 只返回 cooked / partially_cooked，跳过 skipped 记录；
+7. MCP 只读工具通过函数读取当前库存、库存风险、近期餐食、计划消耗执行状态和反馈摘要。
+```
+
+Milestone 4 新增确认后写入函数边界：
+
+```text
+1. 通过 0004_write_business_functions.sql 创建已批准的 SECURITY DEFINER 写入函数；
+2. 写入函数包括 record_purchase_after_confirmation、confirm_meal_execution、record_meal_feedback、adjust_inventory_after_feedback；
+3. 每次写入必须带 confirmed=true、confirmation_text、actor_id 和 idempotency_key；
+4. mcp_tool_calls 使用 (family_id, tool_name, idempotency_key) 保证幂等，相同请求 replay，不同请求拒绝；
+5. 写入函数在同一事务内写业务表、库存事件和 audit_log；
+6. runtime app 用户仍不能直接 SELECT / INSERT / UPDATE / DELETE 业务表，只能 EXECUTE 已批准函数；
+7. 数据库函数继续按 session_user 校验 runtime_family_access，未授权 family_id 会被拒绝。
+```
+
+后续阶段:
 
 ```text
 Milestone 3：只读业务工具
