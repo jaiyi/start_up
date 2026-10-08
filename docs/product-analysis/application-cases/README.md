@@ -28,29 +28,31 @@
 
 ## 文档命名建议
 
+案例文档名统一用中文，便于浏览和检索：
+
 ```text
-<company-or-domain>-<scenario>.md
+<公司或领域>-<场景>.md
 ```
 
 例如：
 
 ```text
-midea-quality-inspection-case.md
-semi-fab-rma-analysis-case.md
+理想汽车-LI-PAS性能稳定性问题分析助手.md
+美的-质检视觉AI案例.md
 ```
 
 同一来源多个案例可建子目录：
 
 ```text
-application-cases/openai-customer-stories/
-application-cases/anthropic-case-studies/
+application-cases/理想汽车/
+application-cases/OpenAI客户案例/
 ```
 
 ## 当前案例
 
 | 案例 | 一句话 |
 |---|---|
-| `li-auto-lipas-performance-stability-assistant.md` | 理想 LI-PAS：把车载系统性能稳定性问题分析串成"受理→日志→分析→知识库回写→交付"的工程化 Agent 工作流，经验沉淀为 Skill + 双层知识库 |
+| `理想汽车-LI-PAS性能稳定性问题分析助手.md` | 理想 LI-PAS：把车载系统性能稳定性问题分析串成"受理→日志→分析→知识库回写→交付"的工程化 Agent 工作流，经验沉淀为 Skill + 双层知识库 |
 
 ## 累积判断维度
 
