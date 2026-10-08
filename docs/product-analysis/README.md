@@ -22,6 +22,7 @@ product-analysis/
 ├── agent-learning-systems/    # Agent 运行轨迹、记忆评估、经验蒸馏、跨框架 Skill 复用
 ├── agent-runtime-harnesses/   # Agent 运行时、工具接入、权限边界、状态管理、流程编排
 ├── ai-native-data-platforms/  # AI 数据基座、AI 原生数据平台、本体语义层、Agent 数据底座
+├── application-cases/         # 应用案例：真实落地场景、客户案例、使用实践，持续积累
 ├── data-governance-platforms/ # 数据 / AI 资产治理、权限、血缘、质量、审计、合规
 ├── industrial-ai-platforms/   # 工业 AI 平台、行业 Agent 平台、制造质量/工艺类产品
 ├── knowledge-bases/           # 知识库、RAG、Wiki、企业知识管理产品
@@ -187,6 +188,19 @@ product-analysis/
 - 飞书智能伙伴
 - 腾讯文档 AI
 - WPS AI
+
+### `application-cases/`
+
+用于持续积累看到的 AI 应用介绍：真实落地案例、客户案例、使用实践分享。
+
+典型问题：
+
+- 谁在什么场景用 AI，解决什么问题？
+- 任务流怎么组织：输入 → AI 参与 → 人工确认 → 执行 → 反馈？
+- 效果是实测数据还是宣传口径？
+- 哪些是每天在用的真实场景，哪些只出现在发布会里？
+
+详细说明见 `application-cases/README.md`。
 
 ### `references/`
 
