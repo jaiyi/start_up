@@ -46,6 +46,12 @@ application-cases/openai-customer-stories/
 application-cases/anthropic-case-studies/
 ```
 
+## 当前案例
+
+| 案例 | 一句话 |
+|---|---|
+| `li-auto-lipas-performance-stability-assistant.md` | 理想 LI-PAS：把车载系统性能稳定性问题分析串成"受理→日志→分析→知识库回写→交付"的工程化 Agent 工作流，经验沉淀为 Skill + 双层知识库 |
+
 ## 累积判断维度
 
 随着案例增多，后续可以做横向归纳，例如：
