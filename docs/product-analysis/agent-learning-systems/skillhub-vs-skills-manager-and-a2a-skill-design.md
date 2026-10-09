@@ -251,3 +251,65 @@ Skill 只是一份被装进模型上下文的说明书——不改任何代码�
 ```
 
 路径二正是我们在 17 案例里收敛出的"确定性流程不烧 token"的推论：当一个 Skill 里模型的判断成分被逐步挤掉、剩下的全是确定步骤时，它就不该继续当说明书，而应该变成运行时的一部分。laya（§4）代表这条路的 ML 变体——判定被蒸馏成毫秒级模型。平台设计上要给这两条路都留出口：registry 只管知识形态的 Skill 会把人卡死在路径一上，所以七层结构里的 `scripts/` 和能力契约不是可选项，是路径二的起点。
+
+---
+
+## 10. 补充：运行遥测缺口有没有现成方案——Higress 的 DSH 可观测实践
+
+> 资料来源：Higress 博客《DeepSeek Harness 全景可观测实践》（阿里云可观测团队，2026-08-18，https://higress.ai/blog/higress-mmse_awbbpb_zrrortwthoddrv3v/ ）、`@loongsuite/dsh-plugin`、`alibaba/loongsuite-pilot`、OpenTelemetry GenAI 语义约定。
+
+先给结论：
+
+```text
+可以补充——它补的是"数据从哪来"，不是"遥测怎么算"。
+LoongSuite 观测的是 agent 运行时（模型调用、工具调用、token、耗时），
+这是 Skill 资产遥测的数据底座；但 registry 需要的 skill 级遥测
+（哪个 skill 被谁调用、成功率、成本归因到 skill）还要在
+trace 数据之上做一层聚合回填——这层没有任何现成开源件。
+```
+
+### 10.1 博客讲了什么：两条采集路线
+
+DSH 自带 append-only 的 Session 事件流（Turn、Step、工具调用、模型消息、流式增量），日志能回答"发生了什么"，但回答不了"这一轮为什么花了 47 秒、时间卡在模型还是工具、失败后重试了几次、Token 消耗来自主 Agent 还是 Subagent"——要把事件组织成 Trace（带父子关系和时间区间的调用树）和 Metrics 才行。阿里云基于开源 LoongSuite 提供两条路线：
+
+| | 路线 A：`@loongsuite/dsh-plugin` | 路线 B：LoongSuite Pilot |
+|---|---|---|
+| 形态 | 独立 Cordis 插件，DSH 插件市场两分钟装好 | 本机统一采集器 daemon（alibaba/loongsuite-pilot） |
+| 覆盖 | 只观测 DSH | 约 20 种主流 Agent，归一化成统一事件 |
+| 数据出口 | 进程内直发 OTLP Trace + Metric，后端自选 | 本地 JSONL 落盘 + 本地 Dashboard + 多种出口 |
+| 适用 | 团队统一用 DSH | 团队混用多种 agent（更贴近真实情况） |
+
+博客自己的总结："独立插件解决'怎样最轻量、最原生地看清 DSH'；Pilot 解决'怎样把 DSH 和机器上的其他 Agent 放进同一套可观测体系'。"
+
+数据模型遵循 **OpenTelemetry GenAI 语义约定**：监听 Session/Turn/Step 生命周期，构建 `ENTRY → AGENT → STEP → LLM / TOOL` 调用树；每次真实模型调用是独立的 LLM Span（重试不合并）；指标含 TTFT（首 token 延迟）、input/output/cache_read tokens。后端可接 Langfuse（只收 Trace）或阿里云监控 2.0（模型分析、工具分析的 p95 延迟 / token 成本 / 失败率、Agent 列表视图）。
+
+### 10.2 为什么它只是"数据底座"：层级差在哪
+
+LoongSuite 的 trace 粒度是**运行时维度**——Session、Turn、Step、LLM 调用、Tool 调用。Skill 的使用在 dsh 里最终体现为一次 `skill` 工具调用（§9：`tool-skill` 是面向模型的 skill 工具），所以在 trace 里**理论上可见**，但要回答第 6 节 skill.yaml 那组遥测字段的问题，中间缺一整层：
+
+```text
+OTLP trace（现有）                registry 遥测字段（要自建）
+─────────────────                ────────────────────────
+某次 tool 调用叫 "skill"    →     哪个 skill（按 skill 名聚合）
+该 Step 的 token 消耗       →     成本归因到 skill（装载→卸载区间累计）
+该 Step 成功/失败           →     successRate（按 skill 统计）
+某天有人用过                →     lastUsed / installs30d（喂降级规则）
+```
+
+这个"OTLP trace → 聚合任务 → registry API 回写"的管道，没有任何现成开源件提供——SkillHub 没有（§4 已指出治理止步于发布），LoongSuite 也没有（它止步于采集与展示）。好消息是 OTel GenAI 是开放语义约定，聚合层不会被绑死在某个后端上；采集端选 LoongSuite 两条路线之一即可。
+
+### 10.3 隐私边界：与 04-06 成本遥测口径的衔接
+
+这套方案有一个值得抄的默认值设计：**`captureContent` 默认 false**——默认只采"量"（token 数、耗时、失败），不采"内容"（提示词、回复、工具参数与结果）。要开正文是显式配置、逐 profile 决策的治理动作，不是技术默认。Pilot 在落盘前还会过滤名称类似 Token / Secret / Password / Credential / Cookie / API Key 的字段，并把文件权限压到 POSIX 0700/0600；组织不允许任何本地原始内容落盘时，博客明确建议改用独立插件并保持 `captureContent: false`。
+
+这与 04-06 成本遥测"先有量、再谈内容"的口径完全同构：遥测系统的第一步永远是可量化的损耗指标（token、时长、失败率），正文采集是需要在安全评审后单独放行的能力。我们将来写采集插件时，这个默认值方向不能反。
+
+另外注意 dsh 自带的 `session-telemetry-otel` 插件（三种 mode：FULL / FEEDBACK_ONLY / DISABLED，默认 DISABLED）是官方口径的遥测出口，LoongSuite 是第三方更完整的方案——两者并存，选型时先跑官方插件看数据形态，再决定是否引入 LoongSuite。
+
+### 10.4 对我们设计的增量结论
+
+**（1）采集端不再是从零开始。** 第 6 节 skill.yaml 的 telemetry 回填管道，采集端可以直接站在 LoongSuite 上：几十人团队混用多种 agent 选 Pilot，统一 DSH 选独立插件；聚合回填层是唯一要自建的部分（一个定时任务消费 OTLP 数据、按 skill 聚合、回写 registry API，规模不大但必须自己做）。
+
+**（2）"90 天零使用自动降级"有了数据来源。** §6.3 的降级规则依赖 lastUsed / installs30d，此前是纯设计假设；现在采集侧有了现实供给，规则可以从"纸面治理"落成"管道喂出来的治理"。
+
+**（3）跟进项。** 博客预告了后续文章（基于观测数据做安全审计、行为评估、DSH 优化），若落地成开源件，聚合层可能进一步被标准化——值得在 04-06 遥测模块设计时复查一次，避免过早自建。
