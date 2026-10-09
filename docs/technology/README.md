@@ -740,6 +740,7 @@ docs/technology/
 - 插件怎么装进 dsh：profile、cordis.patch.yml、overlay、HMR 热替换？
 - 动态插件是什么？agent 运行时自己写插件如何被版本和审批治理？
 - Plugin 与 Skill 的区别：代码资产 vs 文本资产，"机制是插件，内容是 Skill"？
+- 插件是唯一解法吗？内置工具 / 插件 / MCP / Skill / 代码图 / A2A 六种能力组装模式如何对比与叠加使用？
 
 重点关注：
 
