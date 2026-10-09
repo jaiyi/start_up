@@ -213,3 +213,54 @@ telemetry:                          # 注册中心回填，不由作者手填
 4. ClawHub 兼容层的覆盖度：理想 OpenClaw 环境下 `clawhub install` 对 SkillHub 的实际兼容性；
 5. `agent-card.yaml` 与 A2A 标准的 AgentCard 字段对齐——标准仍在演进，跟进 W3C/社区草案，避免自定义过早固化；
 6. 讯飞 Astron 生态的商业边界：SkillHub 的开源承诺与 astron-agent 商业版的关系（引擎开源、平台收费的模式是否稳定）。
+
+---
+
+## 9. 追问：DeepSeek Harness 的元技能体系能否补上"治理止步于发布"的缺口
+
+> 资料来源：`deepseek-ai/deepseek-harness`（约 245k stars，MIT，TypeScript/Cordis，2026-08 创建）的 skill 子系统文档（`docs/subsystems/skills.zh.md`）、随包元技能（`packages/preset/agent-preset/skills/`、`.agents/skills/`）、Agent Notes 治理记录（`.agents/notes/`）。仓库树 16225 个路径全量检查，2026-09-29。
+
+### 9.1 先纠正前提：dsh 没有"技能广场"，也刻意不建
+
+dsh 的 skill 注册表是**分层 Provider 架构**：本地六个 rank 层（project-dsh 100 > project-agents 200 > custom 300 > user-dsh 400 > user-agents 500 > bundled 600）+ 可插拔远程 Provider；分发面就是 npm 插件注册表 + `dsh-plugin` topic。SkillHub 自己的定位就是 dsh 的 registry 后端。分工清晰：
+
+```text
+dsh 管 Skill 怎么被装载、被调用、被限权（runtime 层）；
+广场 / registry 这件事它外包（SkillHub、npm 都能插进来）。
+```
+
+运行时治理 dsh 做得相当细：`SkillInvocationPolicy`（modelInvocable / userInvocable 双通道开关）、kebab-case 名称校验、目录消息 digest 差分替换、description 500 字符上限、"任意 frontmatter 不进领域模型"。但这些是**装载纪律**，不是质量治理。
+
+### 9.2 引导写标准 Skill 的 Skill：有，且随默认 preset 分发
+
+- **`agent-experience`**（`agent-preset` 标准预设内置，每个 agent 默认携带）：触发条件即"设计 skill、上下文装载或多步工作流时"。六条创作铁律：最小上下文起步 / 显式可发现性 / 关键约束前置（权限、破坏性效果、必填校验）/ 有界输出 / 局部性 / **量化 token 变化**（改完定义要测首轮 prompt token 增减）。这是"用 Skill 引导写 Skill"的默认开启引导件。
+- **`cordis-plugin-development`** 创作技能族：SKILL.md 只留流程 + 索引表，配方下沉 `references/`、模板下沉 `templates/`，配 `verification.md`（如何验证插件真的工作）与 `practices.md`（如何选扩展点）。
+- 质量类元技能家族在仓库内自举（dogfooding）：`dsh-code-review`（明确声明"是引导不是清单"）、`dsh-prose-standard`、`dsh-ci-test-reliability`、`dsh-pre-push-checks`、`dsh-find-simplifications`、`dsh-trim-cot-leakage`。
+
+### 9.3 质量管理能力：三层判定
+
+| 层 | dsh 的做法 | 判定 |
+|---|---|---|
+| 结构层 | 2026-09-21 Agent Note：创作技能从 8.7KB 单文件拆为渐进披露结构后，**仓库加了 CI 测试**——SKILL.md < 8192 字符（超限会被工具结果裁剪器截头尾）、每个被引用文件必须存在、每个模板必须可解析 | **已做到 CI 级强制**。"Skill 质量门禁做成测试"是我们"无证据不得 stable"的最便宜具象化 |
+| 过程层 | `human-review-skill-maintenance`（proposed, 2026-07-13）：`dsh-code-review` 技能的周期性人审维护——双独立审查者适配器分类（human-authored / forwarded-automation / unclear × adopted / rejected / unclear）；**采纳证据用 PR 树差异快照严格判定**（merge ≠ 采纳，作者"已修复"回复不算证据，反馈基线取 committer 时间戳严格早于反馈的最新 PR commit）；批量输出 schema 不合法整批 fail-closed；反馈文本用 128-bit nonce 包裹防注入；只出 draft PR 永不自动提交。真实运行记录：62 个 PR、426 条人类反馈、**0 个候选 surfaced**——宁可零产出不放宽标准 | **全开源最严谨的 Skill 质量维护协议**。是"证据驱动 + 人审"资产维护范式的最佳外部佐证，比多数企业实践严格 |
+| 组织层 | 无。维护工具放单个维护者私机、单 Skill 单操作者，Note 自认 "single-maintainer bus factor"；Skill 级 eval 集合、运行遥测回填、Skill 间依赖、能力契约全部缺失 | **没有，且自认**。与 SkillHub 的四缺口完全重合 |
+
+结论：**dsh 的元技能体系不能替代组织级 Skill 治理，但它是"质量前移"的最佳参照系**——把质量约束放进创作时刻（默认 preset 引导件）和 CI 时刻（结构测试），比发布后治理便宜一个数量级。
+
+### 9.4 三个必须偷的模式
+
+1. **创作引导件随默认环境分发**。我们的平台应该在 agent 预设里内置一个"写 Skill 的 Skill"（对标 `agent-experience`），把 frontmatter 必填、四态结论、副作用声明这些规范变成 agent 写 Skill 时自动遵守的默认行为——而不是一份没人读的规范文档；
+2. **结构门禁 CI 化**。七层结构的 ①② 层可以立刻 lint 化：frontmatter 必填 owner / maturity / visibility、SKILL.md 长度阈值、`references/` 引用存在性、Schema 文件可解析。SkillHub 收编时加一个结构校验钩子，成本一天，收益是所有存量资产瞬间有了底线；
+3. **"merge ≠ adoption" 的采纳证据纪律**。将来做"经验→Skill 自动沉淀"管线（对标 17 案例的经验三极）必须继承这条：用户没拒绝 ≠ 采纳，任务完成 ≠ 规则有效。否则自动演化 + 无证据 = 漂移加速器——与 openJiuwen 的 Skill 自演进无质检是同一个坑的两边。
+
+### 9.5 与第 6 节设计的合流
+
+dsh 的证据把七层结构的落地路径修正为**三道门的递进**：
+
+```text
+第一道门（创作时）：preset 内置引导 Skill —— 规范进入默认行为
+第二道门（提交时）：CI 结构测试 —— frontmatter/长度/引用/Schema 校验
+第三道门（发布时）：registry 证据校验 —— 无金样本不得 stable
+```
+
+SkillHub 补第三道门，dsh 的模式补前两道。三者合起来，"治理止步于发布"才真正变成"治理贯穿创作到退役"。
