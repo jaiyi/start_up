@@ -742,6 +742,7 @@ docs/technology/
 - Plugin 与 Skill 的区别：代码资产 vs 文本资产，"机制是插件，内容是 Skill"？
 - 插件是唯一解法吗？内置工具 / 插件 / MCP / Skill / 代码图 / A2A 六种能力组装模式如何对比与叠加使用？
 - dsh 对应 04-05 任务闭环平台八层里的哪几层？为什么运行时必然"跨层"——哪些格子被补上了，哪些格子仍缺开源参照？
+- 在 AI Native 平台出现前，如何用开源件拼任务层 demo：Postgres Task 表 + 迁移约束表 + MCP 受控工具 + dsh runtime + 观察插件血缘回填？dsh 自带 todo/jobs/workflow/plan 为什么不够？
 
 重点关注：
 

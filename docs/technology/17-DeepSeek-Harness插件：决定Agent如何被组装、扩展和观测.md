@@ -415,10 +415,121 @@ dsh 实际提供的归因：token 用量计量（数据原子，无归因模型�
 
 ---
 
-## 13. 后续要验证的问题
+## 13. 实操：在 AI Native 平台出现前，用开源件拼一个任务层 demo
+
+上一节判断了 dsh 对任务层（04-05 第 4 层）只覆盖到"会话内任务"。本节回答一个实操问题：**平台出现之前，怎么用现有开源件拼出一个能用的任务层 demo**——结论先行：
+
+```text
+任务层不要在 dsh 内置任务上完善，也不要急着引入编排引擎。
+demo 期的正确拼法：Postgres 存 Task 对象（source of truth）
+                + MCP 工具暴露受控读写
+                + dsh 做执行 runtime（插件 + Skill）
+                + 状态机先用一张状态列 + 合法迁移表，不上 BPMN / Temporal
+```
+
+### 13.1 先看清 dsh 自带的任务词汇是什么
+
+dsh 有四个任务相关子系统，读完官方文档后的判断：**它们的任务词汇全部是"会话内、进程内"的**，与 04-05 要求的 Task 对象差一个量级：
+
+| dsh 子系统 | 它是什么 | 活多久 | 离 04-05 Task 的距离 |
+|---|---|---|---|
+| `todo` | 模型维护的待办列表，官方文档明说"刻意最小化"：content + 三态 status，无 id、无优先级，每次整体替换 | 一个会话 | 无稳定身份 → 无法跨会话引用、无法 SLA、无法归因 |
+| `jobs` | 后台任务运行时（bash / subagent 两类），五态状态机，有 owner | 进程生命周期 | 无业务语义（task_type、业务对象引用）、无 review_policy |
+| `workflow` | 模型现场写的编排脚本，启动 subagent，单次运行 | 一次运行 | 是"执行编排"不是"业务任务"——没有触发、SLA、人审 |
+| `plan` | 计划模式：模型先出计划、人批准再执行（软性指引） | 一个会话 | 人机分工模式值得抄（见 13.3） |
+
+这不是缺陷，是设计意图：dsh 是编码 agent runtime，它的任务是"帮模型组织好这一次工作"；04-05 的 Task 是**业务资产**——要跨会话、跨人、可审计、可归因，活过任何进程重启。在 todo / jobs 上加字段是走错了方向。
+
+### 13.2 四件套拼法
+
+**① Postgres 一张 Task 表（核心）**
+
+04-05 §6.2 的 Task 字段直接落成 schema——关系字段用列、可变部分用 JSONB：
+
+```text
+tasks
+├── task_id / task_type / status          -- 身份与状态机
+├── business_object_refs (JSONB)          -- 指向设备/工单/项目等业务对象
+├── trigger_event (JSONB)                 -- 谁触发的、什么时候
+├── expected_outcome / input_context      -- 期望与上下文
+├── human_owner / ai_participants (JSONB) -- 人机分工：责任人 + 参与的 skill/agent
+├── required_skills / tool_permissions    -- 需要哪些 skill、放行哪些工具
+├── sla_policy / review_policy (JSONB)    -- SLA 与人审规则
+├── evidence_refs (JSONB)                 -- 指向 dsh session id —— 血缘最小形态
+├── output_artifacts / feedback_records   -- 产物与反馈
+└── value_impact_refs (JSONB)             -- 归因挂点（第一天就要有字段，值可以后填）
+```
+
+**② 状态机：状态列 + 合法迁移表，不要引擎**
+
+```sql
+task_transitions(from_status, to_status)   -- 例如 pending → in_progress → review → done
+```
+
+每次状态变更查表放行，非法迁移拒绝并写审计。这一张约束表就是 demo 需要的全部"状态机引擎"。BPMN 引擎（Camunda / Zeebe）在 13 号文档已判过"门槛过高"；Temporal 是任务量和补偿需求起来之后的事——demo 期引入只会消耗做知识工程的注意力。
+
+**③ MCP server 把 Task 表暴露成受控工具**
+
+16 号文档的模式原样复用：
+
+```text
+读工具（L0）：task_get / task_list / task_context
+写工具（L1）：task_claim / task_update_status / task_append_note
+人审工具：   task_submit_review（推进到 review 状态，等人点头的动作不自动做）
+```
+
+写工具内部做：权限校验 → 迁移合法性校验 → 幂等 → 审计日志。风险分级沿用 04-05 §5.3 的 L0-L3 口径。
+
+**④ dsh 侧：一个插件 + 一批 Skill**
+
+- MCP 接入零代码——dsh 的 mcp 子系统本身就是插件，配置即接（§7）；
+- 写一个小插件监听 `tools/result`，把 task 工具调用回写到 evidence_refs——本文 §5.2 的观察插件模式，十几行代码。这就是"Agent 行为血缘"的最小实现：**Task ↔ session 双向可查**；
+- 每类任务写一个 Skill（教模型"接到维修工单任务该怎么做"）。Skill 文档就是知识资产的第一个形态——Task 表的 `required_skills` 字段与 Skill 文档互相引用，**知识资产从第一天就有业务挂点**，这正是"先进行知识工程建设"的落点。
+
+### 13.3 人机分工与触发
+
+**人机分工抄 dsh 的 plan 模式**（§13.1 表里唯一标"值得抄"的）：
+
+```text
+模型产出方案 → task_submit_review 推进到 review 状态
+             → 人批准 → 才允许 task_update_status 到 done
+```
+
+dsh 的 `plan` 子系统证明"计划-审批-执行"节奏对模型是有效交互模式；我们只是把它的语义从会话内（plan/mode 事件）搬到 Task 状态机的 review 状态上，让它跨会话存活。
+
+**触发**：demo 期用 cron + webhook 插件轮询 / 接收触发事件，向 tasks 表插一行——不需要事件总线。
+
+### 13.4 每个部件的开源出处与自建量
+
+```text
+Postgres + pg        -- Task source of truth（16 号文档）
+MCP SDK (TS/Python)  -- 工具层（16 号文档，Vitest/Zod/Pino 同套）
+dsh                  -- agent runtime（本文）
+dsh mcp/skill 插件   -- 接入与知识装载（零代码或低代码）
+自写观察插件          -- 血缘回填（§5.2 模式）
+```
+
+自建量合计：一张表、一个 MCP server、一个小插件、若干 Skill 文档。没有一处需要"平台团队"级别的投入，单人可完成。
+
+### 13.5 升级路径：什么时候换什么
+
+```text
+任务量大了、需要跨天补偿/重试/定时唤醒 → Temporal（durable workflow 引擎，
+    人审天然用 signal/update 表达，Schema 与 04-05 Task 字段兼容）
+需要图编排（并行分支、按结果路由）     → openJiuwen agent-core（异步图 + checkpoint，
+    调研已判"运行时原语可直接抄"）或 LangGraph
+多个团队跨组织调度                     → A2A 方向，skillhub 调研的 agent-card 层
+```
+
+关键原则：**每一格升级都由真实痛点触发，不预先建设**——与 04-05 §10"MVP 三阶段"、本文 §8.3 的克制顺序是同一条纪律。
+
+---
+
+## 14. 后续要验证的问题
 
 1. 照教程第 1→7 章走一遍，验证本文第 5 节的代码在当前 master 上仍然可运行；
 2. 自写一个最小观测插件（监听 `tools/result` 聚合统计），对比 `@loongsuite/dsh-plugin` 的实现差距——作为团队遥测回填管道的练手；
 3. base profile 的 `cordis.patch.yml` 逐项注释：一份"真实 agent 零件清单"的翻译，可作为团队内训材料；
 4. 动态插件的审批流程在企业多人环境如何治理（审批人是谁、未来版本授权的边界）；
-5. 插件市场（awesome-dsh-plugin.com）的安装、更新、卸载在私有化环境的可行路径——与 SkillHub registry 的收编方案对照。
+5. 插件市场（awesome-dsh-plugin.com）的安装、更新、卸载在私有化环境的可行路径——与 SkillHub registry 的收编方案对照；
+6. §13 四件套拼装最小验证：tasks 表 + task_transitions 约束表 + MCP server + 观察插件血缘回填，用一个两状态任务（pending → done）跑通端到端，再逐步加 review 状态与 SLA 字段。
