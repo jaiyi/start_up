@@ -216,51 +216,38 @@ telemetry:                          # 注册中心回填，不由作者手填
 
 ---
 
-## 9. 追问：DeepSeek Harness 的元技能体系能否补上"治理止步于发布"的缺口
+## 9. 补充：DeepSeek Harness 里 Skill 与 Harness 插件到底是什么差异
 
-> 资料来源：`deepseek-ai/deepseek-harness`（约 245k stars，MIT，TypeScript/Cordis，2026-08 创建）的 skill 子系统文档（`docs/subsystems/skills.zh.md`）、随包元技能（`packages/preset/agent-preset/skills/`、`.agents/skills/`）、Agent Notes 治理记录（`.agents/notes/`）。仓库树 16225 个路径全量检查，2026-09-29。
+> 资料来源：dsh 的 skill 子系统文档（`docs/subsystems/skills.zh.md`）、插件开发技能族（`packages/preset/agent-preset/skills/cordis-plugin-development/`）、仓库结构（`packages/skill/`、`packages/boot/plugin-manager/`）。
 
-### 9.1 先纠正前提：dsh 没有"技能广场"，也刻意不建
-
-dsh 的 skill 注册表是**分层 Provider 架构**：本地六个 rank 层（project-dsh 100 > project-agents 200 > custom 300 > user-dsh 400 > user-agents 500 > bundled 600）+ 可插拔远程 Provider；分发面就是 npm 插件注册表 + `dsh-plugin` topic。SkillHub 自己的定位就是 dsh 的 registry 后端。分工清晰：
+dsh 的口号是 "everything-is-a-plugin"，容易让人以为 Skill 也是插件的一种。实际是**两个正交的层**，一句话说清：
 
 ```text
-dsh 管 Skill 怎么被装载、被调用、被限权（runtime 层）；
-广场 / registry 这件事它外包（SkillHub、npm 都能插进来）。
+Harness 插件改造运行时本体——加工具、加服务、加 UI、接 MCP；
+Skill 只是一份被装进模型上下文的说明书——不改任何代码。
+插件决定 agent "能调用什么"，Skill 决定模型 "知道该怎么做"。
 ```
 
-运行时治理 dsh 做得相当细：`SkillInvocationPolicy`（modelInvocable / userInvocable 双通道开关）、kebab-case 名称校验、目录消息 digest 差分替换、description 500 字符上限、"任意 frontmatter 不进领域模型"。但这些是**装载纪律**，不是质量治理。
-
-### 9.2 引导写标准 Skill 的 Skill：有，且随默认 preset 分发
-
-- **`agent-experience`**（`agent-preset` 标准预设内置，每个 agent 默认携带）：触发条件即"设计 skill、上下文装载或多步工作流时"。六条创作铁律：最小上下文起步 / 显式可发现性 / 关键约束前置（权限、破坏性效果、必填校验）/ 有界输出 / 局部性 / **量化 token 变化**（改完定义要测首轮 prompt token 增减）。这是"用 Skill 引导写 Skill"的默认开启引导件。
-- **`cordis-plugin-development`** 创作技能族：SKILL.md 只留流程 + 索引表，配方下沉 `references/`、模板下沉 `templates/`，配 `verification.md`（如何验证插件真的工作）与 `practices.md`（如何选扩展点）。
-- 质量类元技能家族在仓库内自举（dogfooding）：`dsh-code-review`（明确声明"是引导不是清单"）、`dsh-prose-standard`、`dsh-ci-test-reliability`、`dsh-pre-push-checks`、`dsh-find-simplifications`、`dsh-trim-cot-leakage`。
-
-### 9.3 质量管理能力：三层判定
-
-| 层 | dsh 的做法 | 判定 |
+| | Skill | Harness 插件 |
 |---|---|---|
-| 结构层 | 2026-09-21 Agent Note：创作技能从 8.7KB 单文件拆为渐进披露结构后，**仓库加了 CI 测试**——SKILL.md < 8192 字符（超限会被工具结果裁剪器截头尾）、每个被引用文件必须存在、每个模板必须可解析 | **已做到 CI 级强制**。"Skill 质量门禁做成测试"是我们"无证据不得 stable"的最便宜具象化 |
-| 过程层 | `human-review-skill-maintenance`（proposed, 2026-07-13）：`dsh-code-review` 技能的周期性人审维护——双独立审查者适配器分类（human-authored / forwarded-automation / unclear × adopted / rejected / unclear）；**采纳证据用 PR 树差异快照严格判定**（merge ≠ 采纳，作者"已修复"回复不算证据，反馈基线取 committer 时间戳严格早于反馈的最新 PR commit）；批量输出 schema 不合法整批 fail-closed；反馈文本用 128-bit nonce 包裹防注入；只出 draft PR 永不自动提交。真实运行记录：62 个 PR、426 条人类反馈、**0 个候选 surfaced**——宁可零产出不放宽标准 | **全开源最严谨的 Skill 质量维护协议**。是"证据驱动 + 人审"资产维护范式的最佳外部佐证，比多数企业实践严格 |
-| 组织层 | 无。维护工具放单个维护者私机、单 Skill 单操作者，Note 自认 "single-maintainer bus factor"；Skill 级 eval 集合、运行遥测回填、Skill 间依赖、能力契约全部缺失 | **没有，且自认**。与 SkillHub 的四缺口完全重合 |
+| 本质 | 文本资产（说明书） | 代码资产（TypeScript npm 包） |
+| 形态 | `SKILL.md` + `references/` + `templates/` + `scripts/` | Cordis 组合的包，安装进 profile |
+| 生效方式 | 被调用时把内容注入模型上下文，影响模型行为 | 注册服务 / 工具 / UI 槽位 / MCP 连接 |
+| 生命周期 | 目录热刷新，即装即用 | 装进 profile，跨 session 持久，重启仍在 |
+| 质量性质 | 内容质量：写得对不对、约束清不清楚 | 代码质量：测试、评审、CI |
+| 典型失败 | 模型读了不照做 / 上下文膨胀 | bug、生命周期泄漏、权限越界 |
+| 修改成本 | 改一个 Markdown | 走代码工程的完整流程 |
 
-结论：**dsh 的元技能体系不能替代组织级 Skill 治理，但它是"质量前移"的最佳参照系**——把质量约束放进创作时刻（默认 preset 引导件）和 CI 时刻（结构测试），比发布后治理便宜一个数量级。
+一个关键的架构事实：**skill 能力族本身是用插件实现的**——`packages/skill/skill` 是注册表服务（`ctx.skills`），`skill-filesystem` 是本地目录发现，`tool-skill` 是面向模型的 `skill` 工具。即"装载 Skill 的机制"是 harness 插件，"被装载的内容"是 Skill。这也顺带解释了 dsh 为什么没有技能广场：对它而言 Skill 只是被装载的文本，**注册与分发属于插件层的事，外包给外部 registry**——SkillHub 正是把自己定位成 dsh 的 registry 后端。
 
-### 9.4 三个必须偷的模式
+### 对我们设计的意义：Skill 有两种演化终点
 
-1. **创作引导件随默认环境分发**。我们的平台应该在 agent 预设里内置一个"写 Skill 的 Skill"（对标 `agent-experience`），把 frontmatter 必填、四态结论、副作用声明这些规范变成 agent 写 Skill 时自动遵守的默认行为——而不是一份没人读的规范文档；
-2. **结构门禁 CI 化**。七层结构的 ①② 层可以立刻 lint 化：frontmatter 必填 owner / maturity / visibility、SKILL.md 长度阈值、`references/` 引用存在性、Schema 文件可解析。SkillHub 收编时加一个结构校验钩子，成本一天，收益是所有存量资产瞬间有了底线；
-3. **"merge ≠ adoption" 的采纳证据纪律**。将来做"经验→Skill 自动沉淀"管线（对标 17 案例的经验三极）必须继承这条：用户没拒绝 ≠ 采纳，任务完成 ≠ 规则有效。否则自动演化 + 无证据 = 漂移加速器——与 openJiuwen 的 Skill 自演进无质检是同一个坑的两边。
-
-### 9.5 与第 6 节设计的合流
-
-dsh 的证据把七层结构的落地路径修正为**三道门的递进**：
+对照我们第 6 节的七层结构，这个区分提醒了一件事：**Skill 不是资产的最终形态，而是资产的一种形态**。一个 Skill 的成熟路径有两条：
 
 ```text
-第一道门（创作时）：preset 内置引导 Skill —— 规范进入默认行为
-第二道门（提交时）：CI 结构测试 —— frontmatter/长度/引用/Schema 校验
-第三道门（发布时）：registry 证据校验 —— 无金样本不得 stable
+路径一（知识深化）：越写越准 → 补证据、补契约 → 成为被治理的知识资产
+路径二（逻辑固化）：确定性越来越高 → 脚本化 → 升格为工具/插件，
+                     走正门注册、受权限管、可测可回滚
 ```
 
-SkillHub 补第三道门，dsh 的模式补前两道。三者合起来，"治理止步于发布"才真正变成"治理贯穿创作到退役"。
+路径二正是我们在 17 案例里收敛出的"确定性流程不烧 token"的推论：当一个 Skill 里模型的判断成分被逐步挤掉、剩下的全是确定步骤时，它就不该继续当说明书，而应该变成运行时的一部分。laya（§4）代表这条路的 ML 变体——判定被蒸馏成毫秒级模型。平台设计上要给这两条路都留出口：registry 只管知识形态的 Skill 会把人卡死在路径一上，所以七层结构里的 `scripts/` 和能力契约不是可选项，是路径二的起点。
