@@ -78,6 +78,7 @@
 14. 本体 Ontology：让 AI 理解业务世界的概念、关系与约束
 15. Agent 记忆管理：决定上下文、经验与长期知识如何沉淀
 16. MCP 服务与动态状态：从 Agent 工具调用到 Postgres 部署
+17. DeepSeek Harness 插件：决定 Agent 如何被组装、扩展和观测
 ```
 
 原因是：
@@ -111,7 +112,8 @@ docs/technology/
 ├── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
 ├── 14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
 ├── 15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
-└── 16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
+├── 16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
+└── 17-DeepSeek-Harness插件：决定Agent如何被组装、扩展和观测.md
 ```
 
 后续逐篇填充，不一次性追求完整。每篇都要同时回答：
@@ -719,6 +721,41 @@ docs/technology/
 - 部署：Docker、Docker Compose、Nginx / Caddy；
 - 可观测性：OpenTelemetry、Langfuse、Grafana、Prometheus；
 - 迁移与备份：SQL migrations、pg_dump、Litestream 类备份思路。
+
+---
+
+### 5.17 DeepSeek Harness 插件体系
+
+对应文件：
+
+```text
+17-DeepSeek-Harness插件：决定Agent如何被组装、扩展和观测.md
+```
+
+核心问题：
+
+- DeepSeek Harness 的 "everything-is-a-plugin" 到底是什么意思？agent 是怎么被插件组合出来的？
+- Cordis 插件框架的五个核心概念（服务、上下文、inject、事件、可逆注册）如何理解？
+- 插件能做什么：注册工具、观察事件、拦截策略、接 MCP、加 UI、加观测出口？
+- 插件怎么装进 dsh：profile、cordis.patch.yml、overlay、HMR 热替换？
+- 动态插件是什么？agent 运行时自己写插件如何被版本和审批治理？
+- Plugin 与 Skill 的区别：代码资产 vs 文本资产，"机制是插件，内容是 Skill"？
+
+重点关注：
+
+- dsh 作为 "agent 工程化组装" 的公开范本；
+- 工具注册表模式（defineTool + schema 校验 + render 分离）；
+- waterfall 中间件与单决策短路；
+- PENDING 诊断、id 与重挂载、effect 回卷等工程细节；
+- 官方七步 Cordis 教程作为入门路径；
+- 插件市场生态与私有化团队分发。
+
+开源框架 / 工具候选：
+
+- Cordis（dsh 内嵌的插件框架，vendor 引入）；
+- DeepSeek Harness（deepseek-ai/deepseek-harness）；
+- DSH 插件市场（awesome-dsh-plugin.com）；
+- 观测插件：@loongsuite/dsh-plugin、session-telemetry-otel。
 
 ---
 
