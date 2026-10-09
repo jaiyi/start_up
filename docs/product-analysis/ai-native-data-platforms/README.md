@@ -33,6 +33,7 @@ AI 原生数据平台可以理解为：
 | `shulan-ai-data-foundation.md` | 数澜科技 AI 数据基座 / 本体语义层 / 数据智能体 | 中国数据中台向 AI 数据基座演进路线 | 数据中台如何从数据交换升级为模型交换与 Agent 运行底座 |
 | `transwarp-ai-data-platform.md` | 星环科技 / Transwarp | 国产湖仓、大数据、数据库与 AI 平台路线 | 底层数据基础设施如何支撑 AI 原生数据平台 |
 | `mininglamp-knowledge-graph-ai-platform.md` | 明略科技 | 知识图谱、行业智能和数据智能路线 | 本体、图谱和行业知识如何支撑企业 AI 应用 |
+| `open-ontologies-production-ontology-change-management.md` | Open Ontologies（fabio-rovai，MIT 开源） | 生产本体变更管理工具（"Terraform for ontology"） | 本体进入生产后的 blast radius 推演、Lean 4 证明证书与变更门禁，语义层治理的缺失一环 |
 
 后续可继续补充：
 
