@@ -313,3 +313,73 @@ OTLP trace（现有）                registry 遥测字段（要自建）
 **（2）"90 天零使用自动降级"有了数据来源。** §6.3 的降级规则依赖 lastUsed / installs30d，此前是纯设计假设；现在采集侧有了现实供给，规则可以从"纸面治理"落成"管道喂出来的治理"。
 
 **（3）跟进项。** 博客预告了后续文章（基于观测数据做安全审计、行为评估、DSH 优化），若落地成开源件，聚合层可能进一步被标准化——值得在 04-06 遥测模块设计时复查一次，避免过早自建。
+
+---
+
+## 11. 补充：写一个元技能引导团队写高质量 Skill——质量评测 / 依赖管理 / 能力契约怎么落
+
+先给结论：
+
+```text
+可行，而且 dsh 自己已经验证过这个模式——它的三份元技能就是
+"用 skill 引导写 skill"的现成范本，我们不用从零发明。
+但三个缺口要分开落：引导靠 skill，强制靠 scripts / CI——
+skill 的典型失败模式是"模型读了不照做"（§9），
+门禁这件事永远不能交给一份说明书。
+```
+
+### 11.1 不用从零发明：dsh 三份元技能可以直接抄作业
+
+dsh 官方 preset 里已经带着三份元技能，各自贡献了一个可复用的模式：
+
+| 元技能 | 贡献的模式 | 我们抄什么 |
+|---|---|---|
+| agent-experience | 六条创作铁律（最小上下文、显式可发现、约束前置、有界输出、局部性、量化 token 变化） | 写作质量标准，直接收编进团队规范 |
+| cordis-plugin-development | 渐进披露结构（SKILL.md 只留流程+索引，细节下沉 `references/`、模板下沉 `templates/`）+ verification.md 自检 | 元技能自身的结构标准 |
+| human-review-skill-maintenance | 双独立审查者 + merge≠adoption（合并不等于采纳，采纳要有证据） | 审查纪律，直接对应"无证据不得 stable" |
+
+这三份证明了一件事：**"用 skill 引导写 skill"在 dsh 生态是原生模式，不是外挂**。我们的增量只是把第 6 节的契约字段、eval 纪律、依赖规则填进这个已被验证的骨架。
+
+### 11.2 三个缺口，三种落法
+
+核心判断一句话：**凡是确定性计算的，都不该让 skill 承担**——这是 §9"逻辑固化"路径的直接推论。模型的活儿是教和引导，计算和拦截交给代码。
+
+| 缺口 | skill 能做（引导） | skill 做不了（强制） | 落法 |
+|---|---|---|---|
+| 能力契约 | 教 skill.yaml 每个字段的含义和反例；templates/ 给 schema 骨架 | 装载/发布时的结构校验 | **最适合 skill 形态**——契约是结构化文本，教学+模板覆盖八成，校验进 scripts |
+| 质量评测 | 教怎么挑金样本、怎么写 eval.md、什么算"证据" | 跑评测、拦住无证据打 stable 的发布 | **三层分工**：skill 教、scripts 跑、CI 拦 |
+| 依赖管理 | 引导写对 requires 字段（依赖谁、什么版本、为什么依赖） | blast radius 计算、循环依赖检测、版本解析 | **声明靠 skill 引导，计算必须 scripts**——纯计算任务，模型参与只会引入幻觉 |
+
+注意三个缺口的"skill 适合度"递减：能力契约 > 质量评测 > 依赖管理。越靠近确定性计算，越要往 scripts 层沉。
+
+### 11.3 team-skill-standard：团队元技能的目录设计
+
+```text
+team-skill-standard/
+├── SKILL.md                  # 什么时候触发、五步创作流程、字段速查索引
+├── references/
+│   ├── contract-fields.md    # skill.yaml 每个字段：含义、正例、反例
+│   ├── writing-rules.md      # 收编 agent-experience 六条铁律 + 团队补充
+│   └── review-checklist.md   # 审查清单（双审查者 + merge≠adoption 纪律）
+├── templates/
+│   ├── skill.yaml.tpl        # 契约骨架
+│   ├── input.schema.json.tpl
+│   ├── output.schema.json.tpl
+│   ├── effects.yaml.tpl
+│   └── eval.md.tpl           # 评测集模板
+├── scripts/
+│   ├── validate-skill.py     # frontmatter/契约完整性校验（确定性）
+│   ├── check-deps.py         # 依赖解析 + 循环检测 + blast radius（确定性）
+│   └── run-golden.py         # 跑金样本（确定性）
+└── verification.md           # 用完模板后必须逐项自检
+```
+
+这个设计有一个不可妥协的点：**它是 registry 上第一个要吃自己狗粮的资产**——它自己必须带 skill.yaml、带金样本、带 CHANGELOG。一个没有契约的"标准技能"会立刻失去说服力。
+
+### 11.4 边界：元技能管作者侧，管不了平台侧
+
+三个诚实的限制，决定这件事不能只做元技能：
+
+- **装载问题**：元技能没被装载就不生效。几十人团队不能靠个人自觉安装——要放进团队统一分发的位置（dsh 的 project 级配置或组织 profile），让它默认在场；
+- **绕过问题**：作者可以不经过元技能直接手写文件。CI 门禁兜底：PR 不过 `validate-skill.py` 不给合并，无 eval 证据不给打 stable——门禁规则与元技能教的是同一套标准，一份逻辑两个执行点；
+- **npm 类比的收尾**：eslint 的文档教你写好代码，CI 才拦得住坏代码——元技能与门禁缺一不可。将来 `validate-skill.py` 可以原样升格为 registry 的发布校验（SkillHub 收编时在 server 端跑同一份脚本），作者侧和平台侧从此共用一个标准——这也呼应 skills-manager 的正门原则：标准只写一份，入口可以有多个。
