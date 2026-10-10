@@ -17,7 +17,9 @@
 migrations/
 ├── platform/                       # 平台 schema（共享表）
 │   ├── 0001_audit.sql              # 审计事件（append-only）
-│   └── 0002_connectors.sql         # 连接器注册表 + 凭据引用（plugin-integration）
+│   ├── 0002_connectors.sql         # 连接器注册表 + 凭据引用（plugin-integration）
+│   └── 0003_semantic.sql           # 语义槽位:business_object（结构先行;首版仅注册
+│                                   #   process_key 及其设备/产线关系,见 §3 注记）
 ├── spc/                            # spc schema（SPC 业务表）
 │   ├── 0001_spc_core.sql           # 沿 lads _schema.sql 起步：windows/samples/measurements/
 │   │                               #   control_limits/rule_results/capability_results...
@@ -45,6 +47,7 @@ migrations/
 | `platform.audit_events` | 全系统 append-only 审计 | `event_id`, `actor`, `action`, `target`, `payload`, `recorded_at` |
 | `platform.connector_release` | 连接器注册表（版本化定义与审批） | `connector_id`, `version`, `endpoint_ref`, `protocol`, `contract_digest`, `status(draft/active)`, `approved_by` |
 | `platform.secret_ref` | 凭据引用（不存明文） | `secret_id`, `connector_id`, `env_var_name` |
+| `platform.business_object` | **语义槽位（结构先行,2026-10-10 补;04-05 §2 语义层对位）**：业务对象注册表，跨 profile 共享设备/产线/工序等对象身份与关系；首版仅注册 process_key 及其设备/产线关系，不建本体编辑器/术语表/图谱 | `object_type`, `object_id`, `display_name`, `attributes(jsonb)`, `relations(jsonb)`, `source` |
 
 ### spc schema（平移 lads + 新增/改造）
 
@@ -92,6 +95,7 @@ migrations/
 |---|---|---|
 | `platform.audit_events` | platform-core audit 模块（唯一入口） | 所有插件的审计都经它写 |
 | `platform.connector_release` / `platform.secret_ref` | plugin-integration（经 platform-core 发布流水线） | 审批通过后写入 |
+| `platform.business_object` | platform-core 发布流水线（作为 `config_type=business_object` 的受治理配置写入） | 第二个 profile 出现共享对象诉求前只注册不消费;EVI-L3 的指标口径/损失动因将挂在此层对象关系上 |
 | `spc.samples` / `measurements` / `windows` / `control_limits` / `rule_results` / `capability_results` | 计算节点（算子执行） | 计算产物 |
 | `spc.alert_events` **事件事实列**（`event_id`、`event_type`、`process_key`、`window_id`、`severity`、`metrics`、`business_alert_time`、`occurred_at`、`digest`） | 后端判异引擎 | 工单创建；后端是唯一入口，DSH 宕机不影响 |
 | `spc.alert_events` **处理状态列**（`workorder_status`、`notify_status`） | plugin-workorder | 诊断/闭环推进 |

@@ -22,6 +22,7 @@
 | 5 | 效果观察与闭环 | 调效果验证（CPK/样本门槛） | 是否关闭 |
 
 - gate 状态机在 plugin-workorder（平台通用引擎，gate 数量与语义由 profile 声明）+ platform-gateway `/api/gates` 路由 + Postgres；推进必须人身份 + 合法 decision + 幂等 request_id。
+- **gate 级运营配置（2026-10-10 补，04-05 §6.2 `sla_policy`/`human_owner` 对位）**：每个 gate 在 Pack/profile 配置中声明 `owner_role`（按 process_key / severity 路由到角色）与 `sla_hours`；plugin-workorder 定时扫描超时 gate → 飞书升级（责任人 → 主管），升级事件落审计。首版只做"超时提醒升级"一档，不做自动改派/自动关单——结构现在定（配置项进 Pack 契约），实现随运营面板（第二步）落地。
 - 审计事件 append-only；持久化失败不返回成功（沿现有 advance bridge 语义并修正其幂等缺口）。
 
 ## 2. Diagnosis Pack 统一契约
@@ -127,7 +128,7 @@ release:
 - **首版字段（EVI-L1 留痕级，不追求财务精度）**：
   - 归因血缘：`event_id` / `process_key` / 诊断会话 + `pack_id@version`——"这个价值由哪个版本的诊断知识参与产生"可追溯；
   - 口径：`anomaly_type`、闭环时长（`business_alert_time → closed_at`）、措施是否有效、是否避免复发；
-  - 价值：`estimated_impact`（按可配置损失口径估算：停线时长×单位损失、报废/返工估算；口径未配置则留空）+ `confidence_level`（estimated / business_confirmed）；
+  - 价值：`estimated_impact`（按**受治理损失口径**估算：停线时长×单位损失、报废/返工估算；口径作为 `config_release` 的 `config_type=loss_basis` 发布——带 owner/版本/审批，是语义层第一个受治理资产；口径未发布则留空）+ `confidence_level`（estimated / business_confirmed）；
   - 确认：`confirmation_status`（未确认 / 业务确认）——客户业务负责人确认是 EVI-L2 的门槛，确认动作本身落审计。
 - **展示**：运营工作台做**价值看板**——工单维度明细 + 月度汇总（闭环时长分布、误报率、避免损失累计、知识版本贡献）。调试模式不展示；看板对 `spc.evi_record` 只读。
 - **升级路径**：字段第一天就有；损失口径配置、反事实基线与财务确认（EVI-L3/L4）等真实客户口径出现后再扩展——"为归因而结构化，不为归因而实现"（同 02 §9 纪律）。

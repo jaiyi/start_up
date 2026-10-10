@@ -81,6 +81,7 @@
 要点：
 
 - gate 状态机通用：数量与语义由 profile 的 Pack/配置声明（SPC 五-gate；拧紧判异是否同构见 [07-open-questions.md](07-open-questions.md) Q14）。
+- gate 运营配置：owner 角色与 SLA 声明、超时升级由本引擎定时扫描执行（见 [05-diagnosis-and-learning.md](05-diagnosis-and-learning.md) §1）；首版仅"超时提醒升级"一档。
 - 工单处理状态列（`workorder_status`/`notify_status`）由本引擎更新；事件事实列由后端写。
 - 飞书凭据走环境变量/secret；推送失败落库"通知失败"状态供重发，不吞。
 - 单一反馈表（gate 结论/误报标注/专家修正）统一血缘：`source_event_id` + `process_key` + `pack_id@version` + 知识投影版本。
@@ -189,6 +190,9 @@ profile 内含**路由组声明 + 诊断能力提供者 + 配置引导工具 + P
   - plugin-workorder 的能力提供者接口**先按 SPC 完整实现一次**，接口边界划清楚；拧紧 profile 落地时再抽通用——**不写空转的通用引擎**。
   - plugin-integration 的完整连接器注册表等第一个真实业务系统连接（Q11）出现再做；首版只需凭据管理 + 白名单骨架。
   - plugin-ops 的多服务并发治理等第二个后端服务出现（Q12）再补。
+  - Skill 资产台账化：DSH 侧模型工具的版本/owner/评测集登记（04-05 §6.3 对位；工具已随包版本化，台账等第二个 profile 出现交叉复用时再做）。
+  - 知识失效机制：Pack 分支/整树的退役与替代关系（当前只有版本递增与回滚，无"此分支已失效,被 X 替代"语义）。
+  - 连接器写回风险分级：L0 只读 / L1 平台内状态写入 / L2 业务系统受控回写 / L3 受控自动执行（04-05 §5.3 对位）——等第一个真实回写场景（Q15）出现时定级。
 - 首交付物不变：后端 + PG + 假告警落库 + 单事件诊断链（不依赖 UI/飞书/ops/完整 integration），落位在新结构里。
 
 ## 10. 历史映射
