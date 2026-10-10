@@ -39,9 +39,9 @@ migrations/
 
 | 表 | 用途 | 关键字段 |
 |---|---|---|
-| `spc.alert_events` | 告警事件（后端投递的落库镜像） | `event_id(PK)`, `event_type`, `process_key`, `window_id`, `severity`, `business_alert_time`, `occurred_at`, `digest`, `notify_status` |
-| `spc.diagnosis_session` | 诊断会话 | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate` |
-| `spc.diagnosis_session_event` | gate/审计事件（append-only） | `session_id`, `event_type`, `actor`, `payload` |
+| `spc.alert_events` | 告警事件（**即工单**；后端投递的落库镜像 + 处理状态） | `event_id(PK)`, `event_type`, `process_key`, `window_id`, `severity`, `business_alert_time`, `occurred_at`, `digest`, `notify_status`, `workorder_status(open/diagnosing/closed)` |
+| `spc.diagnosis_session` | 诊断会话（挂在工单上） | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate` |
+| `spc.diagnosis_session_event` | gate/审计事件 + 诊断产物落库（append-only） | `session_id`, `event_type`(gate/evidence/candidate/conclusion/observation), `actor`, `payload` |
 | `spc.knowledge_pack_release` | Pack 发布审批 | `pack_id`, `version`, `candidate_digest`, `approved_by`, `approved_at` |
 | `spc.compute_task` | 计算任务 | `task_id`, `task_type`, `idempotency_key(UQ)`, `status`, `reason_code`, `result_ref` |
 | `spc.config_release` | 接入/参数配置版本 | `config_type`, `version`, `payload`, `status(draft/active)`, `approved_by` |
