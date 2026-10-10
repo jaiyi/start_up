@@ -130,6 +130,7 @@ product-analysis/
 当前样例：
 
 - 连山 / Lianshan
+- Lattice / runlattice.com（Auxiliary Machines，AI 根因调查平台，spc_dsh 的直接海外参照）
 
 ### `knowledge-bases/`
 
