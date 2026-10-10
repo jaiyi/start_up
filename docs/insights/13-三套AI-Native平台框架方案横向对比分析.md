@@ -226,3 +226,61 @@
 **第二 profile / 首个真实连接前——已列入 02 §9 等触发再做清单**：Skill 资产台账化（模型工具的版本/owner/评测）、知识失效机制（Pack 分支退役与替代）、连接器写回风险分级（L0-L3）。
 
 **永远警惕**：本体编辑器、治理目录、GraphRAG、"场景模板中心"产品面——在两个 profile 跑通之前，这些都是 04-05 式的中台幻觉。
+
+---
+
+## 6. 追加对照（2026-10-10）：DSH 取代了连山哪些模块、解决了什么问题
+
+> 触发：用户问"对比连山和这版基于 DeepSeek Harness 的框架，重点利用 DSH 本身解决了什么问题？省去了连山对应的哪些模块，以及解决了什么问题"。
+> 依据：`docs/technology/17` §12/§13（DSH 与 04-05 八层的逐层对照）、连山代码仓分析 `03-dsruntime.md` / `04-workstation-iclaw.md`、`spc_dsh/plans` 02 §10 / 03 §5.4 的历史映射。
+
+### 6.1 一句话结论
+
+**DSH 的本质贡献只有一句话：把「AI 能力层运行时」这一格从自建变成现成品。** 连山体系里最重、最难维护、对齐成本最高的部分——dsruntime 的 LangGraph 大脑 + workstation-iclaw 的整个数字员工工作站——在 spc_dsh 里被压缩成「DSH 宿主 + 一个薄 profile」。这不是换轮子，而是**运行主体的重新划界**：
+
+```text
+连山：  Agent 是运行主体 —— LangGraph 大脑在热路径里做业务决策，人围着 Agent 转
+spc_dsh：后端/PG 是运行主体 —— DSH 只当管理面的交互宿主，计算在 compute node
+```
+
+17 号文档 §12.2 的判断是准的：运行时是纵向的，为了自己能工作被迫长出连接、留痕、权限、反馈、计量上下各一截。连山当年是**自己把这五截都造了一遍**；DSH 把这五截**作为插件机制原生附送**。
+
+### 6.2 DSH 原生解决的问题（对照连山的自建物）
+
+| 能力 | DSH 机制 | 连山当年的自建物 |
+|---|---|---|
+| 工具注册与校验 | `defineTool`：parameters → JSON Schema 自动校验、输出 schema + render | dsClaw `api/websocket.py` 自写 50 轮工具调用循环 |
+| 组合与配置 | `cordis.yml` / `cordis.patch.yml` —— profile 就是一份零件清单 | Bundle 编译（lads 冷路径产 Bundle → dsruntime 消费 → 4 层验收台账） |
+| 留痕与回放 | Session/Turn/Step append-only 事件流、checkpoint | LangGraph `PostgresSaver` checkpointer + `graph_checkpoint` 表 + uuid5 幂等重放 |
+| 权限与 HITL | waterfall 拦截（策略短路）、approval 审批、权限沙箱 | `check_policy_gate` → `check_human_review` 节点 + interrupt() + SLA + reject-rerun 融合权重 |
+| 知识装载 | Skill 文本资产（markdown 即工件） | dsClaw 技能机制 + lads 声明式下发数字员工清单（phase11_employee_sync） |
+| 观测 | OTel 遥测 + `tools/result` 监听插件（十几行回填血缘） | Prometheus + 7 条 PGMQ 队列 + pg_notify |
+| 热更新 | HMR 热模块替换 | Bundle 灰度（migration 068 节点级派发） |
+
+### 6.3 省去的连山模块清单
+
+**① dsruntime hot_path（LangGraph 大脑）——最大的一块。** `build_runtime_workflow()` 那条三层 StateGraph（intent_router → 专家子图 → decision → policy_gate → HITL → execute_bpmn → feedback），连同脚下的 **pgmq / pgvector / AGE / BPMN(SpiffWorkflow) / DMN** 五件基础设施，全部不需要。去向：诊断路径路由 → Pack 故障树内存遍历（Q20 已决）；HITL → DSH approval + 工单五-gate 状态机；相似案例检索 → 有意不做（§5.3 反向缺口）。**解决的问题**：诊断 09/10 批评的"横向堆砌"——AGE/pgvector/DMN 在 SPC 场景没有真实诉求，却是每个环境都要装都要懂的固定复杂度；spc_dsh 用 PG 单实例无扩展跑起来。
+
+**② dsruntime control_plane（Bundle 交付/验收）——整层作废。** 02 §10 / 03 §5.4 已登记："dsruntime Bundle composition 路由 | 作废——其'组合路由'意图由流水线定义工件承接（发布治理版）"。Bundle 是四仓冷热路径交接的必需中间格式，两平面架构（管理面发布 → 计算节点读 PG）下这个交接物本身消失，4 层 AcceptanceReport 压缩成发布管道的校验；dsapp 生命周期 → `config_type` 受治理运营配置。
+
+**③ workstation-iclaw 整个仓——连用户侧一起省掉。** fork 自开源 dsClaw（478 py + 99 tsx），连山真正用的部分：lisen SSO 门（399+176+394 行）、发现连接器、工单桥接、数字员工同步——约 12% 的 commit 量（285/2348）花在这层定制桥接上，而上游带的 Slack/Discord/Teams/Plaza 一大片工业场景根本不用，却是 fork 维护的固定税。spc_dsh 里：诊断对话 = DSH session，工单 UI = DSH host 自带，飞书推送 = plugin-integration，**整个仓不出现**。**解决的问题**：上游 fork 升级地狱（dsClaw 小众上游）、SSO 影子用户同步这类纯桥接成本、用户面对两个入口的分裂。
+
+**④ lads 的组合/分发职责（保留算法层）。** 判异/训练/分析算子是资产，平移进 compute node 算子库（03 §5.4）；省掉的是 Bundle 编译、站点分发、组合路由这些"为了让 dsruntime 消费"而存在的胶水。
+
+### 6.4 反向：DSH 没解决的，spc_dsh 怎么补
+
+17 号文档 §12.3 指出 DSH 每层都停在"个人深度"——这恰好标出自建增量该瞄准的位置：
+
+| DSH 的天花板 | spc_dsh 的补偿（已落计划） |
+|---|---|
+| 任务词汇是会话内的（todo/jobs 无稳定身份、无 SLA、无归因） | 工单表是业务资产：确定性 event_id（uuid5+时间桶）、gate SLA/owner（05 §1）、evidence 血缘 |
+| 血缘只有 Session 事件流一种 | event_id → session → pack@version → evi_record 全链（EVI-L1） |
+| 归因只有 token-meter 数据原子 | 工单关闭触发 `evi_record` 落账，`loss_basis` 受治理口径 |
+| 无组织级资产治理 | 发布管道（pipeline/config/pack release）+ write-owner 矩阵到列组 |
+| 动态插件审批是企业级未知数 | "管理时发布而非运行时控制"——DSH 不在数据热路径上 |
+
+其中最后一条是 spc_dsh 对 DSH 最关键的**重新定位**：连山把 agent 放在热路径上（事件进 LangGraph 大脑决策）；spc_dsh 把 DSH 隔离在管理面，判异/训练这类重计算根本不经过它（"插件层薄、核心逻辑在后端与 Postgres，可整体迁移"）。所以 **DSH 宕机 ≠ 工单损失**——这条 fail-closed 语义是连山架构里没有的韧性。
+
+### 6.5 总括
+
+**DSH 替连山解决了"自建 agent 运行时"的问题**——省掉 dsruntime hot_path（LangGraph + pgmq/pgvector/AGE/BPMN/DMN）、control_plane（Bundle 交付验收）、workstation-iclaw（整个 fork + SSO 桥接层）、lads 的组合分发胶水，把四仓对齐压缩成"宿主 + 薄 profile"；而它没覆盖的业务任务语义、组织治理、经营归因，恰好是 spc_dsh 用工单表、发布管道、EVI 自己补上的部分——**省掉的恰好是连山里"不是资产的成本"，自建保留的恰好是"平台机制核心"**。
