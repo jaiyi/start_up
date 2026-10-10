@@ -22,7 +22,7 @@
 | `audit` | append-only 审计事件写入；持久化失败向调用方抛错，不伪造成功 |
 | `idempotency` | 幂等键统一管理：`event_id`（告警唤醒）/ `request_id`（gate 推进）/ `idempotency_key`（计算任务）三种键的生成与去重入口 |
 | `db` | PG 访问层（repository 模式）：连接管理、事务、按写权限矩阵约束写路径 |
-| `release-pipeline` | 版本化发布流水线（版本递增、digest、审批人、审计）——Pack / config / 连接器定义共用；校验器可注册（各 profile 注册自己的 schema） |
+| `release-pipeline` | 版本化发布流水线（版本递增、digest、审批人、审计）——Pack / config / 连接器定义 / **流水线定义**共用；校验器可注册（各 profile 注册自己的 schema） |
 | `pack-validation` | 校验框架（路径穿越/敏感值/资源存在性/引用完整性，平移 pack_loader）；资源白名单按被校验物声明。SPC Pack schema 由 spc profile 注册 |
 | `time` | `business_alert_time` 时区纪律（历史证据查询的包含式上界） |
 
@@ -87,7 +87,7 @@
 
 ## 4. plugin-ops（受管服务治理，平台插件）
 
-职责：受管服务注册表 + deploy/migrate/status 治理。profile 注册服务描述符（服务名、部署目标、迁移目录、健康端点、schema 归属），ops 对注册表统一执行。操作经 platform-gateway `/api/ops/*` 由人触发；模型只能调用 status 工具。
+职责：受管服务注册表 + deploy/migrate/status 治理。受管对象是**计算节点**（通用计算+存储的 Docker，见 [03-backend-compute.md](03-backend-compute.md) §1）——profile 注册服务描述符（服务名、部署目标、迁移目录、健康端点、schema 归属），ops 对注册表统一执行。算子随节点部署发布；流水线定义走 platform-core 发布流水线（治理面，非 ops 职责）。操作经 platform-gateway `/api/ops/*` 由人触发；模型只能调用 status 工具。
 
 | 工具/操作 | 权限 | 说明 |
 |---|---|---|
@@ -163,7 +163,7 @@ profile 内含**路由组声明 + 诊断能力提供者 + 配置引导工具 + P
 
 ### 7.3 服务注册与 schema 归属
 
-- `spc-backend` 服务描述符：部署目标、迁移目录（`spc` schema）、健康端点。
+- `spc-backend` 服务描述符：部署目标、迁移目录（`spc` schema）、健康端点。**受管对象是通用计算节点**（算子随节点部署、流水线定义经发布流水线挂载，见 [03-backend-compute.md](03-backend-compute.md) §1/§5）。
 - SPC Pack schema 注册进 platform-core release-pipeline（pack-validation 的 SPC 实例）。
 
 ## 8. 职责边界速查

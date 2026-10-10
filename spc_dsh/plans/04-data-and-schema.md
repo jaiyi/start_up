@@ -59,19 +59,20 @@ migrations/
 | `spc.diagnosis_session` | 诊断会话（挂在工单上） | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate` |
 | `spc.diagnosis_session_event` | gate/审计事件 + 诊断产物落库（append-only） | `session_id`, `event_type`(gate/evidence/candidate/conclusion/observation), `actor`, `payload` |
 | `spc.knowledge_pack_release` | Pack 发布审批 | `pack_id`, `version`, `candidate_digest`, `approved_by`, `approved_at` |
+| `spc.pipeline_release` | 流水线定义发布（算子编排/window 分割/参数；计算节点的运营配置，节点从 PG 读已发布版本自持运行） | `pipeline_id`, `version`, `definition(payload)`, `status(draft/active)`, `candidate_digest`, `approved_by`, `approved_at` |
 | `spc.compute_task` | 计算任务 | `task_id`, `task_type`, `idempotency_key(UQ)`, `status`, `reason_code`, `result_ref` |
 | `spc.config_release` | 接入/参数配置版本 | `config_type`, `version`, `payload`, `status(draft/active)`, `approved_by` |
 
 ### 借鉴修正
 
 - `push_feedback` / `workorder_feedback` 双反馈源设计在新架构下合并为**单一反馈表**，统一带 `source_event_id` + `process_key` + `pack_version` 血缘（旧 workorder_feedback 缺 process_key 的教训）。
-- 拧紧判异落地时：若复用 workorder 引擎，其工单/会话/gate 表在 `tightening` schema 按同构结构新建（Q14），不混入 `spc`。
+- 拧紧判异落地时：若复用 workorder 引擎与计算节点，其工单/会话/gate 表与流水线定义在 `tightening` schema 按同构结构新建（Q12/Q14），不混入 `spc`。
 
 ## 4. 数据接入
 
 - 首版文件源：CSV/DB 表批量导入（`evaluate_batch` 任务回放历史）。
-- 实时路径：后端判异引擎消费集成管道持续取数的新测量。
-- 外部业务系统连接（MES/ERP/QMS）：连接器经 plugin-integration 注册治理（[02-plugins.md](02-plugins.md) §5）；window 分割、检测项白名单等配置由 spc 配置引导生成草案、人工发布后生效（`spc.config_release`）。
+- 实时路径：计算节点判异引擎消费集成管道持续取数的新测量（按已发布流水线定义编排）。
+- 外部业务系统连接（MES/ERP/QMS）：连接器经 plugin-integration 注册治理（[02-plugins.md](02-plugins.md) §5）；window 分割、检测项白名单等配置由 spc 配置引导生成草案、人工发布后生效（`spc.config_release` / `spc.pipeline_release`）。
 
 ## 5. 备份与可观测
 
@@ -86,11 +87,11 @@ migrations/
 |---|---|---|
 | `platform.audit_events` | platform-core audit 模块（唯一入口） | 所有插件的审计都经它写 |
 | `platform.connector_release` / `platform.secret_ref` | plugin-integration（经 platform-core 发布流水线） | 审批通过后写入 |
-| `spc.samples` / `measurements` / `windows` / `control_limits` / `rule_results` / `capability_results` | 后端计算服务 | 计算产物 |
+| `spc.samples` / `measurements` / `windows` / `control_limits` / `rule_results` / `capability_results` | 计算节点（算子执行） | 计算产物 |
 | `spc.alert_events` **事件事实列**（`event_id`、`event_type`、`process_key`、`window_id`、`severity`、`metrics`、`business_alert_time`、`occurred_at`、`digest`） | 后端判异引擎 | 工单创建；后端是唯一入口，DSH 宕机不影响 |
 | `spc.alert_events` **处理状态列**（`workorder_status`、`notify_status`） | plugin-workorder | 诊断/闭环推进 |
 | `spc.diagnosis_session` / `spc.diagnosis_session_event` | plugin-workorder | 审计事件经 platform-core audit 写入 |
-| `spc.knowledge_pack_release` / `spc.config_release` | spc profile 知识配置能力（经 platform-core 发布流水线） | 审批通过后写入 |
+| `spc.knowledge_pack_release` / `spc.config_release` / `spc.pipeline_release` | spc profile 知识配置能力（经 platform-core 发布流水线） | 审批通过后写入；pipeline_release 为计算节点运营配置的真相源，节点只读 |
 | `spc.compute_task` | 后端任务执行器（全生命周期状态与结果） | DSH 侧（compute-client）只读 + 提交派单 |
 | `platform.schema_migrations` | plugin-ops 迁移 runner | — |
 | 单一反馈表 | plugin-workorder（gate/闭环结论写入） | 血缘字段见 [05-diagnosis-and-learning.md](05-diagnosis-and-learning.md) §4 |

@@ -7,7 +7,7 @@
 | # | 问题 | 影响 | 状态 |
 |---|---|---|---|
 | Q1 | DSH 能否常驻 server + 外部 POST 唤醒会话 | **架构成立前提** | 未验证；spike 见 [06-spike-plan.md](06-spike-plan.md) |
-| Q2 | 部署目标形态：systemd / docker compose / K8s / 公司平台 | ops 域 `deploy` 实现方式 | 未决，需用户拍板 |
+| Q2 | 计算节点部署目标形态：docker（单节点起步）/ docker compose / K8s / 公司平台 | plugin-ops `deploy` 实现方式 | **倾向 docker**（计算节点模型的自然形态，v0.3.1），未拍板 |
 | Q3 | 数据库：后端服务器自带 PG 还是独立实例 | 拓扑与运维 | 建议全新独立实例，未确认 |
 | Q4 | 后端任务队列：pgmq 还是进程内队列+持久化 | compute-client/后端契约细节 | 未决；倾向 pgmq（有平移基础） |
 | Q5 | 任务完成通知：回调 POST（经 gateway）还是 compute-client 轮询 | 契约实现 | 未决；回调为主、轮询兜底 |
@@ -17,7 +17,8 @@
 | Q9 | DSH 版本演进风险（当前 0.2.0-rc.2 为 rc 版） | 全体系构建在 rc 之上 | 需评估升级策略与锁定版本 |
 | Q10 | DSH 恢复后补唤醒机制（platform-gateway 启动扫描 vs 定时轮询）；后端死信告警通道（是否后端直发飞书兜底） | 工单在 DSH 宕机期间的提醒可见性 | 未决；倾向 gateway 启动扫描 + 死信走运维通道 |
 | Q11 | 集成域首批目标系统与协议（MES/ERP/QMS？REST/MCP/消息队列？公司是否已有统一 API 网关可挂） | plugin-integration 连接器注册表实现范围 | 未决；完整注册表等第一个真实连接出现再做 |
-| Q12 | 拧紧判异的后端形态：复用 spc-backend 任务执行器（新 task_type）还是独立服务 | plugin-ops 多服务治理与部署拓扑 | 未决；取决于拧紧计算量级 |
+| Q12 | 拧紧判异挂载形态：共用计算节点（注册拧紧算子 + 发布拧紧流水线，`tightening` schema）还是另起节点（算力隔离） | 算子注册表机制与部署拓扑 | 未决；计算节点模型下倾向共用节点，取决于拧紧计算量级 |
+| Q16 | 流水线定义契约/DSL 的形态与范围（声明式 DAG？参数 schema 如何声明？首版"流水线退化为 config_release"何时升级为通用 DSL） | spc.pipeline_release 的 payload 格式与计算节点流水线运行器 | 未决；首版按 SPC 具体做（固定编排 + config_release），通用 DSL 等拧紧 profile 触发 |
 | Q13 | PG 单实例 + schema 分域 vs 每 profile 独立实例 | 拓扑与运维 | 建议**单实例 + schema 分域**（04 §1），未确认 |
 | Q14 | workorder 引擎的 gate 语义可配置程度（拧紧判异的 gate 数量/名称是否与 SPC 五-gate 同构） | plugin-workorder 通用化实现范围 | 未决；先按 SPC 实现完整、接口留缝 |
 | Q15 | 对公司业务系统的回写边界与审批链（哪些操作必须人工 gate、批量回写如何审批） | plugin-integration 回写执行与审计 | 未决；原则已定（模型只产草案），细则待业务系统明确 |
@@ -58,3 +59,5 @@
 | 2026-10-10 二轮评审 | 新增 plugin-integration 集成治理域：连接器注册表/凭据/白名单/出入站审计；持续管道归运行面、交互查询归管理面、回写必须人工 gate |
 | 2026-10-10 二轮评审 | PG 单实例 + schema 分域（platform/spc/未来 tightening、sched），建议项待 Q13 确认 |
 | 2026-10-10 二轮评审 | 实施纪律：「为复用而结构化，不为复用而实现」——归属现在定，通用化实现等第二 profile / 首个真实连接触发 |
+| 2026-10-10 三轮评审 | 后端重新定义为通用计算节点（计算 + 存储 Docker，独立自持）；复用单位细化为算子 + 流水线定义；管理经版本化工件**管理时发布**，节点从 PG 读配置自持运行，不做运行时控制 |
+| 2026-10-10 三轮评审 | 算子/流水线定义与 Diagnosis Pack 对称治理（同一条发布流水线，模型只产候选）；流水线定义落 `spc.pipeline_release`；首版流水线退化为固定编排 + config_release，通用 DSL 等拧紧 profile 触发（Q16） |
