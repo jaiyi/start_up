@@ -1,0 +1,10 @@
+安装 dsh
+npm install -g @deepseek-ai/dsh
+dsh web
+
+安装插件
+npm install -g pnpm
+pnpm --version
+
+dsh plugin --profile web add dsh-better-sidebar
+dsh plugin --profile web add @liustack/modlens

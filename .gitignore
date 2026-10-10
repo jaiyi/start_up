@@ -9,3 +9,6 @@
 !**/.env.example
 **/postgres-data/
 **/backups/
+
+# Claude Code local state
+.claude/
