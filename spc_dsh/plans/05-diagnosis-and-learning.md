@@ -9,6 +9,8 @@
 - 诊断全程的产出（证据快照、候选根因、gate 决策、最终结论、效果观察）**必须留存**——运营模式写业务数据不受限，禁止写的只是生产知识（故障树/控制限/规则）。
 - 结论回流反馈表，是调试模式故障树迭代的输入。
 
+> 载体说明：本章描述的 gate/会话/反馈引擎语义由 **plugin-workorder（平台通用工单引擎）** 承载，SPC 特有的证据与故障树查询由 **spc profile 诊断能力**以能力提供者接口注入（见 [02-plugins.md](02-plugins.md) §3/§7）。拧紧判异等后续判异类 profile 复用同一引擎。
+
 ## 1. 五个人工 gate（语义平移，载体更换）
 
 | Gate | 名称 | Agent 辅助 | 人决定 |
@@ -19,7 +21,7 @@
 | 4 | 措施决策 | 形成候选措施（工艺措施/维保提醒）及适用条件 | 选定措施 |
 | 5 | 效果观察与闭环 | 调效果验证（CPK/样本门槛） | 是否关闭 |
 
-- gate 状态机在 workorder-diagnosis 域插件 + gateway `/api/gates` 路由 + Postgres；推进必须人身份 + 合法 decision + 幂等 request_id。
+- gate 状态机在 plugin-workorder（平台通用引擎，gate 数量与语义由 profile 声明）+ platform-gateway `/api/gates` 路由 + Postgres；推进必须人身份 + 合法 decision + 幂等 request_id。
 - 审计事件 append-only；持久化失败不返回成功（沿现有 advance bridge 语义并修正其幂等缺口）。
 
 ## 2. Diagnosis Pack 统一契约
@@ -47,13 +49,14 @@ release:
   candidate_digest / approved_by / approved_at / previous_version
 ```
 
-发布流水线（调试模式 → 运营模式，实现在 spc-core release-pipeline，knowledge-config 域编排）：
+发布流水线（调试模式 → 运营模式，实现在 platform-core release-pipeline，SPC Pack schema 由 spc profile 注册，发布编排归 spc 知识配置能力）：
 
 ```text
 编辑候选 Pack（调试模式,随便改）
-  → 历史事件回放对比（knowledge-config 域经 compute-client 派单 evaluate_batch
-    + workorder 域诊断能力对历史事件跑候选 Pack）
-  → 自动校验（路径穿越/敏感值/资源存在性/引用完整性 —— 平移 pack_loader 检查）
+  → 历史事件回放对比（spc 知识配置能力经 compute-client 派单 evaluate_batch
+    + plugin-workorder 诊断编排对历史事件跑候选 Pack）
+  → 自动校验（路径穿越/敏感值/资源存在性/引用完整性 —— 平移 pack_loader 检查,
+    platform-core pack-validation + spc 注册的 Pack schema）
   → 工艺专家批准（人身份）
   → 版本号递增、digest 固定 → 进运营模式
   → 观测误报/漏报 → 必要时回滚到 previous_version
@@ -63,7 +66,7 @@ release:
 
 ## 3. 告警响应（运营模式）
 
-见 [03-backend-compute.md](03-backend-compute.md) 唤醒投递契约。动作序列：**后端落库为工单 → gateway 收到唤醒（校验签名 + event_id 幂等）→ workorder 域创建诊断会话 → 诊断产物落库 → 飞书提醒**。推理产物结构：
+见 [03-backend-compute.md](03-backend-compute.md) 唤醒投递契约。动作序列：**后端落库为工单 → platform-gateway 收到唤醒（校验签名 + event_id 幂等）→ plugin-workorder 创建诊断会话（编排 spc 诊断能力）→ 诊断产物落库 → 飞书提醒**。推理产物结构：
 
 ```text
 {
@@ -104,8 +107,8 @@ release:
 
 | 现有 | 新架构 |
 |---|---|
-| 五 gate（demos provider/workbench） | gateway `/api/gates` 路由 + workorder 域 + Postgres 状态机 |
-| Diagnosis Pack YAML + pack_loader 校验 | 契约扩展（anchors 按 process_key 路由、版本血缘）+ 校验平移至 spc-core pack-validation |
+| 五 gate（demos provider/workbench） | platform-gateway `/api/gates` 路由 + plugin-workorder + Postgres 状态机 |
+| Diagnosis Pack YAML + pack_loader 校验 | 契约扩展（anchors 按 process_key 路由、版本血缘）+ 校验平移至 platform-core pack-validation（spc 注册 schema） |
 | FTA 投影/查询（Glue 专属） | Pack 声明 namespace/根节点,通用化 |
 | 推荐引擎 `_GLUE_ACTIONS` | Pack recommendations 声明式承载 |
 | 双反馈表 + 双 projector | 单一反馈表统一血缘 |
