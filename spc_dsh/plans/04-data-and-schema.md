@@ -25,7 +25,9 @@ migrations/
 │   ├── 0003_spc_alerts.sql         # 告警事件表（新:event_id/签名校验记录/通知状态）
 │   ├── 0004_diagnosis.sql          # 诊断会话/gate 审计（新:固定 pack_id@version）
 │   ├── 0005_knowledge.sql          # Pack 版本/发布审批/知识投影版本
-│   └── 0006_tasks.sql              # 计算任务表（task_id/idempotency_key/状态机）
+│   ├── 0006_tasks.sql              # 计算任务表（task_id/idempotency_key/状态机）
+│   ├── 0007_feedback.sql           # 单一反馈表 + 样本库（feedback_sample）
+│   └── 0008_evi.sql                # 经营价值记录（工单关闭落账）
 └── (未来) tightening/ sched/
 ```
 
@@ -62,6 +64,9 @@ migrations/
 | `spc.pipeline_release` | 流水线定义发布（算子编排/window 分割/参数；计算节点的运营配置，节点从 PG 读已发布版本自持运行） | `pipeline_id`, `version`, `definition(payload)`, `status(draft/active)`, `candidate_digest`, `approved_by`, `approved_at` |
 | `spc.compute_task` | 计算任务 | `task_id`, `task_type`, `idempotency_key(UQ)`, `status`, `reason_code`, `result_ref` |
 | `spc.config_release` | 接入/参数配置版本 | `config_type`, `version`, `payload`, `status(draft/active)`, `approved_by` |
+| `spc.feedback` | 单一反馈表（闭环结论/误报标注/根因修正，带血缘） | `source_event_id`, `process_key`, `pack_id`, `pack_version`, `feedback_type`(confirmed/false_positive/partial), `payload` |
+| `spc.feedback_sample` | 样本库（反馈 + 关联测量窗口，算子/模型迭代的训练与评测语料） | `sample_id`, `source_event_id`, `sample_type`(true_positive/false_positive/correction), `label_payload`, `window_ref`, `process_key`, `consumed_by` |
+| `spc.evi_record` | 经营价值记录（**工单关闭时由 plugin-workorder 落账**，一工单一记录） | `event_id(UQ)`, `process_key`, `session_id`, `pack_id`, `pack_version`, `anomaly_type`, `closure_duration`, `measure_effective`, `recurrence_avoided`, `estimated_impact`, `impact_basis`, `confidence_level`, `confirmation_status`, `recorded_at` |
 
 ### 借鉴修正
 
@@ -94,7 +99,9 @@ migrations/
 | `spc.knowledge_pack_release` / `spc.config_release` / `spc.pipeline_release` | spc profile 知识配置能力（经 platform-core 发布流水线） | 审批通过后写入；pipeline_release 为计算节点运营配置的真相源，节点只读 |
 | `spc.compute_task` | 后端任务执行器（全生命周期状态与结果） | DSH 侧（compute-client）只读 + 提交派单 |
 | `platform.schema_migrations` | plugin-ops 迁移 runner | — |
-| 单一反馈表 | plugin-workorder（gate/闭环结论写入） | 血缘字段见 [05-diagnosis-and-learning.md](05-diagnosis-and-learning.md) §4 |
+| 单一反馈表 `spc.feedback` | plugin-workorder（gate/闭环结论写入） | 血缘字段见 [05-diagnosis-and-learning.md](05-diagnosis-and-learning.md) §4 |
+| `spc.feedback_sample` | plugin-workorder（反馈闭环终点写入样本条目） | 计算节点/算子库只读消费（debug_operator 的 dataset 来源） |
+| `spc.evi_record` | plugin-workorder（**workorder_status → closed 时落账**，幂等） | 工作台价值看板只读；确认状态变更经审计 |
 
 - `alert_events` 的列组划分在迁移文件中用注释明确标注归属，防止后续变更误越界。
 - platform-core `db` 访问层按本矩阵约束各插件/引擎的写路径（repository 只暴露 owner 允许的写操作）。

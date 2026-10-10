@@ -151,7 +151,8 @@ POST /spc/alerts
   → 工程师进 DSH 调试会话（算法工程师角色）
   → 经 compute-client 派 debug_operator 沙箱任务：
       candidate = 构建产物引用（digest）,不是会话内代码
-      dataset   = 历史窗口/CSV（只读）
+      dataset   = 历史窗口/CSV/样本库（spc.feedback_sample,只读）
+                  ——误报/根因修正样本兼作回归测试集:新算子版本必须在这些样本上不劣化
       compare_baseline = 当前已发布算子@版本
   → 回放对比报告回会话（增益/回归/告警差异）——报告不落任何生产表
   → 满意 → 会话内发起 deploy（plugin-ops,人工审批,审计+receipt）→ 新算子上线
