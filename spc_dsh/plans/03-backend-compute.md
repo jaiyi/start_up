@@ -4,7 +4,7 @@
 
 ## 1. 定位
 
-- 独立 Python 进程，**零 DSH 依赖**；DSH 宕机不影响判异、训练与告警投递。
+- 独立 Python 进程，**零 DSH 依赖**；DSH 宕机不影响判异、训练、工单落库与唤醒投递重试。
 - 计算内核从 lads SPC 算法层平移：Nelson Rules / EWMA / CUSUM / Hotelling T²、控制限训练（含 clamp、分位数法）、能力指数（Cp/Cpk/Pp/Ppk）。
 - 进程守护：systemd 或 docker（未决，见 [07-open-questions.md](07-open-questions.md)）。
 
@@ -18,14 +18,15 @@
 │     └── 结果写入 spc.* 结果表
 ├── 判异引擎（实时路径）
 │     ├── 新测量 → 规则评估 → 违规落库
-│     └── 异常点确认 → 立即 POST 插件 D（重试 + 至少一次）
+│     └── 异常点确认 → 写 spc.alert_events（= 工单创建）
+│                       → POST gateway /spc/alerts 唤醒（重试 + 至少一次）
 ├── 定时任务
-│     ├── 控制限重训（可由插件 B 派单或 cron 触发）
-│     └── 趋势检测（产出告警候选 → POST 插件 D）
-└── 健康检查端点（供插件 F status 探测）
+│     ├── 控制限重训（运营例行由 cron 自持；DSH 侧调试/人工场景经 compute-client 派单）
+│     └── 趋势检测（产出告警 → 落库 alert_events → POST 唤醒）
+└── 健康检查端点（供 ops 域 status 探测）
 ```
 
-## 3. 任务契约（插件 B ↔ 后端）
+## 3. 任务契约（compute-client ↔ 后端）
 
 ### 3.1 派单请求
 
@@ -42,15 +43,15 @@
 ### 3.2 状态与回调
 
 - 状态机：`queued → running → succeeded | failed`；failed 必带 `reason_code`。
-- 完成回调 POST 回插件 B（或插件 B 轮询 `get_task_status`；二选一，spike 后定）。
-- 回调带 `task_id + idempotency_key + digest`；插件 B 校验后落库。
+- 完成回调 POST gateway `/api/tasks/callback`（由 compute-client 注册的回调消费方校验落库并通知等待方；或 compute-client 轮询 `getTaskStatus` 兜底；二选一，spike 后定）。
+- 回调带 `task_id + idempotency_key + digest`；消费方校验后落库。
 
 ### 3.3 幂等
 
 - 后端以 `idempotency_key` 去重：重复派单返回首次结果引用，不重算。
-- 回调消费方（插件 B）同样幂等。
+- 回调消费方（compute-client 消费插件）同样幂等。
 
-## 4. 告警投递契约（后端 → 插件 D）
+## 4. 唤醒投递契约（后端 → gateway）
 
 ```text
 POST /spc/alerts
@@ -69,10 +70,11 @@ POST /spc/alerts
 
 要点：
 
-- `event_id` 由**后端**确定性生成；插件 D 只消费不另造。
+- **工单已由后端落库**：判异引擎写 `spc.alert_events`（= 工单创建）后才投递；POST 的语义是"唤醒推理"，不是"创建工单"。投递失败不影响工单存在性。
+- `event_id` 由**后端**确定性生成；gateway 只消费不另造，以 `event_id` 幂等去重（重复唤醒返回既有诊断会话引用）。
 - `business_alert_time` 与 `occurred_at` 严格区分（前者用于历史证据查询上界）。
 - `process_key` 必传且在后端入口校验——修正现有趋势 detector 只带 `process_name`、anchor 回退 Glue 的缺口。
-- 后端重试策略：指数退避，上限 N 次；插件 D 以 `event_id` 幂等去重。
+- 重试策略：指数退避，上限 N 次；耗尽 → 死信记录 + 运维告警（通道未决，见 [07-open-questions.md](07-open-questions.md) Q10），工单仍在库中，待 DSH 恢复后由 gateway 补唤醒扫描处理。
 
 ## 5. 与旧实现的取舍
 

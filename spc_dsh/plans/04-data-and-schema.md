@@ -6,8 +6,9 @@
 
 1. **全新 PG 实例，不碰旧库**（对齐"不切流、直接新建"决策）。
 2. **schema 是代码**：DDL 由人写的版本化迁移文件管理，随 profile 发布。
-3. **模型不写 DDL**：插件 F 的迁移 runner 只执行已发布的迁移文件。
+3. **模型不写 DDL**：ops 域的迁移 runner 只执行已发布的迁移文件。
 4. **幂等迁移**：平移 lads `SpcSchemaManager` 模式（`CREATE TABLE IF NOT EXISTS` + `ALTER TABLE ADD COLUMN IF NOT EXISTS` + DO 块守卫）。
+5. **每张表（必要时到列组）有唯一写 owner**：后端与 DSH 侧各写各的，不交叉；见 §6。
 
 ## 2. 迁移治理
 
@@ -39,7 +40,7 @@ migrations/
 
 | 表 | 用途 | 关键字段 |
 |---|---|---|
-| `spc.alert_events` | 告警事件（**即工单**；后端投递的落库镜像 + 处理状态） | `event_id(PK)`, `event_type`, `process_key`, `window_id`, `severity`, `business_alert_time`, `occurred_at`, `digest`, `notify_status`, `workorder_status(open/diagnosing/closed)` |
+| `spc.alert_events` | 告警事件（**即工单**；**由后端判异引擎写入**事件事实列，DSH 侧仅更新处理状态列） | `event_id(PK)`, `event_type`, `process_key`, `window_id`, `severity`, `business_alert_time`, `occurred_at`, `digest`, `notify_status`, `workorder_status(open/diagnosing/closed)` |
 | `spc.diagnosis_session` | 诊断会话（挂在工单上） | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate` |
 | `spc.diagnosis_session_event` | gate/审计事件 + 诊断产物落库（append-only） | `session_id`, `event_type`(gate/evidence/candidate/conclusion/observation), `actor`, `payload` |
 | `spc.knowledge_pack_release` | Pack 发布审批 | `pack_id`, `version`, `candidate_digest`, `approved_by`, `approved_at` |
@@ -54,9 +55,27 @@ migrations/
 
 - 首版文件源：CSV/DB 表批量导入（`evaluate_batch` 任务回放历史）。
 - 实时路径：后端判异引擎消费新测量。
-- window 分割、检测项白名单等配置由插件 A 生成草案、人工发布后生效（`spc.config_release`）。
+- window 分割、检测项白名单等配置由 knowledge-config 域生成草案、人工发布后生效（`spc.config_release`）。
 
 ## 5. 备份与可观测
 
 - 每日 pg_dump + 迁移前快照（回滚依赖）。
-- 表级监控：队列深度、告警投递失败数、gate 审计写入失败数——任何"审计写失败"都视为系统不健康而非可忽略日志。
+- 表级监控：队列深度、唤醒投递失败数、gate 审计写入失败数——任何"审计写失败"都视为系统不健康而非可忽略日志。
+
+## 6. 数据写权限 owner 矩阵（2026-10-10 新增）
+
+每张表（`alert_events` 到列组粒度）有唯一写 owner，owner 之外只读：
+
+| 表 / 列组 | 唯一写 owner | 说明 |
+|---|---|---|
+| `spc.samples` / `measurements` / `windows` / `control_limits` / `rule_results` / `capability_results` | 后端计算服务 | 计算产物 |
+| `spc.alert_events` **事件事实列**（`event_id`、`event_type`、`process_key`、`window_id`、`severity`、`metrics`、`business_alert_time`、`occurred_at`、`digest`） | 后端判异引擎 | 工单创建；后端是唯一入口，DSH 宕机不影响 |
+| `spc.alert_events` **处理状态列**（`workorder_status`、`notify_status`） | workorder-diagnosis 插件 | 诊断/闭环推进 |
+| `spc.diagnosis_session` / `spc.diagnosis_session_event` | workorder-diagnosis 插件 | 审计事件经 spc-core audit 写入 |
+| `spc.knowledge_pack_release` / `spc.config_release` | knowledge-config 插件（经 spc-core 发布流水线） | 审批通过后写入 |
+| `spc.compute_task` | 后端任务执行器（全生命周期状态与结果） | DSH 侧（compute-client）只读 + 提交派单 |
+| `schema_migrations` | ops 域迁移 runner | — |
+| 单一反馈表 | workorder-diagnosis 插件（gate/闭环结论写入） | 血缘字段见 [05-diagnosis-and-learning.md](05-diagnosis-and-learning.md) §4 |
+
+- `alert_events` 的列组划分在迁移文件中用注释明确标注归属，防止后续变更误越界。
+- spc-core `db` 访问层按本矩阵约束各插件的写路径（repository 只暴露 owner 允许的写操作）。

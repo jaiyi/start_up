@@ -4,7 +4,7 @@
 
 ## 0. 主线定位：一条告警事件就是一张工单
 
-- 告警事件落库即工单创建；诊断会话挂在工单上。
+- 告警事件落库即工单创建（**由后端判异引擎写入**，DSH 侧只更新处理状态）；诊断会话挂在工单上。
 - 主线 = 诊断 → 结论 → 闭环；飞书推送只是旁路提醒。
 - 诊断全程的产出（证据快照、候选根因、gate 决策、最终结论、效果观察）**必须留存**——运营模式写业务数据不受限，禁止写的只是生产知识（故障树/控制限/规则）。
 - 结论回流反馈表，是调试模式故障树迭代的输入。
@@ -19,7 +19,7 @@
 | 4 | 措施决策 | 形成候选措施（工艺措施/维保提醒）及适用条件 | 选定措施 |
 | 5 | 效果观察与闭环 | 调效果验证（CPK/样本门槛） | 是否关闭 |
 
-- gate 状态机在插件 E API + Postgres；推进必须人身份 + 合法 decision + 幂等 request_id。
+- gate 状态机在 workorder-diagnosis 域插件 + gateway `/api/gates` 路由 + Postgres；推进必须人身份 + 合法 decision + 幂等 request_id。
 - 审计事件 append-only；持久化失败不返回成功（沿现有 advance bridge 语义并修正其幂等缺口）。
 
 ## 2. Diagnosis Pack 统一契约
@@ -47,11 +47,12 @@ release:
   candidate_digest / approved_by / approved_at / previous_version
 ```
 
-发布流水线（调试模式 → 运营模式）：
+发布流水线（调试模式 → 运营模式，实现在 spc-core release-pipeline，knowledge-config 域编排）：
 
 ```text
 编辑候选 Pack（调试模式,随便改）
-  → 历史事件回放对比（插件 C 用候选 Pack 跑 evaluate_batch + 诊断）
+  → 历史事件回放对比（knowledge-config 域经 compute-client 派单 evaluate_batch
+    + workorder 域诊断能力对历史事件跑候选 Pack）
   → 自动校验（路径穿越/敏感值/资源存在性/引用完整性 —— 平移 pack_loader 检查）
   → 工艺专家批准（人身份）
   → 版本号递增、digest 固定 → 进运营模式
@@ -62,7 +63,7 @@ release:
 
 ## 3. 告警响应（运营模式）
 
-见 [03-backend-compute.md](03-backend-compute.md) 投递契约。插件 D 收到告警后的动作序列：**落库为工单 → 唤醒推理 → 诊断产物落库 → 飞书提醒**。推理产物结构：
+见 [03-backend-compute.md](03-backend-compute.md) 唤醒投递契约。动作序列：**后端落库为工单 → gateway 收到唤醒（校验签名 + event_id 幂等）→ workorder 域创建诊断会话 → 诊断产物落库 → 飞书提醒**。推理产物结构：
 
 ```text
 {
@@ -103,8 +104,8 @@ release:
 
 | 现有 | 新架构 |
 |---|---|
-| 五 gate（demos provider/workbench） | 插件 E API + Postgres 状态机 |
-| Diagnosis Pack YAML + pack_loader 校验 | 契约扩展（anchors 按 process_key 路由、版本血缘）+ 校验平移 |
+| 五 gate（demos provider/workbench） | gateway `/api/gates` 路由 + workorder 域 + Postgres 状态机 |
+| Diagnosis Pack YAML + pack_loader 校验 | 契约扩展（anchors 按 process_key 路由、版本血缘）+ 校验平移至 spc-core pack-validation |
 | FTA 投影/查询（Glue 专属） | Pack 声明 namespace/根节点,通用化 |
 | 推荐引擎 `_GLUE_ACTIONS` | Pack recommendations 声明式承载 |
 | 双反馈表 + 双 projector | 单一反馈表统一血缘 |
