@@ -44,6 +44,8 @@ Observe 观察运行轨迹
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
 | `asymptote-agent-beacon.md` | Asymptote Labs Agent Beacon + Jev | 跨框架 Agent 轨迹层 / reviewed memory / 技能蒸馏层 | 编码 Agent 的会话历史如何变成可审阅、可迁移、可复用的工程经验 |
+| `mempalace.md` | MemPalace（mempalace/mempalace） | 本地优先、原文保真的 Agent 长期记忆与协作 MCP | wing/room/drawer、时间关系图、diary、handoff 与本地隐私默认值 |
+| `hindsight.md` | Hindsight（vectorize-io/hindsight） | 面向持续学习的 memory bank：retain / recall / reflect | 四路检索融合、证据型 observations、mental models 与 token-aware recall |
 | `skillhub-vs-skills-manager-and-a2a-skill-design.md` | 讯飞 SkillHub vs Skills Manager | 企业 Skill 注册中心（SkillHub）与个人本地 Skill 库房（Skills Manager）的对比 + 面向 A2A 编排的 Skill 资产七层结构设计 | 团队 Skill 资产选哪个平台治理；完善的 Skill 应包含契约、证据、协商层以支撑跨团队调度 |
 
 ---

@@ -52,6 +52,13 @@
 | `deepseek-harness-demo-architecture-and-plugin-analysis.md` | DeepSeek Harness demo 实现原理与插件机制拆解 | 本地 demo 的 FixedWorkflow、DSH 插件、混合对话、长期记忆和 Skill 演进分析 | 哪些 runtime / plugin / security / memory evolution 模式可借鉴到航天 CAE Agent |
 | `laya-typed-decision-engine-and-server.md` | laya 及 laya server | 非自回归 System 1 类型化决策引擎（choice/score/noul）+ HTTP/MCP 服务形态 | Agent 高频小决策（路由、工具选择、风险分级）如何从 LLM 生成换成毫秒级前向判定 |
 | `openjiuwen-agent-core-and-claw.md` | openJiuwen（agent-core / JiuwenClaw） | 分层开源的 Agent 产品矩阵：运行时 SDK + 个人 AI 管家 + 编排 / 记忆 / 推理配件 | checkpoint 中断恢复的运行时原语、Skill 自演进无质检的治理风险，以及与 OpenClaw 的同构对照 |
+| `docker-agent.md` | docker/docker-agent（Docker 官方实验项目） | 声明式 YAML Agent CLI 插件 + OCI 分发 + 四档安全模式 | Agent 定义如何像容器镜像一样分发，"用户 CLI 选择优先于配置默认"的安全原则 |
+| `praisonai.md` | PraisonAI（MervinPraison，MIT） | 五层 Agent 栈 + Managed Agents 执行位置语义的多 agent 框架全家桶 | tools_run_on / run_on 双语义、completion_reason 枚举退出、doom-loop 检测等循环纪律 |
+| `helix-agent-fleet.md` | Helix（helixml/helix） | 旧调研重定向：该仓库不是本次 Helix Foundry | 正确的 Helix Foundry 分析位于 `ai-native-data-platforms/helix-foundry.md` |
+| `rea.md` | REA（morluto/rea） | 证据型 MCP 逆向工程工具运行时 | Evidence contract、provider binding、progress/cancel/cleanup 与模型侧 schema 投影 |
+| `teamai-cli.md` | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发、上下文与持续改进控制面 | skills/rules/MCP/models 的团队发布、friction learning 与代码图召回 |
+| `paperclip.md` | Paperclip（paperclipai/paperclip） | Agent 公司级组织、任务、heartbeat、预算和审批控制面 | atomic checkout、durable wakeup、adapter、approval 与 budget hard stop |
+| `impeccable.md` | Impeccable（pbakaus/impeccable） | AI coding agent 的设计工作流与确定性质量门 | PRODUCT/DESIGN contract、shape-before-build、detector 与 trusted live |
 
 ---
 
