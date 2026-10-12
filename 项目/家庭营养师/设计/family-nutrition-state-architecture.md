@@ -28,7 +28,13 @@
 6. 最近菜单、复吃频率、库存临期、采购历史需要结构化查询。
 ```
 
-因此，知识库继续负责“知道什么”，数据库负责“现在发生了什么”。
+- `meal_plans`：日期和餐次层面的菜单计划；
+- `meal_plan_items`：计划菜品和菜谱快照；
+- `planned_consumptions`：每道计划菜品预计使用的库存食材和数量；
+- `meal_events` / `meal_event_items`：确认后的实际餐食执行；
+- `inventory_events`：由实际执行产生的库存变化流水。
+
+`planned_consumptions` 只表达计划，不直接扣库存；只有确认餐食执行后，才通过 `meal_events` 和 `inventory_events` 记录实际变化。
 
 ## 3. 数据源职责边界
 
@@ -41,7 +47,7 @@
 | Prompt / Skill 文档 | Git Markdown | 平台配置的可版本化副本 |
 | 当前库存 | Postgres | 由 MCP 工具读写 |
 | 采购记录 | Postgres | 由 MCP 工具写入采购事件 |
-| 计划消耗 | Postgres | 推荐后生成，不等于实际扣减 |
+| 计划消耗 | Postgres | 挂在 `meal_plan_items` 下的食材级预计消耗，不等于实际扣减 |
 | 实际做饭记录 | Postgres | 用户确认执行后写入 |
 | 饭后反馈 | Postgres | 先作为事件记录，长期偏好需确认后沉淀到 Markdown |
 | 近期菜单去重 | Postgres | 基于实际执行和推荐记录查询 |

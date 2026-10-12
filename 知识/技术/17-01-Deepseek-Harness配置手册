@@ -1,10 +1,7 @@
-安装 dsh
-npm install -g @deepseek-ai/dsh
-dsh web
+# DeepSeek Harness 配置片段（已并入 17 号插件文档）
 
-安装插件
-npm install -g pnpm
-pnpm --version
+本文件原为安装和插件命令片段，正文已并入：
 
-dsh plugin --profile web add dsh-better-sidebar
-dsh plugin --profile web add @liustack/modlens
+[17 · DeepSeek Harness 插件](./17-DeepSeek-Harness插件：决定Agent如何被组装、扩展和观测.md#附录基础安装与插件配置)
+
+保留此重定向文件是为了避免旧引用失效。命令仅用于本地试用，生产环境仍需补充版本、权限、审计和回滚验证。

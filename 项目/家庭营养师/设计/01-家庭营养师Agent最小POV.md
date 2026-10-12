@@ -155,19 +155,19 @@ Weknora 更适合基于全文、标签和元数据检索；
 ## 5. 推荐文件结构
 
 ```text
-项目/家庭营养师/设计/family-nutrition-agent-pov/
-  README.md
-
+项目/家庭营养师/
   family/
-    family-profile.md
-    member-preferences.md
-    dietary-rules.md
-
   recipes/
-    番茄鸡蛋虾仁.md
-    西兰花蒸蛋.md
-    虾仁豆腐羹.md
-    土豆炖牛腩.md
+  sources/
+  agent-rules/
+  prompts/
+  skills/
+  state/
+  app/
+  infra/
+```
+
+> 这是当前项目目录的概念结构示意；实际职责和文件归属以项目根目录的 [`STRUCTURE.md`](../STRUCTURE.md) 为准。    土豆炖牛腩.md
     空气炸锅黑椒鸡腿排.md
 
   sources/

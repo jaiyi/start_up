@@ -40,12 +40,12 @@ prompts/knowledge-maintainer.prompt.md
 建议上传稳定知识和能力说明：
 
 ```text
-nutrition-agent-pov/family/
-nutrition-agent-pov/recipes/
-nutrition-agent-pov/sources/
-nutrition-agent-pov/agent-rules/
-nutrition-agent-pov/prompts/
-nutrition-agent-pov/skills/
+项目/家庭营养师/family/
+项目/家庭营养师/recipes/
+项目/家庭营养师/sources/
+项目/家庭营养师/agent-rules/
+项目/家庭营养师/prompts/
+项目/家庭营养师/skills/
 ```
 
 `inventory/` 和 `meals/` 可以上传由 Postgres 导出的 Markdown 摘要快照，但不作为实时状态源。

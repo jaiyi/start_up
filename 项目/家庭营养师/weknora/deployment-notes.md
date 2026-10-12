@@ -18,7 +18,7 @@ WEKNORA_WIKI_ASYNQ_CONCURRENCY=1
 ## 日常调整顺序
 
 ```text
-1. 修改 nutrition-agent-pov/ 下的 Prompt、Skill 或配置文档。
+1. 修改 `项目/家庭营养师/` 下的 Prompt、Skill 或配置文档。
 2. 在 WeKnora 平台同步 Agent 配置。
 3. 用典型问题测试。
 4. 如果涉及服务端并发或模型配置，再按 deployment 文档操作服务器。

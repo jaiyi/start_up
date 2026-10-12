@@ -1,4 +1,4 @@
-# 14 · 本体 Ontology：让 AI 理解业务世界的概念、关系与约束
+# 08 · 本体 Ontology：让 AI 理解业务世界的概念、关系与约束
 
 > 目标：面向没有本体经验的初学者，系统理解什么是本体、为什么企业 AI / RAG / Agent / 知识图谱需要本体、如何建立本体、有哪些开源框架和自动抽取方式，以及本体中的类、实体、关系、Action 与 OWL、RDF、SHACL、SPARQL、DMN、BPMN、Tool、Agent Workflow 之间是什么关系。
 

@@ -102,17 +102,17 @@
 ├── 03-RAG：决定知识如何被检索和组织进上下文.md
 ├── 04-评测：决定回答和检索是否真的有效.md
 ├── 05-Prompt与任务协议：决定模型如何理解任务.md
-├── 06-Harness：决定模型如何进入流程、工具、权限和协作.md
-├── 07-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
-├── 08-知识图谱：支撑GraphRAG、关系检索、实体推理.md
-├── 09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
-├── 10-私有化部署：解决部署、压缩、权限、治理、成本.md
-├── 11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
-├── 12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
-├── 13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
-├── 14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
-├── 15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
-├── 16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
+├── 11-Harness：决定模型如何进入流程、工具、权限和协作.md
+├── 10-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
+├── 09-知识图谱：支撑GraphRAG、关系检索、实体推理.md
+├── 06-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
+├── 07-私有化部署：解决部署、压缩、权限、治理、成本.md
+├── 14-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
+├── 15-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
+├── 16-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
+├── 08-本体Ontology：让AI理解业务世界的概念、关系与约束.md
+├── 13-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
+├── 12-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
 └── 17-DeepSeek-Harness插件：决定Agent如何被组装、扩展和观测.md
 ```
 
@@ -149,7 +149,7 @@
 
 ---
 
-## 5. 十六个模块的学习目标与框架候选
+## 5. 十七个模块的学习目标与框架候选
 
 ### 5.1 知识工程与知识资产设计
 
@@ -325,50 +325,156 @@
 
 ---
 
-### 5.6 Agent / Workflow / Enterprise Harness
+### 5.6 大模型技术体系
 
 对应文件：
 
 ```text
-06-Harness：决定模型如何进入流程、工具、权限和协作.md
+06-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
 ```
 
 核心问题：
 
-- Agent 和 Chatbot 的区别是什么？
-- Workflow 和 Agent 的边界是什么？
-- 如何从 human in the loop 走向 human on the loop？
-- Agent 如何调用企业知识、工具和业务系统？
-- 如何设计权限、日志、状态、失败恢复和人工确认？
+- 大模型擅长什么、不擅长什么？
+- 通用模型、行业模型、私有化模型有什么差别？
+- SFT、RLHF、DPO、Prompt、RAG、知识工程分别适合解决什么问题？
+- 模型能力边界如何影响知识复利系统设计？
 
 重点关注：
 
+- Transformer 基础；
+- Context Window；
 - Tool Calling；
-- Workflow Orchestration；
-- State Management；
-- Memory；
-- Permission Boundary；
-- Audit Log；
-- Human Approval；
-- Failure Recovery；
-- Enterprise Harness。
+- Function Calling；
+- Multi-modal；
+- SFT / RLHF / DPO；
+- Prompt / RAG / Fine-tuning 边界；
+- 主流模型生态。
 
 开源框架 / 工具候选：
 
-- Agent / Workflow：LangGraph、AutoGen、CrewAI、Semantic Kernel、Dify Workflow、Flowise；
-- 通用自动化：n8n、Activepieces；
-- 工作流编排：Temporal、Dagster、Prefect；
-- 记忆与上下文：Mem0、Zep；
-- 可观测性：Langfuse、LangSmith、Phoenix。
+- 模型与训练生态：Transformers、ModelScope、OpenMind、LLaMA-Factory、Axolotl；
+- 主流开源模型：Qwen、DeepSeek、GLM、Yi、Llama、Mistral；
+- 应用接入：LiteLLM、OpenRouter 类模型网关、OneAPI；
+- 本地运行：Ollama、LM Studio、llama.cpp。
 
 ---
 
-### 5.7 WeKnora / LightRAG / Reme 对比
+### 5.7 私有化部署与轻量化治理
 
 对应文件：
 
 ```text
-07-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
+07-私有化部署：解决部署、压缩、权限、治理、成本.md
+```
+
+核心问题：
+
+- 普通团队什么时候应该用外部 API，什么时候才考虑本地模型？
+- 私有化部署的真实成本包括哪些？
+- 量化、剪枝、蒸馏分别解决什么问题？
+- 如何管理 API Key、权限、审计、备份和数据迁移？
+- 如何避免核心组织记忆被平台锁死？
+
+重点关注：
+
+- Quantization；
+- Pruning；
+- Distillation；
+- vLLM / SGLang / llama.cpp；
+- Model Gateway；
+- Docker / Compose / Kubernetes；
+- Auth / Permission / Audit；
+- Data Export / Backup；
+- Cost Governance。
+
+开源框架 / 工具候选：
+
+- 推理与部署：vLLM、SGLang、llama.cpp、Ollama、TensorRT-LLM；
+- 模型网关：LiteLLM、OneAPI、Portkey；
+- 可观测性：Langfuse、Helicone、OpenTelemetry；
+- 基础设施：Docker、Docker Compose、Kubernetes、MinIO、Postgres；
+- 权限与身份：Keycloak、Casdoor、Authentik。
+
+---
+
+### 5.8 本体 Ontology 与语义建模
+
+对应文件：
+
+```text
+08-本体Ontology：让AI理解业务世界的概念、关系与约束.md
+```
+
+核心问题：
+
+- 什么是本体，和术语表、数据库、知识图谱、RAG 有什么区别？
+- 如何建立一个领域本体，应该如何设计类、实体、属性、关系、约束、事件和 Action？
+- RDF、RDFS、OWL、SHACL、SPARQL 分别解决什么问题？
+- 本体自动抽取有哪些方式，如何从文档、数据库、流程和历史案例中抽取候选本体？
+- 本体相关国标 / 标准通常关注哪些要求？
+- 本体和 OWL、DMN、BPMN、Tool、Agent Workflow 之间是什么关系？
+
+重点关注：
+
+- 术语表、类、实体、属性、关系、约束、规则、事件、Action；
+- 本体构建流程、能力问题、数据源映射、版本治理；
+- RDF / OWL 语义路线与 Neo4j / AGE / NebulaGraph 属性图路线；
+- 本体自动抽取、Schema / SHACL 校验、专家审核；
+- 本体如何支撑 RAG、GraphRAG、Tool Contract、DMN 判断和 BPMN 流程节点。
+
+开源框架 / 工具候选：
+
+- 本体编辑：Protégé、WebProtégé、VocBench；
+- RDF / OWL：Apache Jena、RDF4J、GraphDB、Stardog、HermiT、Pellet、ELK；
+- 图数据库：Neo4j、Apache AGE、NebulaGraph、Memgraph、ArangoDB、JanusGraph；
+- 抽取与标注：OntoGPT、LinkML、DeepKE、OpenNRE、HanLP、spaCy、Label Studio、Doccano；
+- LLM 结构化抽取：LlamaIndex、LangChain、Instructor、PydanticAI。
+
+---
+
+### 5.9 知识图谱工程：DeepKE / Nebula Graph / Neo4j
+
+对应文件：
+
+```text
+09-知识图谱：支撑GraphRAG、关系检索、实体推理.md
+```
+
+核心问题：
+
+- 知识图谱到底解决什么问题？
+- 什么场景适合图谱，什么场景不适合？
+- DeepKE 适合解决哪些实体、关系、事件抽取问题？
+- Neo4j 与 Nebula Graph 在部署、查询语言、生态和运维复杂度上有什么差异？
+- 图谱抽取结果如何接入 RAG 和 Agent？
+
+重点关注：
+
+- Entity Extraction；
+- Relation Extraction；
+- Event Extraction；
+- Graph Storage；
+- Graph Query；
+- GraphRAG；
+- 图谱可视化；
+- 图谱与权限治理。
+
+开源框架 / 工具候选：
+
+- 知识抽取：DeepKE、OpenNRE、HanLP、spaCy、LLM-based extraction；
+- 图数据库：Neo4j、Nebula Graph、ArangoDB、HugeGraph、TuGraph；
+- 图计算 / 分析：NetworkX、GraphScope；
+- 图谱增强 RAG：Microsoft GraphRAG、LightRAG、LlamaIndex Knowledge Graph / Property Graph 相关能力。
+
+---
+
+### 5.10 WeKnora / LightRAG / Reme 对比
+
+对应文件：
+
+```text
+10-框架对比：比较WeKnora、LightRAG、Reme等具体方案.md
 ```
 
 核心问题：
@@ -403,294 +509,50 @@
 
 ---
 
-### 5.8 知识图谱工程：DeepKE / Nebula Graph / Neo4j
+### 5.11 Agent / Workflow / Enterprise Harness
 
 对应文件：
 
 ```text
-08-知识图谱：支撑GraphRAG、关系检索、实体推理.md
+11-Harness：决定模型如何进入流程、工具、权限和协作.md
 ```
 
 核心问题：
 
-- 知识图谱到底解决什么问题？
-- 什么场景适合图谱，什么场景不适合？
-- DeepKE 适合解决哪些实体、关系、事件抽取问题？
-- Neo4j 与 Nebula Graph 在部署、查询语言、生态和运维复杂度上有什么差异？
-- 图谱抽取结果如何接入 RAG 和 Agent？
+- Agent 和 Chatbot 的区别是什么？
+- Workflow 和 Agent 的边界是什么？
+- 如何从 human in the loop 走向 human on the loop？
+- Agent 如何调用企业知识、工具和业务系统？
+- 如何设计权限、日志、状态、失败恢复和人工确认？
 
 重点关注：
 
-- Entity Extraction；
-- Relation Extraction；
-- Event Extraction；
-- Graph Storage；
-- Graph Query；
-- GraphRAG；
-- 图谱可视化；
-- 图谱与权限治理。
-
-开源框架 / 工具候选：
-
-- 知识抽取：DeepKE、OpenNRE、HanLP、spaCy、LLM-based extraction；
-- 图数据库：Neo4j、Nebula Graph、ArangoDB、HugeGraph、TuGraph；
-- 图计算 / 分析：NetworkX、GraphScope；
-- 图谱增强 RAG：Microsoft GraphRAG、LightRAG、LlamaIndex Knowledge Graph / Property Graph 相关能力。
-
----
-
-### 5.9 大模型技术体系
-
-对应文件：
-
-```text
-09-大模型：理解DeepSeek、Qwen、GLM等底层模型能力.md
-```
-
-核心问题：
-
-- 大模型擅长什么、不擅长什么？
-- 通用模型、行业模型、私有化模型有什么差别？
-- SFT、RLHF、DPO、Prompt、RAG、知识工程分别适合解决什么问题？
-- 模型能力边界如何影响知识复利系统设计？
-
-重点关注：
-
-- Transformer 基础；
-- Context Window；
 - Tool Calling；
-- Function Calling；
-- Multi-modal；
-- SFT / RLHF / DPO；
-- Prompt / RAG / Fine-tuning 边界；
-- 主流模型生态。
+- Workflow Orchestration；
+- State Management；
+- Memory；
+- Permission Boundary；
+- Audit Log；
+- Human Approval；
+- Failure Recovery；
+- Enterprise Harness。
 
 开源框架 / 工具候选：
 
-- 模型与训练生态：Transformers、ModelScope、OpenMind、LLaMA-Factory、Axolotl；
-- 主流开源模型：Qwen、DeepSeek、GLM、Yi、Llama、Mistral；
-- 应用接入：LiteLLM、OpenRouter 类模型网关、OneAPI；
-- 本地运行：Ollama、LM Studio、llama.cpp。
+- Agent / Workflow：LangGraph、AutoGen、CrewAI、Semantic Kernel、Dify Workflow、Flowise；
+- 通用自动化：n8n、Activepieces；
+- 工作流编排：Temporal、Dagster、Prefect；
+- 记忆与上下文：Mem0、Zep；
+- 可观测性：Langfuse、LangSmith、Phoenix。
 
 ---
 
-### 5.10 私有化部署与轻量化治理
+### 5.12 MCP 服务与动态状态
 
 对应文件：
 
 ```text
-10-私有化部署：解决部署、压缩、权限、治理、成本.md
-```
-
-核心问题：
-
-- 普通团队什么时候应该用外部 API，什么时候才考虑本地模型？
-- 私有化部署的真实成本包括哪些？
-- 量化、剪枝、蒸馏分别解决什么问题？
-- 如何管理 API Key、权限、审计、备份和数据迁移？
-- 如何避免核心组织记忆被平台锁死？
-
-重点关注：
-
-- Quantization；
-- Pruning；
-- Distillation；
-- vLLM / SGLang / llama.cpp；
-- Model Gateway；
-- Docker / Compose / Kubernetes；
-- Auth / Permission / Audit；
-- Data Export / Backup；
-- Cost Governance。
-
-开源框架 / 工具候选：
-
-- 推理与部署：vLLM、SGLang、llama.cpp、Ollama、TensorRT-LLM；
-- 模型网关：LiteLLM、OneAPI、Portkey；
-- 可观测性：Langfuse、Helicone、OpenTelemetry；
-- 基础设施：Docker、Docker Compose、Kubernetes、MinIO、Postgres；
-- 权限与身份：Keycloak、Casdoor、Authentik。
-
----
-
-### 5.11 对话驱动 Agent 工作流
-
-对应文件：
-
-```text
-11-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
-```
-
-核心问题：
-
-- 如何让用户用自然语言进入业务流程？
-- 为什么模型可以驱动流程，但不能篡改流程？
-- LLM、Tool、Policy Guard、Workflow Engine、Business Adapter 如何分工？
-- DMN、BPMN、OWL、AGE 分别解决什么问题？
-- Skill 路径和 Workflow 路径如何选择？
-- BPMN 自动节点如何查表、查图谱、调规则并流转？
-
-重点关注：
-
-- 对话入口和确定性流程控制；
-- Workflow Signal、WaitingPoint、Human Task；
-- 工具治理、权限、幂等、恢复、审计；
-- 多仓库 / 多模块协同契约；
-- Skill 到 Workflow 的升级标准；
-- Agent Workflow 的评测方法。
-
-开源框架 / 工具候选：
-
-- Workflow / BPMN：Camunda、Flowable、Activiti、Temporal、SpiffWorkflow；
-- Agent 编排：LangGraph、Semantic Kernel、AutoGen、CrewAI；
-- DMN / Rules：Camunda DMN、Drools / Kogito、OpenRules；
-- Knowledge Graph：Apache AGE、Neo4j、TypeDB、GraphDB、Jena Fuseki；
-- Observability / Eval：Langfuse、LangSmith、OpenTelemetry、Phoenix、Ragas。
-
----
-
-### 5.12 企业级 Agent 与认知流程层
-
-对应文件：
-
-```text
-12-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
-```
-
-核心问题：
-
-- 企业级 Agent 如果只是给现有 IT 系统包 LLM 壳，价值为什么有限？
-- 数字员工真正区别于聊天机器人的地方是什么？
-- 传统 IT 系统不擅长承载哪些认知劳动？
-- 什么是“认知流程层”？
-- BPMN + LLM Workflow 新增的“认知节点”是什么？
-- 企业级 Agent 的成熟度应该如何分层？
-
-重点关注：
-
-- 传统 IT 流程与 Agent Workflow 的本质差异；
-- 数字员工的角色、工具、流程、知识、权限、评测和交接机制；
-- 入口增量、知识增量、认知增量、协同增量、反馈增量；
-- L0 传统 IT 到 L5 Agentic Operating Model 的成熟度路径；
-- 如何把系统外的认知劳动纳入可观察、可复用、可改进的系统内流程。
-
-开源框架 / 工具候选：
-
-- 流程与编排：Camunda、Temporal、Flowable、LangGraph；
-- 知识与案例：LlamaIndex、LangChain、Neo4j、GraphDB；
-- 协同与自动化：n8n、Node-RED、Dify Workflow；
-- 评测与观测：Langfuse、LangSmith、OpenTelemetry、Ragas、DeepEval。
-
----
-
-### 5.13 认知流程层落地与供应链数字员工
-
-对应文件：
-
-```text
-13-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
-```
-
-核心问题：
-
-- 认知流程层会不会很多，如何避免流程资产失控？
-- 哪些认知任务应该只做 RAG / Skill，哪些应该升级成 Workflow / BPMN？
-- BPMN 如果让业务维护，技术门槛会不会太高？
-- 如何通过业务模板、DMN 决策表、AI 辅助生成和流程资产中心降低门槛？
-- 供应链数字员工应该优先落地哪些认知流程？
-
-重点关注：
-
-- 问答型、分析型、协同型、闭环型认知任务分层；
-- 只读解释、结构化分析、多人协同、写业务数据的技术选型；
-- BPMN 与 DMN 的业务 / 平台分工；
-- Draft / Pilot / Production 的流程生命周期；
-- 供应链异常诊断、PO 延期跟进、库存异常、供应商风险和会议行动项。
-
-开源框架 / 工具候选：
-
-- BPMN / Workflow：Camunda、Flowable、Temporal、SpiffWorkflow；
-- 规则 / 决策：Camunda DMN、Drools / Kogito、OpenRules、json-rules-engine；
-- Agent / Skill：LangGraph、Semantic Kernel、PydanticAI、Dify Workflow；
-- 观测与评测：Langfuse、LangSmith、OpenTelemetry、Promptfoo、DeepEval。
-
----
-
-### 5.14 本体 Ontology 与语义建模
-
-对应文件：
-
-```text
-14-本体Ontology：让AI理解业务世界的概念、关系与约束.md
-```
-
-核心问题：
-
-- 什么是本体，和术语表、数据库、知识图谱、RAG 有什么区别？
-- 如何建立一个领域本体，应该如何设计类、实体、属性、关系、约束、事件和 Action？
-- RDF、RDFS、OWL、SHACL、SPARQL 分别解决什么问题？
-- 本体自动抽取有哪些方式，如何从文档、数据库、流程和历史案例中抽取候选本体？
-- 本体相关国标 / 标准通常关注哪些要求？
-- 本体和 OWL、DMN、BPMN、Tool、Agent Workflow 之间是什么关系？
-
-重点关注：
-
-- 术语表、类、实体、属性、关系、约束、规则、事件、Action；
-- 本体构建流程、能力问题、数据源映射、版本治理；
-- RDF / OWL 语义路线与 Neo4j / AGE / NebulaGraph 属性图路线；
-- 本体自动抽取、Schema / SHACL 校验、专家审核；
-- 本体如何支撑 RAG、GraphRAG、Tool Contract、DMN 判断和 BPMN 流程节点。
-
-开源框架 / 工具候选：
-
-- 本体编辑：Protégé、WebProtégé、VocBench；
-- RDF / OWL：Apache Jena、RDF4J、GraphDB、Stardog、HermiT、Pellet、ELK；
-- 图数据库：Neo4j、Apache AGE、NebulaGraph、Memgraph、ArangoDB、JanusGraph；
-- 抽取与标注：OntoGPT、LinkML、DeepKE、OpenNRE、HanLP、spaCy、Label Studio、Doccano；
-- LLM 结构化抽取：LlamaIndex、LangChain、Instructor、PydanticAI。
-
----
-
-### 5.15 Agent 记忆管理
-
-对应文件：
-
-```text
-15-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
-```
-
-核心问题：
-
-- Agent 记忆管理为什么不等于聊天记录，也不等于向量库？
-- 短期记忆、工作记忆、长期用户记忆、语义记忆、情节记忆、程序性记忆、组织记忆分别是什么？
-- 记忆写入、存储、检索、使用、更新、遗忘和审计应该如何治理？
-- Memory 与 RAG、Ontology、Workflow、Tool、Trace、Audit Log 的关系是什么？
-- 数字员工如何安全地跨会话积累经验，又不越权、不乱记、不污染系统？
-
-重点关注：
-
-- Memory 生命周期；
-- Conversation Summary、Key-Value Profile、Vector Memory、Graph Memory、Workflow State、Case Library；
-- 记忆写入门槛、来源标注、置信度、过期、删除、权限过滤；
-- 供应链数字员工中的用户偏好、任务记忆、案例记忆和组织记忆；
-- 记忆系统评测与治理。
-
-开源框架 / 工具候选：
-
-- Agent Memory：Mem0、Zep、Letta；
-- Workflow Checkpoint：LangGraph Checkpoint、Temporal；
-- Vector Memory：pgvector、Qdrant、Milvus、Weaviate；
-- Graph Memory：Neo4j、Apache AGE、Graphiti；
-- Session / Cache：Redis；
-- Trace / Audit：Langfuse、LangSmith、OpenTelemetry。
-
----
-
-### 5.16 MCP 服务与动态状态
-
-对应文件：
-
-```text
-16-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
+12-MCP服务与动态状态：从Agent工具调用到Postgres部署.md
 ```
 
 核心问题：
@@ -721,6 +583,144 @@
 - 部署：Docker、Docker Compose、Nginx / Caddy；
 - 可观测性：OpenTelemetry、Langfuse、Grafana、Prometheus；
 - 迁移与备份：SQL migrations、pg_dump、Litestream 类备份思路。
+
+---
+
+### 5.13 Agent 记忆管理
+
+对应文件：
+
+```text
+13-Agent记忆管理：决定上下文、经验与长期知识如何沉淀.md
+```
+
+核心问题：
+
+- Agent 记忆管理为什么不等于聊天记录，也不等于向量库？
+- 短期记忆、工作记忆、长期用户记忆、语义记忆、情节记忆、程序性记忆、组织记忆分别是什么？
+- 记忆写入、存储、检索、使用、更新、遗忘和审计应该如何治理？
+- Memory 与 RAG、Ontology、Workflow、Tool、Trace、Audit Log 的关系是什么？
+- 数字员工如何安全地跨会话积累经验，又不越权、不乱记、不污染系统？
+
+重点关注：
+
+- Memory 生命周期；
+- Conversation Summary、Key-Value Profile、Vector Memory、Graph Memory、Workflow State、Case Library；
+- 记忆写入门槛、来源标注、置信度、过期、删除、权限过滤；
+- 供应链数字员工中的用户偏好、任务记忆、案例记忆和组织记忆；
+- 记忆系统评测与治理。
+
+开源框架 / 工具候选：
+
+- Agent Memory：Mem0、Zep、Letta；
+- Workflow Checkpoint：LangGraph Checkpoint、Temporal；
+- Vector Memory：pgvector、Qdrant、Milvus、Weaviate；
+- Graph Memory：Neo4j、Apache AGE、Graphiti；
+- Session / Cache：Redis；
+- Trace / Audit：Langfuse、LangSmith、OpenTelemetry。
+
+---
+
+### 5.14 对话驱动 Agent 工作流
+
+对应文件：
+
+```text
+14-对话驱动Agent工作流：从自然语言入口到可控业务执行.md
+```
+
+核心问题：
+
+- 如何让用户用自然语言进入业务流程？
+- 为什么模型可以驱动流程，但不能篡改流程？
+- LLM、Tool、Policy Guard、Workflow Engine、Business Adapter 如何分工？
+- DMN、BPMN、OWL、AGE 分别解决什么问题？
+- Skill 路径和 Workflow 路径如何选择？
+- BPMN 自动节点如何查表、查图谱、调规则并流转？
+
+重点关注：
+
+- 对话入口和确定性流程控制；
+- Workflow Signal、WaitingPoint、Human Task；
+- 工具治理、权限、幂等、恢复、审计；
+- 多仓库 / 多模块协同契约；
+- Skill 到 Workflow 的升级标准；
+- Agent Workflow 的评测方法。
+
+开源框架 / 工具候选：
+
+- Workflow / BPMN：Camunda、Flowable、Activiti、Temporal、SpiffWorkflow；
+- Agent 编排：LangGraph、Semantic Kernel、AutoGen、CrewAI；
+- DMN / Rules：Camunda DMN、Drools / Kogito、OpenRules；
+- Knowledge Graph：Apache AGE、Neo4j、TypeDB、GraphDB、Jena Fuseki；
+- Observability / Eval：Langfuse、LangSmith、OpenTelemetry、Phoenix、Ragas。
+
+---
+
+### 5.15 企业级 Agent 与认知流程层
+
+对应文件：
+
+```text
+15-企业级Agent的真正价值：不是LLM壳，而是认知流程层.md
+```
+
+核心问题：
+
+- 企业级 Agent 如果只是给现有 IT 系统包 LLM 壳，价值为什么有限？
+- 数字员工真正区别于聊天机器人的地方是什么？
+- 传统 IT 系统不擅长承载哪些认知劳动？
+- 什么是“认知流程层”？
+- BPMN + LLM Workflow 新增的“认知节点”是什么？
+- 企业级 Agent 的成熟度应该如何分层？
+
+重点关注：
+
+- 传统 IT 流程与 Agent Workflow 的本质差异；
+- 数字员工的角色、工具、流程、知识、权限、评测和交接机制；
+- 入口增量、知识增量、认知增量、协同增量、反馈增量；
+- L0 传统 IT 到 L5 Agentic Operating Model 的成熟度路径；
+- 如何把系统外的认知劳动纳入可观察、可复用、可改进的系统内流程。
+
+开源框架 / 工具候选：
+
+- 流程与编排：Camunda、Temporal、Flowable、LangGraph；
+- 知识与案例：LlamaIndex、LangChain、Neo4j、GraphDB；
+- 协同与自动化：n8n、Node-RED、Dify Workflow；
+- 评测与观测：Langfuse、LangSmith、OpenTelemetry、Ragas、DeepEval。
+
+---
+
+### 5.16 认知流程层落地与供应链数字员工
+
+对应文件：
+
+```text
+16-认知流程层如何落地：流程分层、BPMN门槛与供应链数字员工.md
+```
+
+核心问题：
+
+- 认知流程层会不会很多，如何避免流程资产失控？
+- 哪些认知任务应该只做 RAG / Skill，哪些应该升级成 Workflow / BPMN？
+- BPMN 如果让业务维护，技术门槛会不会太高？
+- 如何通过业务模板、DMN 决策表、AI 辅助生成和流程资产中心降低门槛？
+- 供应链数字员工应该优先落地哪些认知流程？
+
+重点关注：
+
+- 问答型、分析型、协同型、闭环型认知任务分层；
+- 只读解释、结构化分析、多人协同、写业务数据的技术选型；
+- BPMN 与 DMN 的业务 / 平台分工；
+- Draft / Pilot / Production 的流程生命周期；
+- 供应链异常诊断、PO 延期跟进、库存异常、供应商风险和会议行动项。
+
+开源框架 / 工具候选：
+
+- BPMN / Workflow：Camunda、Flowable、Temporal、SpiffWorkflow；
+- 规则 / 决策：Camunda DMN、Drools / Kogito、OpenRules、json-rules-engine；
+- Agent / Skill：LangGraph、Semantic Kernel、PydanticAI、Dify Workflow；
+- 观测与评测：Langfuse、LangSmith、OpenTelemetry、Promptfoo、DeepEval。
 
 ---
 

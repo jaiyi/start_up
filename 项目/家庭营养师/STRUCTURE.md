@@ -1,6 +1,6 @@
 # 家庭营养师 Agent 项目结构规划
 
-> 适用范围：`nutrition-agent-pov/` 既是 WeKnora 知识库目录，也是后续家庭营养师 Agent 的代码、Prompt、Skill、状态文件和运维配置的维护根目录。
+> 适用范围：`项目/家庭营养师/` 是家庭营养师 Agent 的项目根目录，包含稳定知识、Prompt、Skill、动态状态、MCP 服务、测试、平台配置和部署说明。`nutrition-agent-pov/` 仅作为历史目录名保留在迁移说明中，不是当前操作路径。
 
 ## 1. 设计原则
 
@@ -26,7 +26,7 @@
 当前目录按四类组织：
 
 ```text
-nutrition-agent-pov/
+项目/家庭营养师/
 ├── README.md
 ├── STRUCTURE.md
 ├── family/        # 家庭画像、成员偏好、饮食规则
@@ -267,9 +267,9 @@ Skill 文件记录职责、输入、输出、工具和边界；
 ## 7. 与 WeKnora 平台的关系
 
 ```text
-nutrition-agent-pov/：源文件和配置版本库
+项目/家庭营养师/：源文件和配置版本库
 WeKnora 知识库：索引和检索层
-WeKnora Wiki：可视化知识页面和人工编辑层
+WeKnora Wiki：可视化/临时编辑层
 WeKnora Agent：对话入口和工具调用层
 Family Nutrition MCP：动态状态读写边界
 独立 Docker Postgres：库存、菜单、反馈等动态状态源
@@ -279,9 +279,9 @@ Family Nutrition MCP：动态状态读写边界
 同步原则：
 
 ```text
-稳定知识先改 nutrition-agent-pov/ 源文件，再同步到 WeKnora；
+稳定知识先改项目/家庭营养师/下的源文件，再同步到 WeKnora；
 动态状态通过 MCP 写入 Postgres，再按需导出 Markdown 快照；
-平台配置变更要回写到 weknora/ 和 prompts/；
+平台配置变更要回写到项目/家庭营养师/weknora/ 和项目/家庭营养师/prompts/；
 不要让平台页面成为唯一真实版本。
 ```
 

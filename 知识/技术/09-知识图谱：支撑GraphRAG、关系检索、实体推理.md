@@ -1,4 +1,4 @@
-# 07 · 知识图谱工程：DeepKE / Nebula Graph / Neo4j
+# 09 · 知识图谱工程：DeepKE / Nebula Graph / Neo4j
 
 ## 1. 这个模块解决什么问题
 

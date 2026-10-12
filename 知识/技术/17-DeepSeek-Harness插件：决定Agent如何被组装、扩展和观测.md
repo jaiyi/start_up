@@ -34,7 +34,7 @@ dsh 的口号是 **everything-is-a-plugin**——连"agent 本身"都不是写�
 
 ## 2. 它在知识复利系统中的位置
 
-这个系列 06 号文档讲过 Harness 是什么：模型负责生成，harness 负责维护会话、组织 ReAct 循环、执行工具调用、管理权限与沙箱。
+这个系列 11 号文档讲过 Harness 是什么：模型负责生成，harness 负责维护会话、组织 ReAct 循环、执行工具调用、管理权限与沙箱。
 
 dsh 是目前最彻底践行"everything-is-a-plugin"的开源 harness（TypeScript、MIT 协议、DeepSeek 官方维护）。对知识复利工程师，它的插件体系值得学，因为：
 
@@ -120,7 +120,7 @@ effect  = 每根电线都带自动回收功能
 单个插件没有意义，**清单才有意义**。dsh 启动时读一份插件列表（教程里是 `cordis.yml`，真实 dsh 里是 profile 的 `cordis.patch.yml`），把所有插件挂载起来：
 
 ```yaml
-# 教程示例：三行清单 = 一个能跑的应用
+### 教程示例：三行清单 = 一个能跑的应用
 - name: '@deepseek-ai/dsh-system-prompt'   # 提供系统提示词服务
 - name: './tool-logger.ts'                  # 你的观察插件
 - name: './greet-tool.ts'                   # 你的工具插件
@@ -346,10 +346,10 @@ dsh 自己就是活例子——它同时用了六种里的四种：
 
 ## 11. 与其他模块的关系
 
-- **06-Harness**：本文是它在具体开源实现上的机制展开——工具注册、事件、权限如何变成代码；
-- **16-MCP**：MCP 服务是被插件接进来的外部工具源（mcp 子系统本身就是 Cordis 包）；
+- **11-Harness**：本文是它在具体开源实现上的机制展开——工具注册、事件、权限如何变成代码；
+- **12-MCP**：MCP 服务是被插件接进来的外部工具源（mcp 子系统本身就是 Cordis 包）；
 - **product-analysis / SkillHub 对比调研**：registry、Skill 资产七层结构、遥测回填——那些是"资产管理"视角，本文是"运行时装配"视角，两者合起来才是完整图景；
-- **12/13-认知流程层**：dsh 展示了"agent 是被组装出来的"这一工程事实——认知流程层的每一段能力，落地时都可以对应到一份插件清单。
+- **15/16-认知流程层**：dsh 展示了"agent 是被组装出来的"这一工程事实——认知流程层的每一段能力，落地时都可以对应到一份插件清单。
 
 ---
 
@@ -533,3 +533,24 @@ dsh mcp/skill 插件   -- 接入与知识装载（零代码或低代码）
 4. 动态插件的审批流程在企业多人环境如何治理（审批人是谁、未来版本授权的边界）；
 5. 插件市场（awesome-dsh-plugin.com）的安装、更新、卸载在私有化环境的可行路径——与 SkillHub registry 的收编方案对照；
 6. §13 四件套拼装最小验证：tasks 表 + task_transitions 约束表 + MCP server + 观察插件血缘回填，用一个两状态任务（pending → done）跑通端到端，再逐步加 review 状态与 SLA 字段。
+
+---
+
+## 附录：基础安装与插件配置
+
+以下命令来自原 `17-01-DeepSeek-Harness配置手册` 配置片段。它们只说明本地试用入口，不代表生产部署或安全配置已经验证。
+
+```bash
+### 安装 dsh
+npm install -g @deepseek-ai/dsh
+dsh web
+
+### 安装插件管理依赖
+npm install -g pnpm
+pnpm --version
+
+dsh plugin --profile web add dsh-better-sidebar
+dsh plugin --profile web add @liustack/modlens
+```
+
+验证环境时应补充 Node.js、dsh、插件版本、profile、权限和回滚记录。

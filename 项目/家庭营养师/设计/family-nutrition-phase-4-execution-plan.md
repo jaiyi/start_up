@@ -79,22 +79,22 @@
 
 ## 数据模型第一版
 
-第一版不预先铺满完整业务域，只固定“库存 + 餐食执行 + 反馈”的最小垂直切片。迁移表以测试驱动逐步增加，避免在真实 POV 验证前背上过重的迁移、鉴权、审计和测试负担。
+第一版固定“库存 + 餐食计划 + 餐食执行 + 反馈”的最小垂直切片。计划消耗采用三层模型：`meal_plans` 表示日期和餐次计划，`meal_plan_items` 表示计划菜品，`planned_consumptions` 表示菜品对应的预计食材消耗。迁移表以测试驱动逐步增加，避免在真实 POV 验证前背上过重的迁移、鉴权、审计和测试负担。
 
-首批只覆盖这些概念：
+首批覆盖这些概念：
 
 - 家庭与操作者：`families`、`actors`
 - 库存快照与库存流水：`inventory_items`、`inventory_events`
-- 菜单计划与菜品明细：`meal_plans`、`meal_plan_items`
-- 实际执行与饭后反馈：`meal_events`、`meal_feedback`
+- 菜单计划、菜品明细和预计消耗：`meal_plans`、`meal_plan_items`、`planned_consumptions`
+- 实际执行与饭后反馈：`meal_events`、`meal_event_items`、`meal_feedback`
 - 工具调用与审计：`mcp_tool_calls`、`audit_log`
 
-暂缓独立建表，等测试和真实用例需要时再补：
+`planned_consumptions` 是 `meal_plan_items` 的食材级子表，不与菜单计划表竞争 source of truth；它只记录预计消耗，不直接扣库存。
+
+仍可按测试和真实用例需要后续补充：
 
 - `family_members`
 - `purchase_records` / `purchase_items`（第一版可先由 `inventory_events` 表达采购入库）
-- `planned_consumptions`（第一版可由 `meal_plans` / `meal_plan_items` 表达计划消耗）
-- `meal_event_items`
 - `preference_observations`
 - `write_confirmations`
 - `state_exports`
@@ -117,6 +117,7 @@
 - `get_current_inventory`
 - `get_inventory_risks`
 - `list_recent_meals`
+- `list_pending_planned_consumptions`
 
 写入工具：
 
@@ -128,7 +129,6 @@
 
 - `record_purchase_after_confirmation`
 - `create_planned_consumption`
-- `list_pending_planned_consumptions`
 - `get_meal_feedback_summary`
 - `adjust_inventory_after_feedback`
 - `export_state_snapshot_to_markdown`
@@ -207,7 +207,7 @@ MCP 服务可以启动
 
 这个阶段不需要真实库存业务，也不需要连接真实 WeKnora。
 
-本地完成后，在代码仓根目录下进入 `nutrition-agent-pov/app` 执行：
+本地完成后，在代码仓根目录下进入 `项目/家庭营养师/app` 执行：
 
 ```bash
 cd 项目/家庭营养师/app
@@ -285,9 +285,10 @@ family-nutrition-mcp-server    running
 get_current_inventory
 get_inventory_risks
 list_recent_meals
+list_pending_planned_consumptions
 ```
 
-后续再补充 `list_pending_planned_consumptions` 和 `get_meal_feedback_summary`。
+`list_pending_planned_consumptions` 读取 `meal_plans`、`meal_plan_items` 和 `planned_consumptions` 的关联结果；`get_meal_feedback_summary` 仍按真实需求后续补充。
 
 优先做只读，是因为读错了可以修，写错了可能重复扣库存、重复入库。
 

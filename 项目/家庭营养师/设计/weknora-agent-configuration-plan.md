@@ -69,12 +69,12 @@ memory_enabled = true
 知识库内容来自：
 
 ```text
-nutrition-agent-pov/family/
-nutrition-agent-pov/recipes/
-nutrition-agent-pov/sources/
-nutrition-agent-pov/agent-rules/
-nutrition-agent-pov/prompts/
-nutrition-agent-pov/skills/
+项目/家庭营养师/family/
+项目/家庭营养师/recipes/
+项目/家庭营养师/sources/
+项目/家庭营养师/agent-rules/
+项目/家庭营养师/prompts/
+项目/家庭营养师/skills/
 ```
 
 `inventory/` 和 `meals/` 可以上传由 Postgres 导出的摘要快照，但不作为实时状态源。实时库存、采购、计划消耗、近期菜单和饭后反馈通过 MCP 查询独立 Postgres。
@@ -336,7 +336,7 @@ recommendation-rules.md
 状态规则：
 
 ```text
-推荐后通过 `meal_plans` / `meal_plan_items` 记录菜单计划和预计消耗，不扣库存。
+推荐后通过 `meal_plans` / `meal_plan_items` 记录菜单计划，通过 `planned_consumptions` 记录每道菜对应的预计食材消耗；这些计划数据不扣库存。
 用户确认执行后，通过 `confirm_meal_execution` 转为实际消耗并扣库存。
 用户有反馈时，通过 `record_meal_feedback` 记录反馈；如需修正库存，通过 `record_inventory_event_after_confirmation` 记录有来源的库存修正。
 每周采购后，通过 `record_inventory_event_after_confirmation` 更新库存新增和优先消耗顺序。
@@ -503,7 +503,7 @@ get_inventory_risks
 写入方式：
 
 ```text
-第一版由 meal_plans / meal_plan_items 表达计划消耗；不单独开放 create_planned_consumption 工具。
+第一版不单独开放 `create_planned_consumption` 工具；计划创建流程应在同一事务中写入 `meal_plans`、`meal_plan_items` 和对应的 `planned_consumptions`。
 ```
 
 ### 7.3 meal events / recent menu
@@ -574,7 +574,7 @@ family-nutrition-state-mcp
 
 ```text
 知识库名称：家庭营养师知识库
-内容：上传 nutrition-agent-pov 目录下的 Markdown 文件
+内容：上传 `项目/家庭营养师/` 下的 Markdown 文件
 ```
 
 ### 9.2 创建家庭营养师 Agent
