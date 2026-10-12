@@ -1,6 +1,6 @@
-# Agent Runtime / Harness 产品分析
+# Agent Runtime / Harness / Control Plane 产品分析
 
-本目录用于分析 Agent / Workflow / Enterprise Harness 类产品或框架。
+本目录用于分析 Agent Runtime、Workflow、Harness、运行时支撑组件和 Agent 执行控制面产品。
 
 它关注的不是某一个模型有多强，也不是某一个 Agent 能不能完成单点任务，而是：
 
@@ -24,20 +24,21 @@
 成本、质量和安全如何治理？
 ```
 
-这些问题不是模型层、知识库层或单一 Coding Agent 能完全解决的，而是 Harness / Runtime 层的核心职责。
+这些问题不是模型层、知识库层或单一 Coding Agent 能完全解决的，而是 Runtime / Harness / Control Plane 层的核心职责。
 
 ---
 
 ## 2. 与相邻类别的边界
 
-| 类别 | 核心对象 | 典型问题 | 与 Harness 的区别 |
+| 类别 | 核心对象 | 典型问题 | 与本目录的区别 |
 |---|---|---|---|
-| `coding-agents/` | 代码仓、工程任务、编辑与测试 | Agent 如何写代码、跑测试、提 PR | Coding Agent 是具体执行者，Harness 是让执行者安全运行的环境 |
-| `agent-learning-systems/` | 运行轨迹、评估、经验蒸馏 | Agent 做过的好经验如何沉淀成 memory / Skill | Learning System 更偏事后学习，Harness 更偏事前约束和事中执行控制 |
-| `agent-workspaces/` | Agent 产物、协作资料、任务空间 | 产物如何沉淀、协作、发布 | Workspace 管结果和协作界面，Harness 管任务运行时 |
-| `knowledge-bases/` | 文档、知识切片、RAG、Wiki | Agent 如何检索稳定知识 | Knowledge Base 是上下文来源，Harness 决定如何使用上下文并调用工具 |
-| `data-governance-platforms/` | 数据资产、权限、血缘、质量、合规 | Agent 能访问哪些可信数据 | Data Governance 是数据控制面，Harness 是任务执行控制面 |
-| `../AI原生数据平台/` | AI 数据基座、本体语义层、Agent 数据底座 | 数据如何被 AI / Agent 消费 | AI Data Platform 供给语义与数据，Harness 组织任务执行 |
+| `编程Agent/` | 代码仓、工程任务、编辑与测试 | Agent 如何写代码、跑测试、提 PR | 编程 Agent 是具体工程执行者；本目录关注执行环境和控制面 |
+| `Agent学习系统/` | 运行轨迹、评估、经验蒸馏 | Agent 做过的好经验如何沉淀成 memory / Skill | Learning System 更偏事后学习；本目录更偏事前约束和事中执行控制 |
+| `Agent工作台/` | Agent 产物、协作资料、任务空间 | 产物如何沉淀、协作、发布 | Workspace 管结果和协作界面；本目录管任务运行时 |
+| `知识库/` | 文档、知识切片、RAG、Wiki | Agent 如何检索稳定知识 | Knowledge Base 是上下文来源；本目录决定如何使用上下文并调用工具 |
+| `数据治理平台/` | 数据资产、权限、血缘、质量、合规 | Agent 能访问哪些可信数据 | Data Governance 是数据控制面；本目录是任务执行控制面 |
+| `AI原生数据平台/` | AI 数据基座、本体语义层、Agent 数据底座 | 数据如何被 AI / Agent 消费 | AI Data Platform 供给语义与数据；本目录组织任务执行 |
+| `Agent资产与团队治理/` | Skill、团队配置、组织、预算和发布治理 | 谁能发布、分发和管理 Agent 资产 | 资产与组织治理偏团队控制面；本目录偏运行时执行控制 |
 
 ---
 
@@ -50,15 +51,13 @@
 | `deepseek-harness-weknora-aerospace-cae-agent.md` | WeKnora + DeepSeek Harness 航天 CAE Agent | 以 WeKnora 为知识底座、DeepSeek Harness 为 Agent 能力层界面的整体方案 | WeKnora、DeepSeek Harness、CAE 工具链、Postgres 和文件存储如何分工支撑航天 CAE 任务闭环 |
 | `deepseek-harness-aerospace-cae-toolchain.md` | 航天 CAE 工具链可行性调研 | 航天 CAE Agent 中工程不确定性最大的工具链部分 | DeepSeek Harness 插件边界、商业 CAE API、开源仿真栈、GUI 自动化兜底与 MVP 落地方案 |
 | `deepseek-harness-demo-architecture-and-plugin-analysis.md` | DeepSeek Harness demo 实现原理与插件机制拆解 | 本地 demo 的 FixedWorkflow、DSH 插件、混合对话、长期记忆和 Skill 演进分析 | 哪些 runtime / plugin / security / memory evolution 模式可借鉴到航天 CAE Agent |
-| `laya-typed-decision-engine-and-server.md` | laya 及 laya server | 非自回归 System 1 类型化决策引擎（choice/score/noul）+ HTTP/MCP 服务形态 | Agent 高频小决策（路由、工具选择、风险分级）如何从 LLM 生成换成毫秒级前向判定 |
+| `laya-typed-decision-engine-and-server.md` | laya 及 laya server | **运行时支撑组件：非自回归 System 1 类型化决策引擎** | Agent 高频小决策（路由、工具选择、风险分级）如何从 LLM 生成换成毫秒级前向判定 |
 | `openjiuwen-agent-core-and-claw.md` | openJiuwen（agent-core / JiuwenClaw） | 分层开源的 Agent 产品矩阵：运行时 SDK + 个人 AI 管家 + 编排 / 记忆 / 推理配件 | checkpoint 中断恢复的运行时原语、Skill 自演进无质检的治理风险，以及与 OpenClaw 的同构对照 |
-| `docker-agent.md` | docker/docker-agent（Docker 官方实验项目） | 声明式 YAML Agent CLI 插件 + OCI 分发 + 四档安全模式 | Agent 定义如何像容器镜像一样分发，"用户 CLI 选择优先于配置默认"的安全原则 |
+| `docker-agent.md` | docker/docker-agent（Docker 官方实验项目） | 声明式 YAML Agent CLI 插件 + OCI 分发 + 四档安全模式 | Agent 定义如何像容器镜像一样分发，用户 CLI 选择优先于配置默认的安全原则 |
 | `praisonai.md` | PraisonAI（MervinPraison，MIT） | 五层 Agent 栈 + Managed Agents 执行位置语义的多 agent 框架全家桶 | tools_run_on / run_on 双语义、completion_reason 枚举退出、doom-loop 检测等循环纪律 |
-| `helix-agent-fleet.md` | Helix（helixml/helix） | 旧调研重定向：该仓库不是本次 Helix Foundry | 正确的 Helix Foundry 分析位于 `../AI原生数据平台/helix-foundry.md` |
-| `rea.md` | REA（morluto/rea） | 证据型 MCP 逆向工程工具运行时 | Evidence contract、provider binding、progress/cancel/cleanup 与模型侧 schema 投影 |
-| `teamai-cli.md` | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发、上下文与持续改进控制面 | skills/rules/MCP/models 的团队发布、friction learning 与代码图召回 |
-| `paperclip.md` | Paperclip（paperclipai/paperclip） | Agent 公司级组织、任务、heartbeat、预算和审批控制面 | atomic checkout、durable wakeup、adapter、approval 与 budget hard stop |
-| `impeccable.md` | Impeccable（pbakaus/impeccable） | AI coding agent 的设计工作流与确定性质量门 | PRODUCT/DESIGN contract、shape-before-build、detector 与 trusted live |
+| `rea.md` | REA（morluto/rea） | **邻接对象：证据型 MCP 工具运行时** | Evidence contract、provider binding、progress/cancel/cleanup 与模型侧 schema 投影 |
+
+TeamAI、Paperclip 和 SkillHub 等偏团队资产、组织和发布治理的产品，统一见 [`../Agent资产与团队治理/`](../Agent资产与团队治理/)。
 
 ---
 

@@ -49,7 +49,7 @@ dsh 是目前最彻底践行"everything-is-a-plugin"的开源 harness（TypeScri
     dsh 的答案就是插件。
 ```
 
-相关调研已沉淀在 `研究/产品/Agent学习系统/skillhub-vs-skills-manager-and-a2a-skill-design.md`（Skill 资产与 registry 视角），本文补的是插件本身的机制视角。
+相关调研已沉淀在 `研究/产品/Agent资产与团队治理/skillhub-vs-skills-manager-and-a2a-skill-design.md`（Skill 资产与 registry 视角），本文补的是插件本身的机制视角。
 
 ---
 
