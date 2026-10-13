@@ -2,7 +2,12 @@
 
 验证材料只回答一个问题：外部平台和依赖在目标环境中实际证明了什么。
 
-它们不能定义产品范围、替代方案主线，也不能把“架构上可行”写成“已经集成”。
+它们不能定义产品范围、替代方案主线，也不能把“架构上可行”写成“已经集成”。特别要区分：
+
+- **Skill 管理是本项目的核心产品能力；**
+- **SkillHub 自动注册、分发和晋升是其中一种待验证实现能力。**
+
+即使 SkillHub 自动化不可用，也必须通过 Git/CI、管理员发布和 DSH 非生产 profile 保证 Skill 管理闭环可运行。
 
 ## 使用规则
 
@@ -17,7 +22,7 @@
 
 ## 材料
 
-- [平台与 Provider 能力验证](./01-平台与Provider能力验证.md)：Git、WeKnora、DSH、SkillHub、MCP 和安全实验
+- [平台与 Provider 能力验证](./01-平台与Provider能力验证.md)：Git、WeKnora、DSH、SkillHub、Skill loader、MCP 和安全实验
 - [DeepSeek Bot 能力评估](./02-DeepSeek-Bot能力评估.md)：Bot/Group/Memory 的源码事实和可选 PoC
 
 ## 与方案的关系
