@@ -18,7 +18,10 @@
 | Git branch/commit/MR/CI | A/B | 幂等、受保护分支、旧 SHA、Webhook 重放 |
 | WeKnora 查询/摄取/检索 | A/B | ACL、来源/版本、重复、索引失败和旧版本 |
 | DSH 入口/插件 | B | 目标版本 UI/API 扩展、生命周期和身份传递 |
+| Plugin/tool manifest and registry | B/C | 工具注册、权限、安装/启停、health、兼容性和回滚 |
 | DSH Skill loader/profile | B | 固定 digest 装载、权限过滤、装载读回和回滚 |
+| TeamAI CLI/repository/hooks/local injection | B/C | 目标版本 init/pull/push、MR、格式兼容、版本锁、灰度、安装读回、删除清理、回滚和内网/外网边界 |
+| SkillHub/TeamAI distribution comparison | B/C | 固定版本、digest、profile、目标安装、审计、撤回和 fallback 的可替代性 |
 | SkillHub 状态读取 | B | 版本、digest、owner 和状态是否可读 |
 | SkillHub 上传/晋升 | C | API、审批、审计、回滚和 webhook；未确认则管理员操作 |
 | MCP tools/list/call | A/B | profile 过滤、schema、ACL、审批、超时和取消 |
@@ -46,11 +49,11 @@
 
 **通过条件：**实际装载版本可读回；Skill 声明的 effects 不能突破 profile/tool policy；失败则使用管理员安装或外部 Web/API 向导。
 
-### V-04：SkillHub capability discovery
+### V-04：SkillHub/TeamAI 分发能力
 
-固定目标版本和部署方式，查找官方 REST/CLI/API，测试 upload、metadata、beta/stable、digest、revoke、audit、webhook 和 DSH 非生产 profile 安装。
+固定目标 SkillHub、TeamAI、Git 服务、dsh 和 profile 版本，分别测试 package/仓库注册、metadata、`init`、变更分支 `push`、`pull`、MR/CI、Hook 生命周期、格式兼容、版本锁、beta/stable、目标安装、文件清单/installed revision 读回、删除清理、revoke、audit、Webhook/同步状态、断网恢复和回滚。
 
-**通过条件：**发布结果、digest、安装结果和回滚都可查询；否则锁定管理员 fallback，但保留 Skill 管理闭环。
+**通过条件：**未审核内容不能自动生效；至少一种路径能提供固定版本、digest、目标安装和实际读回；TeamAI/SkillHub 不可用时管理员 fallback 可运行；重复 pull/push 不产生重复资源；无 secret、敏感正文或生产凭据跨安全域同步；运行能关联实际安装 revision。TeamAI 的 Agent Manifest 复用另行验证，不得绕过 Skill/知识/权限门禁。
 
 ### V-05：Skill contract and regression
 
@@ -64,6 +67,11 @@
 
 **通过条件：**拒绝有稳定错误码和审计；工具结果与真实 provider 状态一致；日志和 trace 无 token、Cookie 和敏感正文。
 
+### V-07：Plugin/tool 扩展能力
+
+固定目标 DSH 版本和一个隔离外部系统，验证 tool manifest、input/output schema、profile 过滤、最小权限、Secret Manager 引用、安装/启用/禁用、health/readback、超时/重试/幂等、兼容性、审计和回滚。
+
+**通过条件：** Plugin 未经权限授予不能出现在普通 profile；安装和实际工具注册可读回；provider unhealthy/unknown 时不能报告工具可用；失败可禁用并回到旧 digest。若能力未确认，只保留 fake provider 或人工安装，不阻塞知识 + Skill MVP。
 ## 4. 通用安全检查
 
 | 检查 | 方法 | 必须结果 |
@@ -73,6 +81,7 @@
 | Webhook 重放 | 重复 event/旧 timestamp | 不重复执行 |
 | 越权合并/晋升 | 普通用户调用 merge/promote | 拒绝并审计 |
 | 权限冲突 | Skill effects 超出 profile | 发布和装载均拒绝 |
+| Plugin/tool 权限 | 构造无 grant、过期 grant、跨 workspace 调用 | 全部拒绝并审计 |
 | 参数注入 | 工具参数携带外部指令 | 只按 schema/策略处理 |
 | 外部响应污染 | provider 返回恶意文本 | 不直接成为系统指令 |
 | 任意文件上传 | 脚本、超大文件、路径穿越 | 拒绝或隔离 |
@@ -80,4 +89,4 @@
 
 ## 5. 当前结论
 
-第一版优先 fake provider、一个真实 Git/WeKnora 隔离环境和一个低风险 Skill 的非生产回放。SkillHub 自动发布、DSH UI/loader、MCP 高风险工具和完整 Gateway 都必须先有实验结果，不能因为设计了 adapter 就视为已接通；但这些实现未验证不影响 Skill 管理作为产品核心能力继续交付。
+第一版优先 fake provider、一个真实 Git/WeKnora 隔离环境和一个低风险 Skill 的非生产回放。SkillHub 自动发布、DSH UI/loader、Plugin/tool runtime、MCP 高风险工具和完整 Gateway 都必须先有实验结果，不能因为设计了 adapter 就视为已接通；但这些实现未验证不影响 Skill 管理作为产品核心能力继续交付。

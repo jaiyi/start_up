@@ -1,6 +1,6 @@
 # 团队知识工程
 
-> 面向 40 人业务团队的知识与 Skill 双资产 AI 工作台：让业务人员把资料和任务经验沉淀为可治理、可运行、可复用、可复核的团队能力。
+> 面向 40 人业务团队的知识与 Skill 双资产 AI 工作台，并沿着受控 Plugin 管理持续演进：让业务人员把资料和任务经验沉淀为可治理、可运行、可复用、可复核的团队能力。
 
 ## 当前状态
 
@@ -10,11 +10,27 @@
 知识生产线：资料 → 知识草稿 → 确认/审核 → Git/CI → WeKnora → 可引用知识
 Skill 生产线：任务需求 → Skill 草稿 → 契约/权限/测试 → Git/CI → 发布/装载 → 可运行 Skill
 
-知识版本 + Skill digest + DSH profile
+知识版本 + Skill digest + profile
   → Agent 运行
   → 结果/反馈/业务结果
   → 知识复核或 Skill 回归
+
+治理闭环与分发闭环分开：
+- 治理闭环决定什么可以成为正式知识、Skill 或后续 Plugin；
+- 分发闭环决定已批准版本如何安全到达目标 dsh/profile，并能读回、回滚和审计。
 ```
+
+长期演进为三个独立资产域：
+
+```text
+Knowledge：Agent 应该知道什么
+Skill：Agent 应该如何完成一类任务
+Plugin：平台或 Agent 可以调用哪些受控外部能力
+
+Skill 组合 Plugin 提供的工具完成任务；Plugin 不等于 Skill。
+```
+
+第一步只建设知识 + Skill：先跑通双资产创建、治理、装载、运行和反馈闭环；待双资产稳定并出现外部系统复用、集中权限/凭据或运行时隔离需求后，再扩展 Plugin 管理。
 
 未经过目标环境验证的 DSH、WeKnora、SkillHub、DeepSeek Bot、Console 或 Gateway 能力，均不得视为已经集成。
 
@@ -40,16 +56,17 @@ Skill 生产线：任务需求 → Skill 草稿 → 契约/权限/测试 → Git
 - **知识**回答 Agent“应该知道什么”；**Skill**回答 Agent“应该如何完成一类任务”。
 - Git 是知识源文件、Skill 源码、契约、测试、metadata 和评审的 canonical source。
 - WeKnora 只负责已批准知识的索引、权限过滤和检索；它不能替代 Skill 管理。
-- SkillHub 负责 Skill 注册和分发；能力未验证时由管理员发布流程替代，但 Skill 管理本身仍是核心范围。
+- Skill/Agent 分发由已验证的 SkillHub、TeamAI distribution adapter 或管理员流程承担；TeamAI 负责 Git-based 初始化、同步、版本切换和本地 dsh 注入，但不负责事实审批、Skill 质量、知识检索或 Plugin runtime。
 - DSH 负责 profile、Skill 装载、工具调用、人工确认和运行结果。
+- Plugin 是长期演进的独立资产域，负责受控工具/外部系统能力的 manifest、权限、安装、健康和运行时治理；它不替代 Skill 管理。
 - 模型负责提取、摘要、分类、起草和发现冲突；脚本负责 schema、权限、依赖、secret 和回归门禁；人负责事实、范围、风险和发布责任。
-- 先用模块化单体 + 持久化 worker；Console/Gateway/多 provider 是演进形态，不是双资产目标的替代品。
+- 先用模块化单体 + 持久化 worker；Console/Gateway/Plugin runtime/多 provider 是演进形态，不是双资产目标的替代品。
 
 ## 当前阶段状态
 
-- **已决定**：双资产产品边界、知识/Skill 关系、Git/WeKnora/SkillHub/DSH 权责、人工控制点和阶段顺序。
-- **待验证**：目标版本的 DSH loader/profile、SkillHub API、WeKnora 索引状态、插件扩展和 Bot 适配。
-- **延后**：多租户、完整 Gateway、MCP 高风险工具、Bot 协作和生产写入；不是延后 Skill 管理。
+- **已决定**：双资产产品边界、知识/Skill 关系、Git/WeKnora/SkillHub/DSH 权责、人工控制点和阶段顺序；分发层与治理层分离，TeamAI 是可替换的分发适配层候选；Plugin 是长期独立资产域，不进入首期硬依赖。
+- **待验证**：目标版本的 DSH loader/profile、SkillHub API、TeamAI CLI/repository/hooks/local injection、WeKnora 索引状态、Plugin/tool 扩展、权限/凭据和 Bot 适配。
+- **延后**：多租户、完整 Gateway、完整 Plugin Registry/Runtime、MCP 高风险工具、跨团队数字员工、Bot 协作和生产写入；不是延后 Skill 管理。
 - **禁止**：模型直接发布知识或 Skill、Agent 直接 push/merge `main`、Skill 自行扩大权限、把 Bot Memory 当正式资产。
 
 ## 与其他项目的边界

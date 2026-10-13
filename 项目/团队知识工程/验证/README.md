@@ -5,9 +5,12 @@
 它们不能定义产品范围、替代方案主线，也不能把“架构上可行”写成“已经集成”。特别要区分：
 
 - **Skill 管理是本项目的核心产品能力；**
-- **SkillHub 自动注册、分发和晋升是其中一种待验证实现能力。**
+- **SkillHub 自动注册、分发和晋升是其中一种待验证实现能力；TeamAI 是另一种可复用的分发/本地同步实现候选。**
+- **TeamAI 不是本项目的首期硬依赖；它的价值在于多人 dsh 配置同步、版本一致性、新人接入、回滚和跨团队 Agent/Skill 复用。**
+- **Plugin 管理是双资产稳定后的长期扩展能力；**
+- **Plugin/tool 扩展、注册、安装和权限治理是待验证实现能力，不属于首期硬依赖。**
 
-即使 SkillHub 自动化不可用，也必须通过 Git/CI、管理员发布和 DSH 非生产 profile 保证 Skill 管理闭环可运行。
+即使 SkillHub 或 TeamAI 自动化不可用，也必须通过 Git/CI、管理员发布和 DSH 非生产 profile 保证 Skill 管理闭环可运行。
 
 ## 使用规则
 
@@ -22,7 +25,7 @@
 
 ## 材料
 
-- [平台与 Provider 能力验证](./01-平台与Provider能力验证.md)：Git、WeKnora、DSH、SkillHub、Skill loader、MCP 和安全实验
+- [平台与 Provider 能力验证](./01-平台与Provider能力验证.md)：Git、WeKnora、DSH、SkillHub/TeamAI 分发、Plugin/tool loader、MCP 和安全实验
 - [DeepSeek Bot 能力评估](./02-DeepSeek-Bot能力评估.md)：Bot/Group/Memory 的源码事实和可选 PoC
 
 ## 与方案的关系

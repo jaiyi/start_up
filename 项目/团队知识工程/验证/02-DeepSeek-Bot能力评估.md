@@ -21,6 +21,7 @@
 | 正式知识源文件和评审 | Git/CI | 不替代 |
 | 知识索引、ACL、版本引用 | WeKnora | 需要外部适配 |
 | Skill 注册、审核、digest 和晋升 | SkillHub + Git/CI | 未发现原生能力 |
+| Plugin/tool 注册、安装、权限和健康 | Plugin registry/runtime + DSH profile | 需要外部适配和验证 |
 | 工具权限和人工确认 | DSH profile/policy | 可复用，但需身份映射 |
 | 统一 trace 和业务反馈 | 观测/反馈系统 | 需要适配器 |
 
@@ -62,4 +63,4 @@ Main Bot
 
 只有在 P1/P2 稳定后，才做 Bot 协作 PoC。若需要多用户共享 roster、企业目录、集中任务队列、HA、限流、SLA、统一审计或服务端多租户，才重新评估服务端化；在此之前按本地 DSH 插件处理。
 
-任何 Secret 都必须使用受控 Secret Manager，不能进入模型请求、工具结果、Git、Memory 或 trace。Bot、Room、Session、Exchange 和工具调用必须能关联到统一 run/correlation 链。
+任何 Secret 都必须使用受控 Secret Manager，不能进入模型请求、工具结果、Git、Memory 或 trace。Bot、Room、Session、Exchange 和工具调用必须能关联到统一 run/correlation 链。Bot 不提供 Plugin registry、权限授予或外部系统健康的企业控制面。
