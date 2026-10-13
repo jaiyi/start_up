@@ -17,6 +17,7 @@
 
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
+| `skill-platform-private-deployment-comparison.md` | 私有化 Skill 平台横向对比 | 面向 WeKnora + DeepSeek Harness 的 Skill 发布、审核、分发和运行监控组合选型 | 为什么需要 SkillHub、Git/CI、DSH 与 Phoenix/Langfuse 分层组合，以及各候选的边界 |
 | `teamai-cli.md` | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发与持续改进控制面 | Skills、Rules、MCP、Models 如何随代码仓和团队约定发布，并通过 friction learning 持续改进 |
 | `paperclip.md` | Paperclip | Agent 公司级组织、任务、Heartbeat、预算和审批控制面 | Agent 如何被组织成可分工、可追踪、受预算和审批约束的团队 |
 | `skillhub-vs-skills-manager-and-a2a-skill-design.md` | SkillHub / Skills Manager 对比 | Skill 注册中心、个人 Skill 库房与 A2A Skill 资产治理设计 | Skill 契约、证据、协商和版本如何支撑跨团队发现、审核与调度 |
