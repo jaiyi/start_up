@@ -123,13 +123,14 @@ Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_
 approved Git revision
   → package
   → immutable version/digest
-  → SkillHub publish request 或管理员 fallback
-  → release receipt 和真实状态读回
-  → handoff metadata
-  → 目标 DeepSeek Harness Provider/discovery/load 验证
+  → SkillHub release request
+  → SkillHub release/version/digest read-back
+  → pinned digest
+  → TeamAI distribution/read-back（如启用）
+  → DSH handoff/discovery/load 验证
 ```
 
-工作台负责确认 package、version、digest、知识依赖、兼容目标和发布状态；SkillHub 负责注册、版本和分发。DeepSeek Harness 负责实际 discovery/load、session 消费、工具策略、运行时人工批准和运行结果。工作台不把目标 profile “可用”、Skill “loaded” 或任务“succeeded”写成自己的发布成功状态。
+工作台负责确认 package、version、digest、知识依赖、兼容目标和发布状态；SkillHub 负责注册、版本、release read-back 和 pinned digest；TeamAI（如启用）只负责消费 pinned digest 并完成目标安装读回；DeepSeek Harness 负责实际 handoff、discovery/load、session 消费、工具策略、运行时人工批准和运行结果。工作台不把目标 profile“可用”、Skill“loaded”或任务“succeeded”写成自己的发布成功状态。
 
 如果 SkillHub 暂时不可用，允许管理员 fallback，但必须保持 Git、审核、digest、目标和回滚语义，并标记实际路径。
 
@@ -143,7 +144,9 @@ draft → tested → review → approved → released → deprecated/rollback
 - `tested`：契约和测试有证据；
 - `review`：等待 owner/steward/reviewer；
 - `approved`：Git/CI/人工审核通过；
-- `released`：SkillHub 或 fallback 发布有真实读回；
+- `released`：SkillHub release/version/digest 或明确标记的管理员 fallback 发布有真实读回；
+- `distributed/installed`：TeamAI 已按 pinned digest 到达目标并完成安装读回；
+- `loaded`：DSH profile 实际装载并读回相同 digest；
 - `deprecated`：不再推荐新会话消费；
 - `rollback`：固定回到已知可用 digest。
 

@@ -8,9 +8,10 @@
 
 ```text
 approved release
-  → version/digest/package metadata
-  → SkillHub 或分发适配器
-  → Harness Provider/discovery/load
+  → package/version/digest metadata
+  → SkillHub release/read-back
+  → TeamAI pinned digest distribution/read-back（如启用）
+  → Harness handoff/discovery/load
   → Harness Workspace/Session 消费
 ```
 

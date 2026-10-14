@@ -21,7 +21,9 @@
 - 工作台首页、两个启动动作和 Creation Session 原型；
 - principal/team membership/role binding、service identity、Git 提交人和 Skill 发布责任链模型；
 - session、draft、asset revision、release、handoff、审批、operation/job/outbox/reconciliation 和反馈引用模型；
-- 会话隔离、暂停/恢复、归档、分叉、只读和并发冲突规则；
+- Git merge event fixture、签名/重放/乱序/旧 SHA contract；
+- WeKnora ingest/read-back contract：document/version/source/repo_path/ACL 和可检索验证；
+- Skill package/digest、SkillHub release/read-back、TeamAI pinned digest/distribution/read-back、DSH handoff/load/read-back contract；
 - SkillHub/DSH handoff metadata 和 fake distribution contract，不要求真实 Harness runtime；
 - Plugin manifest/tool contract 的预留边界和 fake provider contract，不要求真实 Plugin runtime；
 - fake Git/WeKnora/SkillHub/TeamLab provider 或 adapter contract；
@@ -41,23 +43,25 @@ Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记
 
 ### 知识交付
 
-首页“从资料创建知识”必须创建独立 Knowledge Creation Session；会话内包含材料、候选卡片、变更包、Git provider、CI/CODEOWNERS、审核、WeKnora ingest/status/search、引用和复核任务。
+首页“从资料创建知识”必须创建独立 Knowledge Creation Session；会话内包含材料、候选卡片、变更包、Git provider、CI/CODEOWNERS、审核、protected main merge event、Workbench outbox/worker、WeKnora ingest/status/search、document/version/source/ACL read-back、引用和复核任务。完整闭环是：`merge event → outbox → worker → ingest → read-back → published`。
 
 ### Skill 交付
 
-首页“从工作流创建 Skill”必须创建独立 Skill Creation Session；会话内包含 Skill 需求卡、Workflow Draft、模板化创建、input/output schema、知识依赖、effects/能力需求声明、golden/regression/security、Git/CI 审核、digest、SkillHub/fallback 发布和 DSH handoff metadata。
+首页“从工作流创建 Skill”必须创建独立 Skill Creation Session；会话内包含 Skill 需求卡、Workflow Draft、模板化创建、input/output schema、知识依赖、effects/能力需求声明、golden/regression/security、Git/CI 审核、从 merge commit 打包、immutable digest、SkillHub release/read-back、pinned digest、TeamAI distribution/read-back（如启用）和 DSH handoff metadata。
 
-- SkillHub/DSH Provider 未验证时使用管理员发布或 fake adapter，但必须保持 package、digest、approval、target 和回滚状态可追踪。
+- SkillHub/DSH Provider/TeamAI 未验证时使用管理员发布或 fake adapter，但必须保持 package、digest、approval、target、profile、installed revision 和回滚状态可追踪；fallback 不能使用漂移版本。
 
 ### P1 退出
 
 - 非程序员不操作 Git 即可从两个启动动作进入独立会话，并创建知识和 Skill 草稿；
 - 至少两个团队/asset space 可以安装同一 `team-knowledge-workbench`，且 Git、WeKnora、Creation Session、ACL、审计和发布状态完全隔离；
-- 知识创建能生成规范 repo path，WeKnora 能读回相同 knowledge ID、logical path、version、source commit 和 ACL；
+- 知识创建能生成规范 repo path，WeKnora 能读回相同 knowledge ID、logical path、version、source commit 和 ACL，并通过检索验证后才标记 published；
 - 用户可以同时打开多个知识/Skill 会话，暂停、恢复、归档、分叉和只读；
 - 会话上下文、材料、草稿、异步操作和回调不会串线；
 - 同一正式资产的并发修改检测 base revision，冲突不会静默覆盖；
 - 知识检索结果带 document/version/source/ACL；
+- Skill 从固定 merge commit 生成 package/digest，SkillHub read-back digest 与 package 一致；
+- TeamAI（如启用）按同一个 pinned digest 完成目标安装读回，DSH handoff 不发生 digest 漂移；
 - 发布版本能生成可供下游 Harness 验证的 version/digest/dependency metadata；
 - 重复请求不重复创建 MR、release 或 index；
 - CI 失败、契约冲突或权限超界不能发布；
@@ -74,9 +78,9 @@ Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记
 
 反馈不直接改正式资产；连续 4 周有真实消费或脱敏回放和复核记录；至少一个质量指标改善；知识问题能进入知识 MR，Skill 问题能进入 Skill 回归；未知交接状态可人工对账。
 
-## 5. P3：DeepSeek Harness 消费能力验证
+## 5. P3：SkillHub → TeamAI → DeepSeek Harness 消费能力验证
 
-在创作发布闭环稳定后，验证目标 Harness 环境能否发现、加载并在自己的会话中消费固定 Skill 版本。验证内容包括 Provider/discovery/load、版本和 digest 一致性、知识依赖提示、profile/工具策略边界、人工批准、下游反馈引用和回滚协作。
+在创作发布闭环稳定后，按固定 digest 验证 SkillHub release/read-back、TeamAI distribution/install/read-back 和目标 Harness handoff/discovery/load。必须证明：同一个 package digest 从 SkillHub 贯穿 TeamAI 到 DSH loaded digest，profile/工具策略不越权，安装失败可清理，版本漂移进入 unknown/reconciling 并可回滚。
 
 本阶段不在本项目实现 Harness Session、Run、Tool Call 或业务任务状态机；只保留交接协议、验证结果和反馈引用。
 
@@ -113,23 +117,24 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-07 | 双资产 schema/状态 | 合法/非法/重复/并发迁移有测试 |
 | V-08 | Skill 创建 | 模板、metadata、契约和知识依赖可生成并审核 |
 | V-09 | Skill 门禁 | schema、effects、能力需求、依赖、golden/regression/security 有效 |
-| V-10 | Git 变更 | 知识/Skill 路径安全、MR 幂等、CI/审批有效 |
-| V-11 | WeKnora | 来源/版本/ACL 可读回，失败保留旧版 |
-| V-12 | Skill 发布 | digest、release、目标和回滚可读回 |
-| V-13 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布 |
-| V-14 | 交接协议 | 下游 target、version、digest 和依赖可追踪 |
-| V-15 | 反馈分流 | 知识问题启动知识复核会话，Skill 问题启动 Skill 回归会话 |
-| V-16 | 身份与责任链 | DSH principal、team/role ACL、Git service identity、approved_by/released_by/executed_by 和跨团队拒绝可审计 |
-| V-17 | PostgreSQL 控制面 | migration、事务/乐观锁、幂等、备份恢复、Worker 重启和数据库故障的 unknown/degraded 状态可验证 |
-| V-18 | 安全审计 | 无 secret 泄露、越权和不可追踪写入 |
-| V-19 | 故障恢复 | 超时、丢回调、重复和未知状态可对账 |
-| V-20 | 稳定发布 | released/rollback 有批准、证据、digest 和旧版本 pin |
-| V-21 | 运营价值 | 至少一个场景减少重复劳动或返工 |
-| V-22 | Plugin 预留契约 | P0 有 manifest/tool contract、权限边界；不要求真实业务 Plugin runtime |
-| V-23 | Harness 能力验证（P3） | Provider/discovery/load 和反馈引用有可重复证据 |
-| V-24 | 分发 contract | SkillHub/TeamLab/管理员路径中，MR、固定版本、目标交接、实际读回、回滚和 fallback 可验证 |
-| V-25 | Agent Manifest 复用（后续） | 依赖 Skill/知识可追踪，不能绕过审批；不要求首期实现 |
-| V-26 | Plugin Bundle 开发与安装门禁 | 每个阶段都完成固定版本的 build/package/digest/fresh-profile install/restart/load-report/readback/功能 E2E，并可 disable/uninstall/rollback；未确认契约不得进入正式 Plugin |
+| V-10 | Git merge event 与异步发布 | merge event 验签、event idempotency、旧 SHA/乱序处理、outbox 落库、worker lease/retry/crash recovery 可验证 |
+| V-11 | WeKnora ingest/read-back | 来源/版本/ACL/document 可读回，检索验证成功后才 published；失败保留旧版 |
+| V-12 | Skill package/SkillHub release | 固定 merge commit、package digest、SkillHub release id/状态/digest 可读回 |
+| V-13 | SkillHub pinned digest → TeamAI → DSH | TeamAI target/installed revision/file list/digest 与 pinned digest 一致；DSH handoff/load/profile read-back 可验证 |
+| V-14 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布 |
+| V-15 | 交接协议 | 下游 target、version、digest 和依赖可追踪 |
+| V-16 | 反馈分流 | 知识问题启动知识复核会话，Skill 问题启动 Skill 回归会话 |
+| V-17 | 身份与责任链 | DSH principal、team/role ACL、Git service identity、approved_by/released_by/executed_by 和跨团队拒绝可审计 |
+| V-18 | PostgreSQL 控制面 | migration、事务/乐观锁、幂等、备份恢复、Worker 重启和数据库故障的 unknown/degraded 状态可验证 |
+| V-19 | 安全审计 | 无 secret 泄露、越权和不可追踪写入 |
+| V-20 | 故障恢复 | provider 半成功、超时、丢 event、重复和未知状态可对账 |
+| V-21 | 稳定发布 | released/rollback 有批准、证据、digest 和旧版本 pin |
+| V-22 | 运营价值 | 至少一个场景减少重复劳动或返工 |
+| V-23 | Plugin 预留契约 | P0 有 manifest/tool contract、权限边界；不要求真实业务 Plugin runtime |
+| V-24 | Harness 能力验证（P3） | Provider/discovery/load 和反馈引用有可重复证据 |
+| V-25 | 分发 contract | SkillHub/TeamLab/管理员路径中，MR、固定版本、目标交接、实际读回、回滚和 fallback 可验证 |
+| V-26 | Agent Manifest 复用（后续） | 依赖 Skill/知识可追踪，不能绕过审批；不要求首期实现 |
+| V-27 | Plugin Bundle 开发与安装门禁 | 每个阶段都完成固定版本的 build/package/digest/fresh-profile install/restart/load-report/readback/功能 E2E，并可 disable/uninstall/rollback；未确认契约不得进入正式 Plugin |
 
 详细平台实验见[验证材料](../验证/README.md)。
 

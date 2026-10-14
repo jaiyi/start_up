@@ -15,8 +15,12 @@
 
 | 能力 | 当前判断 | 必须验证 |
 |---|---|---|
-| Git branch/commit/MR/CI | A/B | 幂等、受保护分支、旧 SHA、Webhook 重放 |
-| WeKnora 查询/摄取/检索 | A/B | ACL、来源/版本、重复、索引失败和旧版本 |
+| Git branch/commit/MR/CI/merge event | A/B | 幂等、受保护分支、merge commit、旧 SHA、签名、重放、乱序和丢失补偿 |
+| Workbench outbox/worker | B | 事件落库后确认、operation 幂等、lease/retry/crash recovery、provider 半成功和 read-back 对账 |
+| WeKnora 查询/摄取/检索 | A/B | ACL、来源/版本、重复、document/read-back、检索验证、索引失败和旧版本 |
+| Skill package/digest/SkillHub release | B/C | 固定 merge commit 构建、immutable digest、release API、审批、release/digest read-back、撤回和回滚 |
+| TeamAI pinned digest distribution | B/C | 只消费 SkillHub digest、target workspace、init/push/pull、installed revision/file list/digest read-back、删除清理和回滚 |
+| DSH handoff/load | B | pinned digest、profile、handoff id、loaded digest/read-back、权限过滤和回滚 |
 | DSH Desktop Workbench package/market | B | `team-knowledge-workbench` 的 package layout、canonical repository identity、catalog/install/restart、enabled/UI read-back、卸载/回滚和市场准入；市场安装不等于资产发布 |
 | 多团队 Workbench 安装 | B | 两个团队安装同一 Workbench 后的 team/asset-space binding、Git/WeKnora/session/ACL/审计隔离和 cross-team deny |
 | 腾讯云 DSH/SkillHub/TeamLab 非生产部署 | B/C | 目标版本制品、网络/TLS、认证、健康检查、持久化、备份恢复、升级/回滚；未确认则管理员/fake provider fallback |
@@ -36,15 +40,18 @@
 
 ### V-01：Git provider contract
 
-使用 fake provider 覆盖 branch、batch commit、MR、pipeline 和状态读取；再在隔离项目验证 protected main、expected base/head SHA、Webhook 签名、重复和乱序事件。
+使用 fake provider 覆盖 branch、batch commit、MR、pipeline 和状态读取；再在隔离项目验证 protected main、expected base/head SHA、merge event 签名、event id 去重、重复/乱序/丢失事件、旧 head SHA 合并拒绝和轮询补偿。
 
-**通过条件：**重复请求不重复创建资源；所有动作能关联 `principal_id`/`service_identity_id`、job、commit、MR 和 pipeline；旧 head SHA 合并被拒绝。
+**通过条件：**重复请求不重复创建资源；事件落库后才确认接收；所有动作能关联 `principal_id`/`service_identity_id`、event、job、commit、MR 和 pipeline；旧 head SHA 合并被拒绝；事件丢失可由 merge commit 对账补发。
 
-### V-02：WeKnora 索引、检索和 Git 逻辑目录映射
+### V-01A：Workbench outbox/worker contract
 
-准备两个团队的独立测试 asset space 和知识库，上传带 canonical key、`repo_path`、domain/topic、source commit、version、sensitivity、ACL 的脱敏文档，测试首次 ingest、重复、增量更新、Git 路径移动/重命名、退役、ACL、hybrid search、旧版本和索引失败。
+验证 merge event 落库、outbox operation、worker lease、重复领取、崩溃恢复、provider 已完成但 read-back 超时、重试和人工补偿。知识 ingest 以 `merge_commit_sha + knowledge_scope` 去重，SkillHub release 以 `skill_id + package_digest` 去重，TeamAI/DSH 以 target/profile/pinned digest 去重。
 
-**通过条件：**结果返回 document/version/source/repo_path；Git↔WeKnora 逻辑路径可双向追溯；跨 workspace/team 拒绝；索引失败不覆盖旧版本；移动和退役有 migration/alias/retired 记录；`approved` 不被错误标成 `published`。
+**通过条件：**事件重复不产生重复 ingest/release；租约过期可恢复；provider 半成功进入 `unknown/reconciling` 并先 read-back 再重试；旧回调不能覆盖新 state version。
+准备两个团队的独立测试 asset space 和知识库，从已合并的 Git fixture 触发 `merge event → outbox → worker → ingest → read-back`，上传带 canonical key、`repo_path`、domain/topic、source commit、version、sensitivity、ACL 的脱敏文档，测试首次 ingest、重复、增量更新、Git 路径移动/重命名、退役、ACL、hybrid search、旧版本和索引失败。
+
+**通过条件：**结果返回 document/version/source/repo_path；Git↔WeKnora 逻辑路径可双向追溯；跨 workspace/team 拒绝；只有真实 read-back 和检索冒烟成功才能标记 `published`；索引失败不覆盖旧版本；移动和退役有 migration/alias/retired 记录；`approved` 不被错误标成 `published`。
 
 ### V-02A：DSH Desktop Workbench 安装与多团队隔离
 
@@ -65,11 +72,17 @@
 **通过条件：**实际装载版本、digest、profile、plugin id/name、enabled/healthy 和 load report 可读回；Skill 声明的 effects 不能突破 profile/tool policy；安装失败、禁用、卸载和回滚均可诊断并清理；失败则使用管理员安装或外部 Web/API 向导。
 
 
-### V-04：SkillHub/TeamLab/TeamAI 分发能力
+### V-04：Skill package → SkillHub release/read-back
 
-固定目标 SkillHub、TeamLab、可选 TeamAI、Git 服务、DSH 和 profile 版本，分别测试 package/仓库注册、metadata、审批、目标安装、文件清单/installed revision 读回、删除清理、revoke、audit、Webhook/同步状态、断网恢复和回滚。对 TeamAI 额外验证 `init`、变更分支 `push`、`pull`、Hook 生命周期和格式兼容；对 TeamLab 额外验证 service identity、目标 workspace/协作空间绑定和实际 release read-back。
+固定一个已合并的 Skill commit，执行 `package → digest → SkillHub release → release/digest read-back`，验证 metadata、审批、immutable digest、重复 release、撤回、断网恢复、回滚和审计。SkillHub read-back 缺失或 digest 不一致时，不得进入 TeamAI。
 
-**通过条件：**未审核内容不能自动生效；至少一种路径能提供固定版本、digest、目标安装和实际读回；SkillHub/TeamLab/TeamAI 不可用时管理员 fallback 可运行；重复操作不产生重复资源；无 secret、敏感正文或生产凭据跨安全域同步；运行能关联实际安装 revision。TeamAI 的 Agent Manifest 复用另行验证，不得绕过 Skill/知识/权限门禁。
+**通过条件：**未审核内容不能自动生效；SkillHub 返回的 release/version/digest 与本地 package 一致；重复操作不产生重复 release；release unknown 可对账；旧 digest 可回滚。
+
+### V-04A：SkillHub pinned digest → TeamAI → DSH
+
+固定已读回的 SkillHub `pinned_digest`，测试 TeamAI distribution request、目标 workspace、`init`、变更分支 `push`、`pull`、Hook 生命周期、格式兼容、安装/删除清理、installed revision/file list/digest read-back，再测试 DSH handoff、profile 和 loaded digest read-back。
+
+**通过条件：**TeamAI 不接受 `latest` 或未审核版本；TeamAI 实际 digest 与 SkillHub pinned digest 一致；DSH loaded digest/profile 与 handoff 一致；digest 漂移、安装半成功和 loaded unknown 均阻断运行并进入对账；TeamAI/DSH 不可用时管理员 fallback 可按同一个 digest 运行。
 
 ### V-05：Skill contract and regression
 
@@ -96,6 +109,9 @@
 | Secret 泄露 | 扫描 Git、日志、trace、错误响应 | 无 token、Cookie、密钥 |
 | 跨 workspace | 构造资源 ID 和 Webhook | 全部拒绝 |
 | Webhook 重放 | 重复 event/旧 timestamp | 不重复执行 |
+| Merge event 签名/越权 | 伪造 event、跨 team/asset-space 或错误 merge commit | 拒绝、隔离并审计 |
+| Provider read-back 污染 | 返回伪造 document/release/install/load 状态 | 不直接成为成功状态，需校验关联 id、digest、ACL 和 source |
+| Digest 篡改 | 修改 SkillHub、TeamAI 或 DSH 返回的 digest | 全链路阻断并进入对账 |
 | 越权合并/晋升 | 普通用户调用 merge/promote | 拒绝并审计 |
 | 权限冲突 | Skill effects 超出 profile | 发布和装载均拒绝 |
 | Plugin/tool 权限 | 构造无 grant、过期 grant、跨 workspace 调用 | 全部拒绝并审计 |
