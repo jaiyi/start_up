@@ -1,83 +1,125 @@
 # 团队知识工程
 
-> 面向 40 人业务团队的知识与 Skill 双资产 AI 工作台，并沿着受控 Plugin 管理持续演进：让业务人员把资料和任务经验沉淀为可治理、可运行、可复用、可复核的团队能力。
+> 一个面向团队的 AI 工作台：把会议、资料和日常工作方式变成可确认、可测试、可版本化、可发布的知识与 Skill。
 
-## 当前状态
+## 产品定位
 
-当前处于 **P0：双资产边界与能力侦察**。本项目不是只做 WeKnora 知识库，而是同时建设两条资产生产线，并让它们汇合到 Agent 运行：
+本项目是**知识与 Skill 的创作发布工作台**，不是通用任务运行器，也不是 DeepSeek Harness 的替代品。
 
-```text
-知识生产线：资料 → 知识草稿 → 确认/审核 → Git/CI → WeKnora → 可引用知识
-Skill 生产线：任务需求 → Skill 草稿 → 契约/权限/测试 → Git/CI → 发布/装载 → 可运行 Skill
-
-知识版本 + Skill digest + profile
-  → Agent 运行
-  → 结果/反馈/业务结果
-  → 知识复核或 Skill 回归
-
-治理闭环与分发闭环分开：
-- 治理闭环决定什么可以成为正式知识、Skill 或后续 Plugin；
-- 分发闭环决定已批准版本如何安全到达目标 dsh/profile，并能读回、回滚和审计。
-```
-
-长期演进为三个独立资产域：
+用户把材料或工作想法带进来，Agent 负责梳理、追问和起草，用户负责讨论、校正和确认；平台把确认后的内容提交到正式系统，并展示发布证据和下游交接状态。
 
 ```text
-Knowledge：Agent 应该知道什么
-Skill：Agent 应该如何完成一类任务
-Plugin：平台或 Agent 可以调用哪些受控外部能力
-
-Skill 组合 Plugin 提供的工具完成任务；Plugin 不等于 Skill。
+资料入口：会议纪要/资料 → 梳理讨论 → 知识草稿 → Git/MR/CI → WeKnora
+能力入口：工作流描述 → 追问建模 → Skill + 测试 → Git/MR/CI → SkillHub
+发布交接：approved release → 版本/digest → DSH Provider/discovery/load
+反馈回流：Harness/业务反馈 → 知识复核或 Skill 回归 → 新的变更与发布
 ```
 
-第一步只建设知识 + Skill：先跑通双资产创建、治理、装载、运行和反馈闭环；待双资产稳定并出现外部系统复用、集中权限/凭据或运行时隔离需求后，再扩展 Plugin 管理。
+## 两种核心体验
 
-未经过目标环境验证的 DSH、WeKnora、SkillHub、DeepSeek Bot、Console 或 Gateway 能力，均不得视为已经集成。
+首页只有两个创作入口，点击后会创建独立的 Creation Session；用户在会话内完成梳理、确认、测试、提交和发布，而不是在多个系统状态页面之间跳转。
 
-## 如何阅读
+### 1. 资料变知识
 
-按产品和落地顺序阅读：
+```text
+拖入会议纪要/资料
+  → Agent 摘要、拆解、定位来源和发现冲突
+  → 用户逐条讨论、修订和确认
+  → 生成知识资产草稿
+  → 提交 knowledge-assets Git 仓库
+  → WeKnora 建立 Wiki/索引
+  → 后续 Harness 会话中的 Agent 可检索并引用
+```
+
+原始材料、模型推断、待确认事项和正式知识必须分开。未经人工确认、Git/CI 和审核的候选不得进入正式知识库。
+
+### 2. 工作方式变 Skill
+
+```text
+描述一个重复的工作流
+  → Agent 追问输入、步骤、判断、例外和输出
+  → 生成 Skill 草稿、脚本/资源、契约和测试集
+  → 用脱敏样例试跑、比较和修改
+  → 用户确认并提交 Git
+  → 审核通过后发布到 SkillHub
+  → 交给 DeepSeek Harness 的 Skill Provider 消费
+```
+
+Skill 不只是 Prompt，而是可阅读、可测试、可版本化、可发布的能力包。工作台负责证明它可以发布；Harness 负责在自己的会话中发现、加载并运行它。
+
+## 系统边界
+
+| 系统 | 主要职责 | 本项目如何交接 |
+|---|---|---|
+| 团队知识/Skill 工作台 | 资料收件、知识/Workflow/Skill 草稿、测试、审核、Git/MR、发布状态、反馈候选 | 生成经过批准的版本、digest、package metadata 和引用 |
+| knowledge-assets Git | 知识、Skill、契约、测试和审核后的 canonical source | 由工作台发起变更，不绕过分支保护和审核 |
+| WeKnora | 已批准知识的 Wiki、索引、权限过滤、检索和来源引用 | 工作台展示 ingest/index/read-back 状态 |
+| SkillHub | Skill package 的注册、版本和发布分发 | 工作台展示 release、version、digest 和真实状态 |
+| DeepSeek Harness | Workspace、Session、Skill discovery/load、Agent 对话、工具、权限、运行时人工批准、恢复和运行观测 | 工作台只提供已发布资产并接收结构化反馈引用 |
+| 业务系统/SPC 后端 | 业务事实、动态状态、计算、告警、工单和生产运行 | 工作台不复制业务运行状态机 |
+
+发布后的 Skill 进入任务执行，是 DeepSeek Harness 会话工作台的职责，不是本项目的主要产品模块。
+
+## 核心对象关系
+
+```text
+Workspace
+└─ Creation Session
+   ├─ Knowledge Draft / Workflow Draft / Skill Draft
+   ├─ Draft Revision / Test / Evaluation
+   └─ Asset Revision → Release → Handoff
+
+Feedback Candidate → 新的 Creation Session
+
+Harness session / 业务系统
+  └─ 消费已发布版本并返回 feedback reference
+```
+
+- **Creation Session**：一次独立、可暂停、可恢复、可并行的知识或 Skill 创作上下文，不是正式资产，也不是 Harness Session。
+- **Knowledge**：Agent 应该知道什么，以及依据、范围和复核条件。
+- **Workflow**：用户实际如何完成一类工作，是生成 Skill 的中间建模对象。
+- **Skill**：从工作流抽象出的可复用任务能力包。
+- **Release**：经 Git/CI/人工审核并带固定版本和 digest 的可交付资产。
+- **Feedback reference**：来自下游运行的结构化引用，不是本项目复制的完整运行记录。
+
+## 首个垂直切片
+
+1. 上传一份脱敏会议纪要；
+2. 生成摘要、决策、规则、行动项、冲突和知识候选；
+3. 用户讨论、修改并确认；
+4. 提交 Git，并同步 WeKnora；
+5. 描述一个相关的重复工作流；
+6. 生成 Skill 草稿、资源和 3–5 个测试例；
+7. 用样例试跑、比较并修改；
+8. 确认后提交 Git、发布 SkillHub；
+9. 生成交接记录，供目标 DeepSeek Harness 环境验证发现和加载。
+
+首期不做本项目自己的任务执行入口、通用 Runtime、完整 Session/Run 控制面、运行时工具调用追踪、开放 Plugin 市场、多租户和高风险生产写入。
+
+## 文档阅读顺序
 
 1. [方案总览与关键决策](./方案/00-方案总览与关键决策.md)
 2. [问题、用户与产品范围](./方案/01-问题、用户与产品范围.md)
-3. [端到端双资产工作流](./方案/02-端到端知识工作流.md)
+3. [端到端工作台工作流](./方案/02-端到端知识工作流.md)
 4. [知识与 Skill 资产模型](./方案/03-知识资产与生命周期.md)
 5. [角色、治理与运营机制](./方案/04-角色、治理与运营机制.md)
 6. [系统架构与权威边界](./方案/05-系统架构与权威边界.md)
 7. [数据、状态与可追溯性](./方案/06-数据、状态与可追溯性.md)
 8. [发布、安全与故障处置](./方案/07-发布、安全与故障处置.md)
 9. [MVP 实施、验证与验收](./方案/08-MVP实施、验证与验收.md)
+10. [工作台信息架构与核心对象](./方案/09-工作台信息架构与核心对象.md)
+11. [Workflow 到 Skill 的生成、测试与发布](./方案/10-Workflow到Skill的生成、测试与发布.md)
+12. [DeepSeek Harness 能力验证](./验证/03-DeepSeek%20Harness能力验证.md)
 
-外部平台事实和源码评估放在[验证材料](./验证/README.md)，不能反过来定义产品目标。
+验证材料只回答“外部能力实际证明了什么”，不能把未验证的发布、索引、装载或运行显示为成功。
 
-## 核心判断
+## 不可绕过的原则
 
-- 这是知识和 Skill 的双资产工作台，不是只有知识检索的系统。
-- **知识**回答 Agent“应该知道什么”；**Skill**回答 Agent“应该如何完成一类任务”。
-- Git 是知识源文件、Skill 源码、契约、测试、metadata 和评审的 canonical source。
-- WeKnora 只负责已批准知识的索引、权限过滤和检索；它不能替代 Skill 管理。
-- Skill/Agent 分发由已验证的 SkillHub、TeamAI distribution adapter 或管理员流程承担；TeamAI 负责 Git-based 初始化、同步、版本切换和本地 dsh 注入，但不负责事实审批、Skill 质量、知识检索或 Plugin runtime。
-- DSH 负责 profile、Skill 装载、工具调用、人工确认和运行结果。
-- Plugin 是长期演进的独立资产域，负责受控工具/外部系统能力的 manifest、权限、安装、健康和运行时治理；它不替代 Skill 管理。
-- 模型负责提取、摘要、分类、起草和发现冲突；脚本负责 schema、权限、依赖、secret 和回归门禁；人负责事实、范围、风险和发布责任。
-- 先用模块化单体 + 持久化 worker；Console/Gateway/Plugin runtime/多 provider 是演进形态，不是双资产目标的替代品。
-
-## 当前阶段状态
-
-- **已决定**：双资产产品边界、知识/Skill 关系、Git/WeKnora/SkillHub/DSH 权责、人工控制点和阶段顺序；分发层与治理层分离，TeamAI 是可替换的分发适配层候选；Plugin 是长期独立资产域，不进入首期硬依赖。
-- **待验证**：目标版本的 DSH loader/profile、SkillHub API、TeamAI CLI/repository/hooks/local injection、WeKnora 索引状态、Plugin/tool 扩展、权限/凭据和 Bot 适配。
-- **延后**：多租户、完整 Gateway、完整 Plugin Registry/Runtime、MCP 高风险工具、跨团队数字员工、Bot 协作和生产写入；不是延后 Skill 管理。
-- **禁止**：模型直接发布知识或 Skill、Agent 直接 push/merge `main`、Skill 自行扩大权限、把 Bot Memory 当正式资产。
-
-## 与其他项目的边界
-
-`项目/SPC-DeepSeek-Harness/` 是验证 DSH/Agent 平台能力的业务试点；本项目沉淀可复用的知识与 Skill 双资产方法。
-
-`研究/产品/Agent资产与团队治理/` 记录外部产品事实和横向选型；本项目记录团队自己的决策、验证和实施结果。
-
-## 维护规则
-
-- 方案目录回答“目标是什么、如何运行、如何治理和如何落地”；验证目录回答“外部能力实际证明了什么”。
-- 每个关键决策只有一个权威位置；其他文档通过链接引用，不重复改写。
-- 知识、Skill、运行和发布状态都必须有证据；超时、回调丢失和状态未知不能展示为成功。
+- 模型不能直接发布知识或 Skill，也不能推送 protected `main`；
+- Git/MR/CI/人工审核是正式发布门禁；
+- WeKnora 只接收批准后的知识；SkillHub 不替代质量评测和审核；
+- Skill 只能声明能力需求，不能自行扩大工具权限或数据范围；
+- 不把聊天 Memory、运行日志或业务原文直接当正式资产；
+- `approved`、`published`、`loaded`、`running` 和 `succeeded` 属于不同系统状态；
+- 没有真实系统证据时，不声称已经发布、索引、装载或运行成功；
 - 不提交生产 Token、Cookie、密码、业务原文或个人敏感信息。
