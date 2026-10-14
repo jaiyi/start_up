@@ -34,13 +34,32 @@ Team B → team-knowledge-asset-B → Git-B + WeKnora space-B
 | UI/security | Electron main/Harness 隔离、Renderer sandbox/context isolation、窄 preload IPC | 插件不能通过 DOM 注入、Renderer Node 或宽泛 preload 绕过安全边界 |
 | Extension style | 优先 host/plugin extension point，最小、版本化、可测试的 patch | Workbench 应使用宿主 slots/API，不覆盖宿主导航和权限 |
 
-### 2.1 安装与市场限制
+> 以上表格只描述 `dataelement/dsh-desktop` 在固定 commit `115a0b474cc2c4794316171c640a8898398591fe` 的 Workbench 实现，不自动构成所有 DSH 业务 Plugin 的通用契约。业务 Plugin 必须按[DSH Plugin 开发与安装契约验证](./05-DSH%20Plugin开发与安装契约验证.md)在目标 DSH commit/profile 中重新取证。
 
 正式市场分发至少需要确认：构建产物、canonical GitHub repository identity、catalog entry、来源完整性、安装/重启、实际面板加载、启停和回滚。Source distribution 不会替插件自动构建，必须发布已构建产物。市场安装记录不应与 Team Knowledge 的资产发布记录混用。
 
 内部推广可以先走受控内部安装，但必须保留与正式市场相同的 package、version、digest、target、restart、enabled 和 read-back 证据。不能因为本地加载成功就声称已经满足市场准入。
 
-## 3. Team Knowledge 的独立后端边界
+## 3. 与业务 Plugin Bundle 的边界
+
+`team-knowledge-workbench` 的 Workbench package 与未来业务 Plugin Bundle 都可能由 DSH Desktop 安装，但不是同一种资产。Workbench 负责团队知识/Skill 创作与资产后端绑定；业务 Plugin 运行在 Harness 宿主信任边界内，必须另行满足目标 DSH 版本的 package、Cordis patch、Host/Client、权限和生命周期契约。local package、catalog 或 market 安装都只能证明宿主安装路径，不证明业务功能、知识发布或 Harness handoff 成功。
+
+真实 Plugin 开发必须按阶段重复：
+
+```text
+固定 DSH commit/profile
+→ 读取官方源码/类型/README/fixture
+→ build/package/digest
+→ fresh-profile install
+→ restart
+→ boot/Node/Client load report readback
+→ functional E2E
+→ disable/uninstall/rollback
+```
+
+Host-only、Client-only、Mixed bridge 和 session trace 每新增一层都要重新走完整链路；但只对插件实际声明的能力面设置通过条件。Host-only 不要求 UI/bridge/trace；Client-only 增加 Client entry、slot/mount 和 UI read-back；Mixed 增加官方 bridge/store 与断连恢复；声明 trace 能力时才增加 trace service 和统计聚合。未声明或不适用的能力记录 `N/A` 及原因。证据至少保存 source commit、package digest、target profile、install mode、installed/loaded revision、enabled/healthy、实际功能、失败清理和回滚。未确认的 session trace service、Host→Client bridge、UI slot 或 package 字段只能标记 `candidate/pending`，不能写入正式插件或市场准入契约。
+
+## 4. Team Knowledge 的独立后端边界
 
 DSH Desktop 当前提供的是本地插件/UI/Session ownership 机制，不是 TeamAI API，也不是共享团队控制平面。Team Knowledge Backend 必须独立负责：
 
@@ -53,9 +72,9 @@ DSH Desktop 当前提供的是本地插件/UI/Session ownership 机制，不是 
 
 `desktopWorkbenchOwnership` 只是元数据，不是授权。DSH launch token 只参与宿主根 URL 的启动交换，不是可转发给 Team Knowledge API 或后台 worker 的通用 credential。后台 worker 必须使用独立、最小权限且可审计的认证。
 
-## 4. 多团队安装验证
+## 5. 多团队安装验证
 
-### 4.1 绑定模型
+### 5.1 绑定模型
 
 每个团队绑定一套独立配置：
 
@@ -73,7 +92,7 @@ distribution_targets: []
 
 Team B 使用不同的 repo、space、ACL、steward 和 policy。客户端不能仅凭请求参数切换 `asset_space_id`；服务端根据身份和 Workbench installation binding 授权并读回。
 
-### 4.2 必须验证
+### 5.2 必须验证
 
 1. Team A、Team B 安装同一 Workbench version/digest；
 2. 两个安装都能完成 panel/server registration 和 UI read-back；
@@ -83,7 +102,7 @@ Team B 使用不同的 repo、space、ACL、steward 和 policy。客户端不能
 6. Workbench uninstall/reinstall 不删除团队资产、Git 历史、WeKnora 正式文档或发布审计；
 7. DSH mode switch 不会误认为后台 job 已取消，后台任务有显式 owner、cancellation 和 reconciliation。
 
-## 5. P0 腾讯云非生产部署
+## 6. P0 腾讯云非生产部署
 
 当前腾讯云已有 WeKnora，但尚无已确认的 DSH、SkillHub 或 TeamLab 部署。因此 P0 应增加一条部署与 readiness 线：
 
@@ -129,7 +148,7 @@ service reachable
 ≠ Harness running
 ```
 
-## 6. 知识 Git 目录与 WeKnora 结构验证
+## 7. 知识 Git 目录与 WeKnora 结构验证
 
 推荐每个 `team-knowledge-asset` 使用如下结构：
 
@@ -161,7 +180,7 @@ Git repo_path
 
 首次 ingest、增量更新、重复 ingest、移动/重命名、合并、退役、ACL 变更和失败重试都必须读回 mapping。Git 是事实来源；不能先在 WeKnora 后台改分类，再让 Git 失去来源。移动或退役要保留 alias/redirect、旧版本或退役记录，索引失败时保留旧可用版本。
 
-## 7. 证据模板
+## 8. 证据模板
 
 每次实验至少记录：
 
@@ -172,6 +191,10 @@ environment: tencent-cloud-non-production | desktop-local
 team_id: <team>
 asset_space_id: <asset-space>
 workbench_version: <version>
+plugin_version: <version-or-null>
+target_dsh_commit: <immutable-ref-or-null>
+target_profile: <profile-or-null>
+install_mode: fresh-profile | local-package | catalog | market
 package_digest: sha256:...
 source_commit: <commit>
 fixture: <脱敏 fixture>
@@ -185,7 +208,7 @@ executed_at: <timestamp>
 next_action: <action>
 ```
 
-## 8. 不可混淆的结论
+## 9. 不可混淆的结论
 
 - `team-knowledge-workbench` 是可复用 Workbench 产品包；`team-knowledge-asset` 是团队独立资产域；
 - DSH Workbench market 是插件分发渠道，不是知识/Skill canonical registry；

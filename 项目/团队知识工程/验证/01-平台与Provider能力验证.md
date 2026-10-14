@@ -60,9 +60,10 @@
 
 ### V-03：DSH 入口和 Skill loader
 
-创建只读测试插件或 API bridge，验证入口注册、profile 传递、固定 Skill digest 装载、权限过滤、重启、升级、卸载、失败清理和回滚。
+固定目标 DSH commit/tag、Node/包管理器、目标 profile、安装方式和 fresh profile。先从官方源码、类型、README、fixture 与 Loader 取证，再验证入口注册、profile 传递、固定 Skill digest 装载、权限过滤、重启、升级、卸载、失败清理和回滚。每个阶段均必须经过 `build → package → digest → fresh-profile install → restart → boot/load report readback → functional E2E`，不能只验证源码 import 或开发 profile。
 
-**通过条件：**实际装载版本可读回；Skill 声明的 effects 不能突破 profile/tool policy；失败则使用管理员安装或外部 Web/API 向导。
+**通过条件：**实际装载版本、digest、profile、plugin id/name、enabled/healthy 和 load report 可读回；Skill 声明的 effects 不能突破 profile/tool policy；安装失败、禁用、卸载和回滚均可诊断并清理；失败则使用管理员安装或外部 Web/API 向导。
+
 
 ### V-04：SkillHub/TeamLab/TeamAI 分发能力
 
@@ -84,9 +85,10 @@
 
 ### V-07：Plugin/tool 扩展能力
 
-固定目标 DSH 版本和一个隔离外部系统，验证 tool manifest、input/output schema、profile 过滤、最小权限、Secret Manager 引用、安装/启用/禁用、health/readback、超时/重试/幂等、兼容性、审计和回滚。
+固定目标 DSH 版本/commit、Node、profile、一个隔离外部系统和 fresh profile。详细契约取证、P1–P5 阶段和证据模板以[DSH Plugin 开发与安装契约验证](./05-DSH%20Plugin开发与安装契约验证.md)为准；本项只验证目标环境中的整体能力矩阵和 Go/No-Go。各能力面按适用范围验证：Host-only 不要求 UI/bridge/trace；Client-only 增加 Client entry、slot/mount 和 UI read-back；Mixed 增加官方 bridge/store 与断连恢复；声明 trace 能力时才增加 trace service 和统计聚合。每个适用阶段都执行 `build → package → digest → fresh-profile install → restart → load report/readback → functional E2E → disable/uninstall/rollback`。
 
-**通过条件：** Plugin 未经权限授予不能出现在普通 profile；安装和实际工具注册可读回；provider unhealthy/unknown 时不能报告工具可用；失败可禁用并回到旧 digest。若能力未确认，只保留 fake provider 或人工安装，不阻塞知识 + Skill MVP。
+**通过条件：**适用能力面对应的 package identity、权限、安装、load report、health、功能结果和生命周期均可读回；不适用项明确记录 `N/A` 及原因；provider unhealthy/unknown、bridge 断开、trace 服务缺失或权限拒绝时不能报告可用；失败可禁用并回到旧 digest。SBOM、依赖锁定、license/secret scan、来源 commit、package digest、target profile 和审计齐全。若能力未确认，只保留 fake provider 或人工安装，不阻塞知识 + Skill MVP。
+
 ## 4. 通用安全检查
 
 | 检查 | 方法 | 必须结果 |

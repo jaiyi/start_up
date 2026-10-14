@@ -69,11 +69,34 @@ compatible_targets: []
 - 不把 Harness 的运行结果猜测为发布成功；
 - 不复制完整 session/run/tool-call/receipt/outbox/reconciliation 数据。
 
+### 3.1 Plugin Bundle handoff
+
+如果交接对象是可安装 Plugin，而不是 Skill/knowledge，最小 handoff 还必须包括：
+
+```yaml
+plugin_id: <plugin-id>
+plugin_version: <version>
+source_commit: <approved-plugin-commit>
+package_digest: sha256:...
+target_dsh_commit: <immutable-dsh-ref>
+target_profile: <profile>
+install_mode: <fresh-profile|catalog|market>
+required_permissions: []
+compatible_targets: []
+installed_revision: <read-back-or-null>
+loaded_revision: <read-back-or-null>
+```
+
+`installed_revision`、`loaded_revision`、`enabled`、`healthy` 和功能 E2E 结果必须分开读回；package 构建成功不等于安装成功，安装成功不等于加载成功，加载成功不等于业务功能成功。Plugin handoff 同样必须经过 `build → package → digest → install → restart → load report → functional E2E`，并保留 disable/uninstall/rollback 证据。
+
 ### DSH-09：身份、服务身份与 PostgreSQL 交接状态
 
 使用 DSH Desktop 认证上下文进入 Workbench，验证后端能将已验证的 DSH subject 映射为 `principal_id`、team membership、role 和 `asset_space_id`；客户端伪造 team/space、owner 或 approver 必须被拒绝并审计。验证 PostgreSQL 中的 session、draft revision、approval、operation/job、outbox、handoff 和 reconciliation 能关联 `requested_by`、`approved_by`、`released_by`、`executed_by`、`service_identity_id`、source commit 和 package digest。TeamLab、SkillHub 或管理员 fallback 的实际读回必须保持 `released`、`handoff_verified` 和 `loaded` 的状态区分；数据库故障、Worker 重启或 provider 半成功只能进入 `unknown/degraded/reconciling`，不能伪造成功。
 
 **通过条件：**DSH launch token、用户登录 token 和组件服务凭据不被转发为通用 API credential；跨团队读取和提交被拒绝；重复 job 可安全恢复；外部状态能够读回或进入人工对账。
+
+## 4. 实验矩阵
+
 | ID | 实验 | 预期证据 | 状态 |
 |---|---|---|---|
 | DSH-01 | 发布包按固定 digest 查询 | Provider 返回匹配 package 或明确 not found | 待目标环境验证 |

@@ -27,11 +27,15 @@
 - fake Git/WeKnora/SkillHub/TeamLab provider 或 adapter contract；
 - Skill input/output、effects、能力需求和风险模型；
 - 目标版本的 WeKnora 状态、SkillHub/TeamLab API、DeepSeek Harness Provider/discovery/load 能力记录；
+- DSH Plugin 可安装契约侦察：固定 commit/profile，读取官方 package/类型/README/fixture/Loader，区分 `fact/candidate/pending_checks/warning`；
+- 一个最小 Host-only Plugin Bundle Spike，完成 `build → package → digest → fresh-profile install → restart → load report/read-back → functional smoke → disable/uninstall/rollback`；
 - 不使用生产 Token 的验证证据。
 
 ### P0 退出
 
 双资产 schema、非法状态、幂等、权限冲突、契约失败、运行归因、故障路径和人工 fallback 均有测试；腾讯云非生产环境可部署、可观测、可备份和可回滚；PostgreSQL migration、跨团队拒绝、Worker 重启恢复和外部操作对账可验证；WeKnora 测试 space 可完成 Git path/metadata/read-back 验证；Workbench package 可完成安装、重启、enabled/UI read-back；DSH/Harness、SkillHub、TeamLab 尚未确认的能力都有 owner、日期、blocker 和人工 fallback。
+
+Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记录固定 DSH commit/profile、package digest、fresh-profile 安装、重启、load report、功能 smoke、disable/uninstall 和 rollback 的实际结果；若目标环境不可用，必须以 `blocked` 或 `fallback` 完成证据记录，并填写 owner、日期、原因和下一步。未达到上述条件不得进入 P1 的正式 Plugin 依赖或将 Plugin 契约侦察标记为完成。
 
 ## 3. P1：双资产 MVP 闭环
 
@@ -80,6 +84,9 @@
 
 只有在两个以上知识域或 Skill 稳定使用、出现第二 provider、人工状态查询成为瓶颈、需要集中权限/审计，或模块化单体无法接受地测试发布时，才评估 Console/Gateway/adapter、Plugin catalog/runtime、签名事件和低风险 MCP。
 
+P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能力面、Bundle 安装步骤和证据模板以[DSH Plugin 开发与安装契约验证](../验证/05-DSH%20Plugin开发与安装契约验证.md)为准；每个增量必须在目标 DSH commit/profile 上重新打 Bundle、计算 digest、安装到 fresh profile、重启、读取 boot/Node/Client load report，再做脱敏功能 E2E。Host-only、Client-only、Mixed bridge、trace aggregation 和生产候选分别形成 Go/No-Go 证据；未确认的 package 字段、Cordis patch、session trace service、Host→Client bridge 或 UI slot 不得进入正式业务 Plugin。
+
+
 ### Plugin 交付
 
 - Plugin catalog 和最小 manifest/tool contract；
@@ -122,6 +129,7 @@
 | V-23 | Harness 能力验证（P3） | Provider/discovery/load 和反馈引用有可重复证据 |
 | V-24 | 分发 contract | SkillHub/TeamLab/管理员路径中，MR、固定版本、目标交接、实际读回、回滚和 fallback 可验证 |
 | V-25 | Agent Manifest 复用（后续） | 依赖 Skill/知识可追踪，不能绕过审批；不要求首期实现 |
+| V-26 | Plugin Bundle 开发与安装门禁 | 每个阶段都完成固定版本的 build/package/digest/fresh-profile install/restart/load-report/readback/功能 E2E，并可 disable/uninstall/rollback；未确认契约不得进入正式 Plugin |
 
 详细平台实验见[验证材料](../验证/README.md)。
 

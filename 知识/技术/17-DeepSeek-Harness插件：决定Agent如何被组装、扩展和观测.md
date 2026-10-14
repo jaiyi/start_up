@@ -77,7 +77,7 @@ Cordis 加载它时调用 `apply(ctx)`，你在里面注册你想贡献的一切
 
 **② 上下文（ctx）是服务的容器。**
 
-每个服务占一个稳定的 `ctx.<key>`，比如 `ctx.tools`（工具注册表）、`ctx.llm`（模型流）、`ctx.sessions`（会话）。其他插件通过 key 查找服务，**不 import 具体实现**——所以工具插件和界面插件互不认识，却能协作。
+每个服务占一个稳定的 `ctx.<key>`，比如官方示例中常见的工具服务（具体名称、会话服务和其他 key 必须以目标 DSH 版本类型/README 为准）。其他插件通过 key 查找服务，**不 import 具体实现**——所以工具插件和界面插件互不认识，却能协作。
 
 **③ 通过 `inject` 声明依赖。**
 
@@ -527,12 +527,15 @@ dsh mcp/skill 插件   -- 接入与知识装载（零代码或低代码）
 
 ## 14. 后续要验证的问题
 
-1. 照教程第 1→7 章走一遍，验证本文第 5 节的代码在当前 master 上仍然可运行；
-2. 自写一个最小观测插件（监听 `tools/result` 聚合统计），对比 `@loongsuite/dsh-plugin` 的实现差距——作为团队遥测回填管道的练手；
-3. base profile 的 `cordis.patch.yml` 逐项注释：一份"真实 agent 零件清单"的翻译，可作为团队内训材料；
-4. 动态插件的审批流程在企业多人环境如何治理（审批人是谁、未来版本授权的边界）；
-5. 插件市场（awesome-dsh-plugin.com）的安装、更新、卸载在私有化环境的可行路径——与 SkillHub registry 的收编方案对照；
-6. §13 四件套拼装最小验证：tasks 表 + task_transitions 约束表 + MCP server + 观察插件血缘回填，用一个两状态任务（pending → done）跑通端到端，再逐步加 review 状态与 SLA 字段。
+正式 Plugin 开发不再只以教程跑通作为验收，而采用官方证据优先、分阶段打包安装的门禁：
+
+1. 固定目标 DSH commit/tag、Node、包管理器、OS、profile 和 fresh profile；读取官方 development、Cordis API/tutorial、Bundle、Client modules/resources/slots、插件 fixture、Loader、类型声明和 E2E 测试；
+2. 逐项确认 `package.json` identity/exports、Node/Client entry、`dsh.bundle.patch`、`dsh.client.platform`、`cordis.patch.yml` 的真实结构、dependencies、profile compatibility、digest 和安装/卸载/回滚行为；
+3. 先做 Host-only，再做 Client-only、Mixed Host→Client bridge，最后接 session trace/trajectory；每层都执行 `build → package → digest → fresh-profile install → restart → load report/readback → functional E2E → disable/uninstall/rollback`；
+4. Session trace、UI slot、bridge 和服务名只采用目标版本的源码/类型/README/实际读回证据；不能把 `ctx.trace`、`ctx.session`、候选 slot 或社区示例当成正式 API；
+5. 社区 Creator/Builder Skill 可用于生成目录、检查清单和作者提示，但不具备官方契约权威，不能替代类型检查、CI、安装测试、权限审查和回滚；
+6. 最小观测插件和 §13 四件套验证要使用脱敏 fixture，测试空/乱序/重复/缺 token/缺结束时间/慢步骤/断连/权限拒绝和敏感字段脱敏；
+7. 只有插件声明的能力面对应证据齐全，才允许进入正式 Workbench Plugin 或业务 Plugin：Host-only 需通过 Host entry、权限、health、load report、功能 E2E 和生命周期；Client-only 需额外通过 Client entry、slot/mount 和 UI read-back；Mixed 需额外通过官方 bridge/store、断连和重启恢复；Trace 需额外通过真实 trace service、脱敏聚合和异常路径。对未声明或不适用的能力记录 `N/A` 及原因，不要求伪造证据；每个能力面仍必须通过 §5 的详细门禁。
 
 ---
 
