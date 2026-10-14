@@ -4,7 +4,7 @@
 
 ## 1. 验证目的
 
-团队知识/Skill 工作台负责创作、测试、审核和发布；DeepSeek Harness 负责消费已发布资产的会话运行。因此需要单独验证：
+团队知识/Skill 工作台以 `team-knowledge-workbench` 作为可复用的 DSH Desktop Workbench Plugin，负责创作、测试、审核和发布；每个团队的 `team-knowledge-asset`、Git、WeKnora space 和治理策略独立。DeepSeek Harness 负责消费已发布资产的会话运行。因此需要单独验证：
 
 ```text
 approved release
@@ -22,7 +22,10 @@ approved release
 
 | 能力 | 当前结论 | 证据边界 |
 |---|---|---|
-| Web UI | 官方指南描述 Model、Workspace、Session 和 Agent 任务流程 | 证明 Harness 有会话工作台，不证明本项目已集成 |
+| DSH Desktop Workbench Host | dsh-desktop 提供 Workbench server/client 注册、canonical repository identity、market/catalog 安装、重启、启停和宿主 state | 证明插件承载和本地安装机制，不证明共享 Team Knowledge backend 或资产治理 |
+| Workbench Session ownership | `desktopWorkbenchOwnership` 提供只读 Session binding metadata | 不是授权系统；Team Knowledge 必须执行自己的身份、team/asset-space ACL |
+| Workbench host security | Electron main/Harness 隔离进程、Renderer sandbox/context isolation、窄 preload IPC | 插件不能通过 DOM/preload 扩权；worker 不使用 launch token 作为通用 API credential |
+| Workbench market vs asset | Workbench package 可被多个团队安装；团队分别绑定 team-knowledge-asset | 安装/启用不等于 Git approved、WeKnora indexed、SkillHub released 或 Harness loaded |
 | Workspace/Session | Agent 在会话中读写 workspace、运行命令、维护计划并请求权限批准 | 属于 Harness runtime |
 | Plugin | 官方插件以 TypeScript 模块和 `apply(ctx)` 扩展宿主能力 | 证明扩展模型，不证明目标 SkillHub loader 约定 |
 | Skill Provider | 本地 Memory Evolution 设计使用 provider 注册正式 Skill，候选 Skill 需先评估和批准 | 属于本地实现/设计事实，需与目标发行版区分 |
@@ -66,8 +69,11 @@ compatible_targets: []
 - 不把 Harness 的运行结果猜测为发布成功；
 - 不复制完整 session/run/tool-call/receipt/outbox/reconciliation 数据。
 
-## 4. 验证矩阵
+### DSH-09：身份、服务身份与 PostgreSQL 交接状态
 
+使用 DSH Desktop 认证上下文进入 Workbench，验证后端能将已验证的 DSH subject 映射为 `principal_id`、team membership、role 和 `asset_space_id`；客户端伪造 team/space、owner 或 approver 必须被拒绝并审计。验证 PostgreSQL 中的 session、draft revision、approval、operation/job、outbox、handoff 和 reconciliation 能关联 `requested_by`、`approved_by`、`released_by`、`executed_by`、`service_identity_id`、source commit 和 package digest。TeamLab、SkillHub 或管理员 fallback 的实际读回必须保持 `released`、`handoff_verified` 和 `loaded` 的状态区分；数据库故障、Worker 重启或 provider 半成功只能进入 `unknown/degraded/reconciling`，不能伪造成功。
+
+**通过条件：**DSH launch token、用户登录 token 和组件服务凭据不被转发为通用 API credential；跨团队读取和提交被拒绝；重复 job 可安全恢复；外部状态能够读回或进入人工对账。
 | ID | 实验 | 预期证据 | 状态 |
 |---|---|---|---|
 | DSH-01 | 发布包按固定 digest 查询 | Provider 返回匹配 package 或明确 not found | 待目标环境验证 |

@@ -28,6 +28,7 @@
 - [平台与 Provider 能力验证](./01-平台与Provider能力验证.md)：Git、WeKnora、DSH、SkillHub/TeamAI 分发、Plugin/tool loader、MCP 和安全实验
 - [DeepSeek Bot 能力评估](./02-DeepSeek-Bot能力评估.md)：Bot/Group/Memory 的源码事实和可选 PoC
 - [DeepSeek Harness 能力验证](./03-DeepSeek%20Harness能力验证.md)：官方 Web UI、Workspace、Session、Plugin/Skill Provider 和发布交接的能力边界
+- [DSH Desktop Workbench 落地与多团队部署验证](./04-DSH%20Desktop%20Workbench落地与多团队部署验证.md)：Workbench Plugin 市场、团队资产隔离、腾讯云非生产部署和 Git↔WeKnora 结构映射
 
 ## 与方案的关系
 

@@ -17,10 +17,13 @@
 |---|---|---|
 | Git branch/commit/MR/CI | A/B | 幂等、受保护分支、旧 SHA、Webhook 重放 |
 | WeKnora 查询/摄取/检索 | A/B | ACL、来源/版本、重复、索引失败和旧版本 |
-| DSH 入口/插件 | B | 目标版本 UI/API 扩展、生命周期和身份传递 |
+| DSH Desktop Workbench package/market | B | `team-knowledge-workbench` 的 package layout、canonical repository identity、catalog/install/restart、enabled/UI read-back、卸载/回滚和市场准入；市场安装不等于资产发布 |
+| 多团队 Workbench 安装 | B | 两个团队安装同一 Workbench 后的 team/asset-space binding、Git/WeKnora/session/ACL/审计隔离和 cross-team deny |
+| 腾讯云 DSH/SkillHub/TeamLab 非生产部署 | B/C | 目标版本制品、网络/TLS、认证、健康检查、持久化、备份恢复、升级/回滚；未确认则管理员/fake provider fallback |
 | Plugin/tool manifest and registry | B/C | 工具注册、权限、安装/启停、health、兼容性和回滚 |
 | DSH Skill loader/profile | B | 固定 digest 装载、权限过滤、装载读回和回滚 |
-| TeamAI CLI/repository/hooks/local injection | B/C | 目标版本 init/pull/push、MR、格式兼容、版本锁、灰度、安装读回、删除清理、回滚和内网/外网边界 |
+| TeamLab 分发/协作 adapter | B/C | 目标 API/版本、service identity、固定 package/digest、审批、目标交接、读回、撤回和回滚；未确认则管理员 fallback |
+| TeamAI CLI/repository/hooks/local injection | B/C（可选候选） | 仅在实际需要时验证 init/pull/push、MR、格式兼容、版本锁、灰度、安装读回、删除清理、回滚和内外网边界 |
 | SkillHub/TeamAI distribution comparison | B/C | 固定版本、digest、profile、目标安装、审计、撤回和 fallback 的可替代性 |
 | SkillHub 状态读取 | B | 版本、digest、owner 和状态是否可读 |
 | SkillHub 上传/晋升 | C | API、审批、审计、回滚和 webhook；未确认则管理员操作 |
@@ -35,13 +38,25 @@
 
 使用 fake provider 覆盖 branch、batch commit、MR、pipeline 和状态读取；再在隔离项目验证 protected main、expected base/head SHA、Webhook 签名、重复和乱序事件。
 
-**通过条件：**重复请求不重复创建资源；所有动作能关联 actor、job、commit、MR 和 pipeline；旧 head SHA 合并被拒绝。
+**通过条件：**重复请求不重复创建资源；所有动作能关联 `principal_id`/`service_identity_id`、job、commit、MR 和 pipeline；旧 head SHA 合并被拒绝。
 
-### V-02：WeKnora 索引和检索
+### V-02：WeKnora 索引、检索和 Git 逻辑目录映射
 
-准备测试知识库和两个 workspace，上传带 canonical key、source commit、version、sensitivity 的脱敏文档，测试重复、ACL、hybrid search、旧版本、退役和索引失败。
+准备两个团队的独立测试 asset space 和知识库，上传带 canonical key、`repo_path`、domain/topic、source commit、version、sensitivity、ACL 的脱敏文档，测试首次 ingest、重复、增量更新、Git 路径移动/重命名、退役、ACL、hybrid search、旧版本和索引失败。
 
-**通过条件：**结果返回 document/version/source；跨 workspace 拒绝；索引失败不覆盖旧版本；`approved` 不被错误标成 `published`。
+**通过条件：**结果返回 document/version/source/repo_path；Git↔WeKnora 逻辑路径可双向追溯；跨 workspace/team 拒绝；索引失败不覆盖旧版本；移动和退役有 migration/alias/retired 记录；`approved` 不被错误标成 `published`。
+
+### V-02A：DSH Desktop Workbench 安装与多团队隔离
+
+构建真实的 `team-knowledge-workbench` server/client package，验证 canonical repository identity、构建产物、market/catalog 或内部受控安装、重启、client/server 注册、enabled、UI read-back、ownership metadata、卸载和回滚。然后让 Team A 与 Team B 安装同一版本，分别绑定独立 Git repository、WeKnora space、ACL 和 steward，尝试跨团队读取 Creation Session、source ref、draft、发布 job 和索引。
+
+**通过条件：**安装版本和 digest 可读回；安装失败可诊断并回滚；两个团队可复用同一 Workbench 但资产、权限、会话、审计和发布状态完全隔离；`desktopWorkbenchOwnership` 只作为只读 Session metadata，不能替代授权；Workbench installed 不被报告为 asset published。
+
+### V-02B：腾讯云非生产 DSH/SkillHub/TeamLab 部署 readiness
+
+在腾讯云以脱敏数据部署 Team Knowledge Backend、worker、PostgreSQL、对象存储、现有 WeKnora 独立测试 space，以及目标版本可确认时的 DSH/Harness、SkillHub 和 TeamLab 服务或 provider。记录制品、版本、网络/TLS、DSH auth context 映射、principal/team/role、service identity、健康检查、日志脱敏、备份恢复、升级、回滚和 owner。若 DSH、SkillHub 或 TeamLab 没有可确认部署制品/API，只记录 blocker 并切换管理员/fake provider fallback。
+
+**通过条件：**“服务可访问”“安装成功”“资产发布”“WeKnora indexed”“SkillHub/TeamLab released”“Harness loaded”分别有独立证据；worker 不复用 DSH launch token 或用户 token 作为 API credential；失败、未知和半成功状态可对账。
 
 ### V-03：DSH 入口和 Skill loader
 
@@ -49,11 +64,11 @@
 
 **通过条件：**实际装载版本可读回；Skill 声明的 effects 不能突破 profile/tool policy；失败则使用管理员安装或外部 Web/API 向导。
 
-### V-04：SkillHub/TeamAI 分发能力
+### V-04：SkillHub/TeamLab/TeamAI 分发能力
 
-固定目标 SkillHub、TeamAI、Git 服务、dsh 和 profile 版本，分别测试 package/仓库注册、metadata、`init`、变更分支 `push`、`pull`、MR/CI、Hook 生命周期、格式兼容、版本锁、beta/stable、目标安装、文件清单/installed revision 读回、删除清理、revoke、audit、Webhook/同步状态、断网恢复和回滚。
+固定目标 SkillHub、TeamLab、可选 TeamAI、Git 服务、DSH 和 profile 版本，分别测试 package/仓库注册、metadata、审批、目标安装、文件清单/installed revision 读回、删除清理、revoke、audit、Webhook/同步状态、断网恢复和回滚。对 TeamAI 额外验证 `init`、变更分支 `push`、`pull`、Hook 生命周期和格式兼容；对 TeamLab 额外验证 service identity、目标 workspace/协作空间绑定和实际 release read-back。
 
-**通过条件：**未审核内容不能自动生效；至少一种路径能提供固定版本、digest、目标安装和实际读回；TeamAI/SkillHub 不可用时管理员 fallback 可运行；重复 pull/push 不产生重复资源；无 secret、敏感正文或生产凭据跨安全域同步；运行能关联实际安装 revision。TeamAI 的 Agent Manifest 复用另行验证，不得绕过 Skill/知识/权限门禁。
+**通过条件：**未审核内容不能自动生效；至少一种路径能提供固定版本、digest、目标安装和实际读回；SkillHub/TeamLab/TeamAI 不可用时管理员 fallback 可运行；重复操作不产生重复资源；无 secret、敏感正文或生产凭据跨安全域同步；运行能关联实际安装 revision。TeamAI 的 Agent Manifest 复用另行验证，不得绕过 Skill/知识/权限门禁。
 
 ### V-05：Skill contract and regression
 

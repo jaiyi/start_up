@@ -10,7 +10,7 @@
 
 ## 2. 从用户描述到 Workflow Draft
 
-用户从工作台点击“从工作流创建 Skill”，平台先创建一个独立的 `Skill Creation Session`、`Workflow Draft` 和 `draft_revision_id`。用户可以直接描述工作流、粘贴 SOP/模板、上传历史产物，或从 Feedback Candidate fork 出新的修订会话。Agent 按阶段追问目标和触发、输入、步骤和判断、例外和风险、输出和成功标准。每个候选答案都要标明来源、假设和待确认状态。
+用户从工作台点击“从工作流创建 Skill”，平台先创建一个独立的 `Skill Creation Session`、`Workflow Draft` 和 `draft_revision_id`，并绑定当前团队的 `team_id`、`asset_space_id`、Git repository 和知识依赖范围。用户可以直接描述工作流、粘贴 SOP/模板、上传历史产物，或从 Feedback Candidate fork 出新的修订会话。Agent 按阶段追问目标和触发、输入、步骤和判断、例外和风险、输出和成功标准。每个候选答案都要标明来源、假设和待确认状态。
 
 ```yaml
 id: <workflow-id>
@@ -113,9 +113,11 @@ Skill Draft
   → owner/reviewer 审核
 ```
 
-平台展示变更摘要、文件差异、测试和门禁、审核意见、commit/MR 链接以及失败原因。模型不能直接 push protected `main`，也不能用 Hook 绕过审核。
+平台展示变更摘要、文件差异、测试和门禁、审核意见、commit/MR 链接以及失败原因。默认由 Workbench Git service identity 创建分支、commit 和 MR；`created_by`/`submitted_by`/`approved_by` 仍记录真实 DSH 用户及责任角色。模型不能直接 push protected `main`，也不能用 Hook 绕过审核。
 
 ## 7. 发布到 SkillHub 与下游交接
+
+Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_id`、`asset_space_id`、source repository、approved Git revision、package digest、`skill_owner`、`approved_by`、`released_by`、`executed_by` 和 release read-back。Workbench Plugin 是否已经安装在 DSH Desktop，不改变 Skill 的发布状态：
 
 ```text
 approved Git revision
@@ -182,6 +184,7 @@ draft → tested → review → approved → released → deprecated/rollback
 - 通用可视化 DAG 编排器；
 - 自动从任意聊天批量生成 stable Skill；
 - 未经审批的生产工具写入；
-- 开放 Skill marketplace；
+- 独立业务 Skill 分发市场（Skill marketplace）；
+- 独立业务 Plugin Marketplace；
 - 复杂跨 Skill 动态规划；
 - 把 SkillHub 当成测试、权限和运行遥测的唯一系统。

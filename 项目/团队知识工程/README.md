@@ -4,9 +4,25 @@
 
 ## 产品定位
 
-本项目是**知识与 Skill 的创作发布工作台**，不是通用任务运行器，也不是 DeepSeek Harness 的替代品。
+本项目是**知识与 Skill 的创作发布工作台**，以可进入 DSH Desktop Workbench 市场的 `team-knowledge-workbench` 作为产品交付形态；它不是通用任务运行器，也不是 DeepSeek Harness 的替代品。
 
-用户把材料或工作想法带进来，Agent 负责梳理、追问和起草，用户负责讨论、校正和确认；平台把确认后的内容提交到正式系统，并展示发布证据和下游交接状态。
+`team-knowledge-workbench` 与 `team-knowledge-asset` 是两个分离的边界：前者是可被多个团队安装的 Workbench 产品/插件包，后者是某个团队自己的知识、Skill、Git、WeKnora 空间、权限和治理资产域。同一个 Workbench 安装不能跨团队共享可变资产或授权。
+
+## 产品边界与部署形态
+
+```text
+DSH Desktop / Workbench Market
+  └─ team-knowledge-workbench
+       └─ 多个团队分别安装和配置
+            ├─ team-knowledge-asset-A → Git-A + WeKnora space-A
+            └─ team-knowledge-asset-B → Git-B + WeKnora space-B
+```
+
+Workbench 的市场安装、版本和重启状态不等于团队资产发布。每个团队必须独立绑定 `team_id`、`asset_space_id`、资产 Git 仓库、WeKnora space、steward、review policy 和下游分发目标。DSH Desktop 的本地 state、Session ownership 和 market install record 不是共享团队控制面，也不是正式知识/Skill 的权威来源。
+
+P0 需要在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。部署对象包括 Team Knowledge Backend、worker、PostgreSQL、对象存储和现有 WeKnora 的独立测试空间；DSH/Harness、SkillHub 和 TeamLab 若目标版本具备可部署制品则纳入部署验证，否则明确保留管理员/fake provider fallback，不把“可访问”写成“已集成”。Workbench 当前复用 DSH Desktop 的认证上下文，不以公司统一身份系统接入作为 P0 前提；后端仍必须验证身份、团队/asset-space ACL 和服务身份。Git、WeKnora、SkillHub、TeamLab 可以复用内部组件接入配置，但不能共享团队资产、可变草稿或授权。
+
+身份与执行责任：当前用户通过 DSH Desktop 认证上下文进入 Workbench，后端映射 `principal_id`、团队成员和角色并重新校验 asset-space ACL。真实用户承担确认、审核和发布责任；Workbench Git bot、WeKnora adapter、SkillHub/TeamLab publisher 和 Worker 负责技术执行，分别记录 `approved_by`、`released_by`、`executed_by` 和 service identity。Git、WeKnora、SkillHub、TeamLab 可复用受控内部接入，但不共用用户 Token、团队资产授权或审计上下文。
 
 ```text
 资料入口：会议纪要/资料 → 梳理讨论 → 知识草稿 → Git/MR/CI → WeKnora
@@ -94,7 +110,7 @@ Harness session / 业务系统
 8. 确认后提交 Git、发布 SkillHub；
 9. 生成交接记录，供目标 DeepSeek Harness 环境验证发现和加载。
 
-首期不做本项目自己的任务执行入口、通用 Runtime、完整 Session/Run 控制面、运行时工具调用追踪、开放 Plugin 市场、多租户和高风险生产写入。
+首期不做本项目自己的任务执行入口、通用 Runtime、完整 Session/Run 控制面、运行时工具调用追踪、独立业务 Plugin Marketplace 或通用 SaaS 多租户控制面；但 P0 必须完成非生产部署验证，P1 必须验证至少两个团队/asset space 安装同一 Workbench 后的隔离。Workbench 多团队安装不等于建设一个共享可变资产的 SaaS 控制面。
 
 ## 文档阅读顺序
 
