@@ -14,14 +14,26 @@
 
 ## 使用规则
 
-每个验证项记录：目标版本、部署环境、测试样本、运行命令、预期结果、实际结果、失败路径、证据位置、owner、日期和下一步。
+每个验证项记录：目标版本、部署环境、测试样本、运行命令、预期结果、实际结果、失败路径、证据位置、owner、日期和下一步。验证证据还必须绑定 `experiment_id`、不可变 commit 或制品 digest、fixture digest、实际 read-back、复核人和证据自身 digest；只有完整证据才能进入 `confirmed` 或 Go 判断。
 
 验证结论分为：
 
-- **已确认**：有源码、官方 API 或可重复运行证据；
+- **已确认**：有源码、官方 API 或可重复运行证据，并明确目标版本、环境和适用范围；
 - **待验证**：架构上可行，但目标版本或部署环境未证明；
-- **人工 fallback**：自动化接口未确认，先由管理员操作；
+- **人工 fallback**：自动化接口未确认，先由管理员操作；必须记录操作人、原因、source commit、package digest、target、profile 和审计；
+- **契约已验证**：fake/provider contract、状态机、权限、幂等、read-back 和失败路径已通过，但不代表真实 Provider 已接通；
+- **真实已验证**：目标版本、目标环境和真实 Provider 完成操作及最终状态 read-back；
+- **阻塞**：存在未解决问题，当前不能进入对应阶段；
 - **不建议依赖**：当前证据不足或风险不适合首期。
+
+Provider 另记录：
+
+```text
+provider_mode: fake | admin | real
+integration_status: pending | blocked | fallback_only | contract_verified | real_verified | deprecated
+```
+
+`fallback_only`、`contract_verified` 和 `real_verified` 不能混用。fake/admin 结果不得对外表述为真实 Provider release、distribution、installation 或 loaded。没有完整证据的项目只能保持 `pending`、`fallback_only`、`contract_verified` 或 `blocked`，不能标为生产就绪。
 
 ## 材料
 

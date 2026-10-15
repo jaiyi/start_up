@@ -9,7 +9,24 @@
 - **C：前置条件未确认，只做只读、fake provider 或人工 fallback。**
 - **D：当前不建议作为正式依赖。**
 
-技术可行不等于已经集成。每个 B/C 项必须产生版本、环境、日期和结论。
+技术可行不等于已经集成。每个 B/C 项必须产生版本、环境、日期和结论，并记录统一的 Provider 验证状态：
+
+| 状态 | 含义 |
+|---|---|
+| `pending` | 尚未完成验证 |
+| `blocked` | 存在阻塞问题，当前不可使用 |
+| `fallback_only` | 只能通过 fake 或 admin fallback 使用 |
+| `contract_verified` | 契约、状态机和失败路径已验证，但不代表真实 Provider 接通 |
+| `real_verified` | 目标版本、目标环境和真实 Provider read-back 已验证 |
+| `deprecated` | 不再作为推荐依赖 |
+
+同时记录：
+
+```text
+provider_mode: fake | admin | real
+```
+
+fake/admin 结果不得报告为真实 Provider 的 `released`、`distributed`、`installed` 或 `loaded`。只有 `provider_mode: real` 且 `integration_status: real_verified`，才能作为真实 Provider 路径的证据；只有完整的 experiment/evidence manifest 才能用于 Go 判断。
 
 ## 2. 当前能力矩阵
 
@@ -76,13 +93,13 @@
 
 固定一个已合并的 Skill commit，执行 `package → digest → SkillHub release → release/digest read-back`，验证 metadata、审批、immutable digest、重复 release、撤回、断网恢复、回滚和审计。SkillHub read-back 缺失或 digest 不一致时，不得进入 TeamAI。
 
-**通过条件：**未审核内容不能自动生效；SkillHub 返回的 release/version/digest 与本地 package 一致；重复操作不产生重复 release；release unknown 可对账；旧 digest 可回滚。
+**通过条件：**未审核内容不能自动生效；SkillHub 返回的 release/version/digest 与本地 package 一致；重复操作不产生重复 release；release unknown 可对账；旧 digest 可回滚。该结果只有在目标版本、真实 Provider、目标环境和最终状态 read-back 均有证据时，才能标记 `integration_status: real_verified`；fake/admin 只能标记 `fallback_only` 或 `contract_verified`，不能作为真实 SkillHub 接通证据。
 
 ### V-04A：SkillHub pinned digest → TeamAI → DSH
 
 固定已读回的 SkillHub `pinned_digest`，测试 TeamAI distribution request、目标 workspace、`init`、变更分支 `push`、`pull`、Hook 生命周期、格式兼容、安装/删除清理、installed revision/file list/digest read-back，再测试 DSH handoff、profile 和 loaded digest read-back。
 
-**通过条件：**TeamAI 不接受 `latest` 或未审核版本；TeamAI 实际 digest 与 SkillHub pinned digest 一致；DSH loaded digest/profile 与 handoff 一致；digest 漂移、安装半成功和 loaded unknown 均阻断运行并进入对账；TeamAI/DSH 不可用时管理员 fallback 可按同一个 digest 运行。
+**通过条件：**TeamAI 不接受 `latest` 或未审核版本；TeamAI 实际 digest 与 SkillHub pinned digest 一致；DSH loaded digest/profile 与 handoff 一致；digest 漂移、安装半成功和 loaded unknown 均阻断运行并进入对账；TeamAI/DSH 不可用时管理员 fallback 可按同一个 digest 运行。真实 Provider 路径必须记录 `provider_mode: real`、目标版本、目标环境和最终 read-back；管理员/fake 路径只能标记 `fallback_only` 或 `contract_verified`，不得报告为真实分发或加载成功。
 
 ### V-05：Skill contract and regression
 

@@ -66,17 +66,29 @@ Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记
 - 重复请求不重复创建 MR、release 或 index；
 - CI 失败、契约冲突或权限超界不能发布；
 - SkillHub、WeKnora 和 provider 超时有清晰状态和人工接管；
-- 至少有一项真实或脱敏回放场景完成双资产生产线。
+- 至少有一项真实或脱敏回放场景完成双资产生产线；
+- P1 只允许将真实 Provider 标记为 `real_verified`，fake/admin 路径必须标记 `fallback_only` 或 `contract_verified`，不能将 fallback 结果报告为真实 release、distribution 或 loaded；
+- P1 必须能记录三层指标的最小字段：可靠性指标完整记录，采用指标可按有效调用/尝试/用户去重，价值指标没有业务结果时明确为 `unknown`。
+
+P1 退出不等于 Stable。P1 只能说明双资产 MVP 在受控环境可运行；进入 Pilot Beta 还需要一个明确低风险真实场景、业务结果 Owner、人工基线、目标指标和反馈回流证据。
 
 ## 4. P2：发布交接与反馈闭环
 
 ### 交付
 
-发布版本、digest、handoff target、交接读回、最小消费事件、调用/人数/成功聚合、反馈引用、知识复核队列、Skill 回归队列、每周复核、每月质量报告、stale/纠正率/失败率提醒、备份 owner、退役和回滚流程。
+发布版本、digest、handoff target、交接读回、最小消费事件、三层指标聚合、反馈引用、知识复核队列、Skill 回归队列、每周复核、每月质量报告、stale/纠正率/失败率提醒、备份 owner、退役和回滚流程。
 
-### 退出
+指标按以下三层逐步实现：
 
-反馈不直接改正式资产；连续 4 周有真实消费或脱敏回放和复核记录，能够查看每个 Skill 的调用次数、活跃用户数、技术/契约/业务成功次数、Badcase 报告数和确认数；至少一个质量指标改善；知识问题能进入知识 MR，Skill 问题能进入 Skill 回归；未知交接或消费状态可人工对账。
+- **价值指标**：业务任务完成率、首次成功率、人工返工率、平均处理时长、业务错误率、已确认 Badcase 率和目标业务指标改善；
+- **采用指标**：有效调用次数、执行尝试次数、活跃用户数、发布版本消费率、版本复用率、反馈覆盖率和资产维护及时率；
+- **平台可靠性指标**：merge-to-index 时延、package build 成功率、Provider read-back 成功率、outbox backlog、retry rate、unknown 数量/持续时间、digest mismatch、回滚成功率和 provider error rate。
+
+### P2 退出
+
+反馈不直接改正式资产；连续 4 周有真实消费或脱敏回放和复核记录，能够按实际 Skill version/digest 查看采用指标，并对技术/契约/业务结果分别归因；至少一个质量或价值指标改善；知识问题能进入知识 MR，Skill 问题能进入 Skill 回归；未知交接或消费状态可人工对账；低反馈覆盖率时不把 Badcase 比例解释为真实错误率。
+
+P2 的指标闭环不等于 Stable。只有在真实 Provider read-back、价值 Owner 确认、关键可靠性阈值、安全治理、SLA、回滚和维护容量均满足时，才可将声明范围内的资产标记为 Stable。
 
 ## 5. P3：SkillHub → TeamAI → DeepSeek Harness 消费能力验证
 
@@ -148,3 +160,11 @@ Agent 不拥有生产凭据，不直接 merge `main`，不执行任意 shell/路
 ## 10. Go/No-Go
 
 以下任一项不通过，就保持当前阶段：双资产权限隔离、审计完整性、契约和回归、知识/Skill 版本可追踪、发布目标和交接读回、未知状态处理、旧版本保留、回滚、人工接管、secret 扫描、非程序员可用性或真实业务价值。P3 另需 Harness discovery/load 和反馈引用证据；P4 另需 Plugin 权限、安装、健康、兼容性和回滚证据。
+
+成熟度判断必须区分：
+
+- `Contract Beta`：契约、权限、状态机、幂等、失败路径和可靠性基础证据通过；允许 fake/admin fallback，不代表真实 Provider 或业务价值已经验证；
+- `Pilot Beta`：一个明确低风险真实场景有真实用户、业务结果 Owner、人工基线、采用指标和至少一个价值指标，fallback 与真实 Provider 状态清晰分开；
+- `Stable`：在声明的 asset type、asset space、provider mode、target、profile 和 package digest 范围内，三层指标、真实 Provider read-back、价值结果、安全治理、SLA、恢复和维护容量均达标。
+
+Go 决策必须绑定 evidence manifest。没有目标版本、环境、不可变 commit/制品 digest、fixture digest、实际命令和退出码、最终 read-back、失败/回滚结果、执行人、复核人及证据自身 digest 的项目，只能保持 `pending`、`fallback_only`、`contract_verified` 或 `blocked`，不得标记为 `real_verified`、Stable 或生产就绪。
