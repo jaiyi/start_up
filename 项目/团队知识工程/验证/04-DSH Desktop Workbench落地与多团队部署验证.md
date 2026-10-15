@@ -150,20 +150,19 @@ service reachable
 
 ## 7. 知识 Git 目录与 WeKnora 结构验证
 
-推荐每个 `team-knowledge-asset` 使用如下结构：
+推荐每个 `team-knowledge-asset` 使用如下 canonical repository 结构，路径相对于绑定的 `asset_repository` root：
 
 ```text
-team-knowledge-asset/
+<asset_repository root>/
 ├── README.md
 ├── taxonomy/v1.yaml
 ├── knowledge/<domain>/<topic>/<knowledge-slug>/
-│   ├── KNOWLEDGE.md
-│   ├── metadata.yaml
-│   ├── sources.yaml
-│   └── CHANGELOG.md
+├── skills/<domain>/<name>/
 ├── profiles/
 └── CODEOWNERS
 ```
+
+P1 默认同一个 repository 同时承载 Knowledge 和 Skill；如拆仓，必须通过 `asset_repository_id`、`team_id`、`asset_space_id`、`repository_kind`、repository identity、protected ref 和 ACL 显式绑定。
 
 Workbench 创建知识时必须展示目标 `repo_path`，并校验 taxonomy、domain/topic、slug、重复 canonical key、owner、sensitivity 和 CODEOWNERS。`KNOWLEDGE.md` 保存可读正文，`metadata.yaml` 保存知识 ID、版本、状态、owner、taxonomy、敏感级别、来源 commit 和 WeKnora space，`sources.yaml` 保存受控来源引用。原始敏感材料不直接进入 Git。
 

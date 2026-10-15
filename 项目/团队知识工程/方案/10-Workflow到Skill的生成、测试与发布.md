@@ -61,23 +61,28 @@ success_criteria:
 ### Skill 包内容
 
 ```text
-skill/
+skills/<domain>/<name>/
 ├── SKILL.md
 ├── skill.yaml
-├── schemas/
+├── contract/
 │   ├── input.schema.json
-│   └── output.schema.json
+│   ├── output.schema.json
+│   └── effects.yaml
 ├── scripts/
 │   └── <可选确定性脚本>
 ├── references/
 │   └── <模板、格式和示例>
-└── tests/
-    ├── golden/
-    ├── boundary/
-    ├── exception/
-    ├── regression/
-    └── security/
+├── tests/
+│   ├── golden/
+│   ├── boundary/
+│   ├── exception/
+│   ├── regression/
+│   └── security/
+├── dependencies.lock
+└── CHANGELOG.md
 ```
+
+以上路径相对于当前 `asset_repository` 的 repository root；`skills/<domain>/<name>/` 是 Git canonical source path，`contract/` 是源码中的规范契约目录。若 SkillHub 或 DSH loader 使用不同的外部布局，由 package builder 映射，并在 manifest 中记录 `asset_repository_id`、source repository、source path 和 approved merge commit，不在 Git 中并行维护 `schemas/` 和 `contract/` 两套 canonical 目录。
 
 `SKILL.md` 说明使用边界、输入输出、推荐步骤、知识引用、能力需求和失败处理；`skill.yaml` 记录 id、version、owner、风险等级、schema、知识依赖、effects/能力声明、兼容目标、测试集和发布策略。确定性处理优先放入脚本；脚本和资源必须经过依赖、secret、权限和安全检查。
 
@@ -101,7 +106,7 @@ skill/
 
 评测结果至少包括 contract、deterministic script、golden/regression、citation、output completeness、safety/permission 和 human review。评测失败时 Agent 可以提出修改，用户决定是否接受。
 
-## 6. 提交到 knowledge-assets Git
+## 6. 提交到 canonical asset repository Git
 
 ```text
 Skill Draft
@@ -117,12 +122,12 @@ Skill Draft
 
 ## 7. 发布到 SkillHub 与下游交接
 
-Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_id`、`asset_space_id`、source repository、approved Git revision、package digest、`skill_owner`、`approved_by`、`released_by`、`executed_by` 和 release read-back。Workbench Plugin 是否已经安装在 DSH Desktop，不改变 Skill 的发布状态：
+Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_id`、`asset_space_id`、`asset_repository_id`、`repository_identity`、`repo_path`、source repository、approved Git revision、package digest、`skill_owner`、`approved_by`、`released_by`、`executed_by` 和 release read-back。Workbench Plugin 是否已经安装在 DSH Desktop，不改变 Skill 的发布状态：
 
 ```text
 approved Git revision
+  → package root: skills/<domain>/<name>/
   → package
-  → immutable version/digest
   → SkillHub release request
   → SkillHub release/version/digest read-back
   → pinned digest
@@ -149,6 +154,8 @@ draft → tested → review → approved → released → deprecated/rollback
 - `loaded`：DSH profile 实际装载并读回相同 digest；
 - `deprecated`：不再推荐新会话消费；
 - `rollback`：固定回到已知可用 digest。
+
+Skill 的 `success_criteria` 应至少定义技术完成、契约成功和业务成功的判定方式；确认的 Badcase 必须能关联实际 version/digest，并可转为回归样例或新的 Creation Session。
 
 一次样例成功不能自动晋升，也不能把下游一次运行成功当成 stable 依据。是否可供指定 Harness profile 消费，要由发布和下游运行治理共同决定。
 

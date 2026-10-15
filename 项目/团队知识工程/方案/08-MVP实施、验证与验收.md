@@ -72,11 +72,11 @@ Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记
 
 ### 交付
 
-发布版本、digest、handoff target、交接读回、反馈引用、知识复核队列、Skill 回归队列、每周复核、每月质量报告、stale/纠正率/失败率提醒、备份 owner、退役和回滚流程。
+发布版本、digest、handoff target、交接读回、最小消费事件、调用/人数/成功聚合、反馈引用、知识复核队列、Skill 回归队列、每周复核、每月质量报告、stale/纠正率/失败率提醒、备份 owner、退役和回滚流程。
 
 ### 退出
 
-反馈不直接改正式资产；连续 4 周有真实消费或脱敏回放和复核记录；至少一个质量指标改善；知识问题能进入知识 MR，Skill 问题能进入 Skill 回归；未知交接状态可人工对账。
+反馈不直接改正式资产；连续 4 周有真实消费或脱敏回放和复核记录，能够查看每个 Skill 的调用次数、活跃用户数、技术/契约/业务成功次数、Badcase 报告数和确认数；至少一个质量指标改善；知识问题能进入知识 MR，Skill 问题能进入 Skill 回归；未知交接或消费状态可人工对账。
 
 ## 5. P3：SkillHub → TeamAI → DeepSeek Harness 消费能力验证
 
@@ -123,7 +123,7 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-13 | SkillHub pinned digest → TeamAI → DSH | TeamAI target/installed revision/file list/digest 与 pinned digest 一致；DSH handoff/load/profile read-back 可验证 |
 | V-14 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布 |
 | V-15 | 交接协议 | 下游 target、version、digest 和依赖可追踪 |
-| V-16 | 反馈分流 | 知识问题启动知识复核会话，Skill 问题启动 Skill 回归会话 |
+| V-16 | 反馈分流与 Badcase | 报告、确认、去重、受影响调用数和反馈覆盖率可统计；知识、Skill、分发和平台问题进入正确治理任务 |
 | V-17 | 身份与责任链 | DSH principal、team/role ACL、Git service identity、approved_by/released_by/executed_by 和跨团队拒绝可审计 |
 | V-18 | PostgreSQL 控制面 | migration、事务/乐观锁、幂等、备份恢复、Worker 重启和数据库故障的 unknown/degraded 状态可验证 |
 | V-19 | 安全审计 | 无 secret 泄露、越权和不可追踪写入 |
@@ -135,6 +135,7 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-25 | 分发 contract | SkillHub/TeamLab/管理员路径中，MR、固定版本、目标交接、实际读回、回滚和 fallback 可验证 |
 | V-26 | Agent Manifest 复用（后续） | 依赖 Skill/知识可追踪，不能绕过审批；不要求首期实现 |
 | V-27 | Plugin Bundle 开发与安装门禁 | 每个阶段都完成固定版本的 build/package/digest/fresh-profile install/restart/load-report/readback/功能 E2E，并可 disable/uninstall/rollback；未确认契约不得进入正式 Plugin |
+| V-28 | Skill 消费指标与隐私 | 按实际 Skill version/digest 统计调用次数、活跃用户、分层成功、unknown、Badcase 和反馈覆盖率；重复/重试去重、团队隔离、小样本保护、敏感数据不进入报表且可对账 |
 
 详细平台实验见[验证材料](../验证/README.md)。
 

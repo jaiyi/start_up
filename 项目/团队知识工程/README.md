@@ -103,6 +103,7 @@ Harness session / 业务系统
 - **Skill**：从工作流抽象出的可复用任务能力包。
 - **Release**：经 Git/CI/人工审核并带固定版本和 digest 的可交付资产。
 - **Feedback reference**：来自下游运行的结构化引用，不是本项目复制的完整运行记录。
+- **Consumption summary**：按团队、Skill/version/digest 聚合的调用次数、活跃用户数、分层成功次数和 Badcase；工作台只接收最小消费事件和反馈引用，不复制 Harness Runtime。
 
 ## 首个垂直切片
 
