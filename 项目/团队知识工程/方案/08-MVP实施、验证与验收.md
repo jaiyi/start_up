@@ -23,6 +23,8 @@ target_improvement: <待确认的目标改善>
 pilot_stop_conditions: <待确认的停止条件>
 ```
 
+试点输入卡还需附一页**用户任务观察记录**：第一受益者在现有文档、群聊或系统中如何找到答案；一周内重复问答、找不到/找错、等待领域负责人确认的具体样本；第一用户维护资料花费的时间；审核人当前处理纠错和过期内容的方式；每项记录来源、时间窗口和是否允许将脱敏片段用于试点。由受益者、贡献者和结果 Owner 分别确认，不能把竞品案例或产品设想当作本团队已验证需求。以既有人工流程的耗时/返工和可信答案样本建立基线；观察窗口、目标改善与停止条件由业务侧确定，不在方案中预填成果。
+
 Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持续更新以下 readiness matrix；每次状态变化都必须关联证据 manifest、责任人和复审日期：
 
 | Provider | 目标版本/环境 | provider_mode | integration_status | 本阶段必需证据 | 允许 fallback 的阶段 | 阻塞条件 | 回滚路径 |
@@ -50,14 +52,14 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 | N5 Provider 交接 | 外部 Provider 适配器和 read-back contract 可用 | 不改变 Git/WeKnora canonical source 和检索权威 | SkillHub → TeamAI（如启用）→ DSH pinned digest/read-back | 每个真实 Provider 节点重复 `build/package/digest/install/restart/load/read-back/rollback` |
 | N6 MVP 发布候选 | 双资产版本、ACL、旧版、指标和回滚证据齐全 | Knowledge 发布、消费和反馈闭环验收 | Skill package、digest、fallback/真实 release 和最小消费验收 | 发布候选 fresh-profile 安装、端到端 smoke、disable/uninstall/rollback |
 
-每个节点必须记录目标版本、环境、package/artifact digest、fixture digest、实际命令和退出码、read-back、失败路径、回滚结果、执行人、复核人和证据自身 digest。未完成节点性打包和安装测试的功能，不得进入下一个 MVP 节点；节点测试失败时可以保留已通过的旧版本，但不得把失败功能标记为已发布或已安装。
+每个节点必须记录目标版本、环境、package/artifact digest、fixture digest、实际命令和退出码、read-back、失败路径、回滚结果、执行人、复核人和证据自身 digest。未完成节点性打包和安装测试的功能，不得进入下一个 MVP 节点；节点测试失败时可以保留已通过的旧版本，但不得把失败功能标记为已发布或已安装。N0–N6 是能力验收节点，不与下述实施阶段编号一一对应：阶段 6 先验证 N4 中的 Knowledge 反馈和通用事件契约，阶段 7 产出 N3 Skill 制品后补验 N4 中的 Skill 最小消费；N4 双资产验收须在 N3 完成之后才能整体通过。
 
 
 ### 阶段 0：方案冻结与实施输入
 
 - **目标**：将产品边界转成可开发、可验收且不误解业务责任的实施基线。
 - **输入**：已批准方案、验证计划、Provider 能力现状、目标环境，以及待确认的试点场景、三类角色、人工基线、目标指标和停止条件。
-- **主要设计/开发项**：冻结只建设知识与 Skill 创作、测试、审核、发布和反馈控制面；明确不建设 Harness Runtime、通用任务运行器或完整业务状态机；统一术语和状态词典；建立风险登记表和依赖清单。
+- **主要设计/开发项**：冻结只建设知识与 Skill 创作、测试、审核、发布和反馈控制面；明确不建设 Harness Runtime、通用任务运行器或完整业务状态机；统一术语和状态词典；建立风险登记表和依赖清单；围绕试点输入卡中的一个目标团队和低风险场景观察受益者现有入口、贡献者的维护负担、审核人处理纠错/过期的路径，并标注已确认与待验证的用户假设；业务流程 Owner 还需明确专家/审核可用维护时间、替补与超载时的缩小/暂停决定人。如能招募其他团队，可作为扩样观察，不构成阶段 0 退出前置条件。
 - **输出**：实施基线、试点输入卡、范围清单、状态词典、风险登记表、任务拆分表和阶段验收清单。
 - **测试**：方案结构检查；状态/边界正反例评审；缺少试点输入时的阻塞测试；敏感数据和生产凭据扫描。
 - **证据**：批准版本、评审记录、输入卡版本、风险 owner 和决策记录。
@@ -68,7 +70,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 - **目标**：在业务代码前冻结控制面数据模型、状态迁移、外部契约和错误语义。
 - **输入**：阶段 0 基线、既有对象关系、Provider contract。
-- **主要设计/开发项**：定义 `team`、`asset_space`、`asset_repository`、`creation_session`、`draft`、`draft_revision`、`asset_revision`、`knowledge`、`skill`、`release`、`handoff`、`outbox_operation`、`worker_attempt`、`reconciliation_record`、`feedback`、`consumption_event`、`metric_aggregate`、`audit_event`；绘制 Creation Session、Draft、Release、Handoff、Outbox 和 Provider Operation 状态机；设计 API schema、错误码、幂等键、`operation_id`、`correlation_id` 和 `expected_state_version`；设计 migration、唯一约束、乐观锁、索引、审计、soft delete、备份恢复和数据保留；定义 merge、read-back、package、release、handoff、consumption、feedback event。
+- **主要设计/开发项**：定义 `team`、`asset_space`、`asset_repository`、`creation_session`、`draft`、`draft_revision`、`asset_revision`、`knowledge`、`skill`、`release`、`handoff`、`outbox_operation`、`worker_attempt`、`reconciliation_record`、`feedback`、`consumption_event`、`metric_aggregate`、`audit_event`；绘制 Creation Session、Draft、Release、Handoff、Outbox 和 Provider Operation 状态机；设计 API schema、错误码、幂等键、`operation_id`、`correlation_id` 和 `expected_state_version`；设计 migration、唯一约束、乐观锁、索引、审计、soft delete、备份恢复和数据保留；定义 merge、read-back、package、release、handoff、consumption、feedback event。专家判断、待办转交及贡献更正先作为与现有候选/草稿修订、身份和审计关联的操作契约设计，不另立一套资产批准或消费主体画像状态机。
 - **输出**：领域模型图、状态机、OpenAPI/JSON Schema、ERD/migration、事件契约、错误码表、权限矩阵和 API examples。
 - **设计冻结门**：必须同时冻结数据字典、合法/非法状态迁移、API request/response、错误模型、幂等和唯一约束、事务边界、并发策略、Provider callback/read-back、审批/发布/回滚授权、迁移兼容策略、审计事件、evidence manifest schema 及其正向/负向/故障测试矩阵；未形成这些设计物只能进入设计评审，不能进入控制面实现或真实 Provider 接入。
 - **测试**：先写状态迁移和 schema contract tests；覆盖非法迁移、重复幂等、旧版本更新、跨团队访问和错误响应；数据库约束使用 integration test。
@@ -117,33 +119,33 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 - **输入**：已确认的 `<pilot_scenario>` 或脱敏 fixture、Creation Session 设计、Git/WeKnora contract、阶段 4 权限能力。
 - **主要设计/开发项**：实现资料上传/脱敏、来源定位、候选卡片、冲突和待确认项；实现草稿、修订、确认、暂停/恢复、分叉/只读和并发 base revision；生成规范 knowledge path、metadata、sources、CHANGELOG 和变更包；通过 Git provider 创建分支/MR，执行格式、敏感信息、taxonomy、owner、链接和权限门禁；只接受 protected main merge event；由 outbox/Worker 调用 WeKnora ingest，读回 document/version/source/repo_path/ACL 并执行 retrieval smoke；只有 read-back 和检索通过才标记 `published`，失败保留旧版并进入 retry/reconciliation。
 - **输出**：Knowledge-first E2E、页面/API、Git change package、merge event、WeKnora published/read-back、人工接管和回滚。
-- **测试**：Creation Session、Git webhook、`创建 → 确认 → MR → merge → ingest → read-back → 检索` E2E；并发、重复、旧 SHA、半成功、敏感资料和 ACL 测试。
+- **测试**：Creation Session、Git webhook、`创建 → 确认 → MR → merge → ingest → read-back → 检索` E2E；并发、重复、旧 SHA、半成功、敏感资料和 ACL 测试；让第一用户从真实或脱敏材料起步，在不操作 Git 的前提下看到来源、待确认点、草稿变更和下一步，暂停后返回原位置；让有权 steward 对过期资料[拒绝/限定范围/要求补证]，验证决定绑定候选及修订、阻断该候选而不误改已发布版本，补证形成新修订并重新确认；让受益者从可用的消费入口找到可核对来源的答案。阶段 5 仅验证“报告错/旧/缺内容”的入口原型或授权人工登记，并保留资产版本与来源；反馈候选处理、事件归因和回访闭环在阶段 6 验收。无法接入既有入口时明示为试点临时入口，不暗示已嵌入日常工作。
 - **证据**：fixture digest、MR/merge commit、outbox/attempt、WeKnora read-back、检索结果、审计、失败和回滚记录。
-- **退出条件**：第一用户无需直接操作 Git 完成确认和提交；知识在实际检索后才发布；消费和反馈可记录。
+- **退出条件**：第一用户无需直接操作 Git 完成确认和提交；知识在实际检索后才发布；消费入口可查到已读回版本，反馈入口原型或授权人工登记可记录问题、来源和资产版本；正式反馈处理和消费归因留给阶段 6。
 - **阻塞条件**：草稿未经确认进入 WeKnora；merge event 可伪造或重复副作用；索引未读回却显示 published；无法保留旧版或人工补偿；数据无法脱敏。
 
 ### 阶段 6：消费、反馈与三层指标
 
 - **目标**：建立发布后的 Knowledge 和 Skill 消费、反馈与指标最小闭环，不从技术成功推断业务成功。
-- **输入**：已发布 Knowledge 或 MVP 内已完成安装/read-back 的 Skill、消费入口、反馈分流规则和试点指标配置。
-- **主要设计/开发项**：接收最小消费事件和 feedback reference，不复制完整 Prompt、输出、Token、Cookie、业务文件或 Tool Call trace；区分 invocation、attempt 和活跃主体并去重；分别记录 `technical_status`、`contract_status`、`business_status`，支持 `passed`、`failed`、`not_evaluable`、`unknown`；实现可靠性、采用、价值三层聚合和 team/asset-space/version/digest 隔离；将反馈分流为知识 MR、Skill regression、Provider/分发故障或平台问题；为 unknown、digest mismatch、handoff pending 和低反馈覆盖率提供下一步、责任人、超时和告警。
+- **输入**：已发布 Knowledge、可用的知识消费入口、反馈分流规则和试点指标配置；Skill 的真实消费制品由阶段 7 产出，不作为阶段 6 的输入或退出前置条件。
+- **主要设计/开发项**：接收最小消费事件和 feedback reference，不复制完整 Prompt、输出、Token、Cookie、业务文件或 Tool Call trace；区分 invocation、attempt 和活跃主体并去重；分别记录 `technical_status`、`contract_status`、`business_status`，支持 `passed`、`failed`、`not_evaluable`、`unknown`；实现可靠性、采用、价值三层聚合和 team/asset-space/version/digest 隔离；将反馈分流为知识 MR、Skill regression、Provider/分发故障或平台问题；为 unknown、digest mismatch、handoff pending 和低反馈覆盖率提供下一步、责任人、超时和告警。反馈从用户回答/资料出处进入时，最小化保留问题类别、引用及资产版本、发现入口和获授权的复核人；受理后给用户可返回的状态与处理结果，复核发现是权限或工具问题时不错误修改知识。过期提醒来自明确的 owner/复核日期或受影响版本事件，进入队列等人工确认，不自动标记所有旧资料为错误或跳过审核发布。
 - **消费事件契约**：最小事件至少包含 `event_id`、`idempotency_key`、`invocation_id`、`attempt_no`、`team_id`、`asset_space_id`、asset/version/digest、actor type/ref、时间、三层状态、`outcome_reference`、`feedback_reference` 和 schema version；有效调用、执行尝试、重试、unknown 的分母规则必须可计算、可对账，未知 digest、跨团队事件、迟到/重复事件必须拒绝或进入 reconciliation。没有业务结果证据只能记为 `unknown`；低反馈覆盖率和小样本不得直接发布 Badcase 率或价值结论。
 - **输出**：Consumption Event API、Feedback Candidate、指标聚合、最小报表、Badcase 分流和运营复核记录。
-- **测试**：schema/idempotency、重复/重试/迟到事件、状态分母规则、ACL、敏感字段拒绝、反馈去重、小样本保护和事件对账。
+- **测试**：schema/idempotency、重复/重试/迟到事件、状态分母规则、ACL、敏感字段拒绝、反馈去重、小样本保护和事件对账；以一条“回答缺来源/内容过期”的反馈走通报告、受理/误报分流、指派、修订、审核、发布读回、回访确认，验证各阶段可见但不把受理和入库当业务效果；以无人认领、待核实、Provider unknown 和指标覆盖不足分别展示可执行下一步；验证待办超载时申请暂缓/转交/升级均有接收者或下次检查时间，未接收不转移责任，贡献归因更正留痕且无权者不可修改。
 - **证据**：事件样本、聚合查询、对账、脱敏报表、反馈处理、周/月复核和告警记录。
-- **退出条件**：能按 Knowledge 或 Skill 的实际资产版本和固定 digest 查看调用、尝试、用户、分层成功、unknown、Badcase 和反馈覆盖率；Knowledge 按 `knowledge_id/version/source_commit` 归因，Skill 按 `skill_id/version/package_digest` 归因；无业务证据时为 `unknown`；反馈可进入修订任务。脱敏回放只可证明契约、可靠性、回归和故障恢复，不能替代 Pilot Beta 所需的真实用户、真实低风险流程、人工基线、业务结果 Owner 和价值指标。
+- **退出条件**：Knowledge 按实际 `knowledge_id/version/source_commit` 归因，能查看引用/消费、去重后的使用主体、分层结果（有证据时）、`unknown`、Badcase 和反馈覆盖率；反馈可关联版本、进入修订任务并回访。Skill 的 `skill_id/version/package_digest` 事件契约和测试 fixture 在本阶段通过，但不要求尚未生成的 Skill 产生真实消费；阶段 7 完成 package、安装或 fallback 与读回后，须按固定 digest 补验最小消费、去重、三层结果、反馈分流和版本归因。无业务证据时为 `unknown`；脱敏回放只可证明契约、可靠性、回归和故障恢复，不能替代 Pilot Beta 所需的真实用户、真实低风险流程、人工基线、业务结果 Owner 和价值指标。
 - **阻塞条件**：把发布/安装/load 当消费；用单一 outcome 推断三层成功；重试重复计为调用；敏感数据进入长期指标；低覆盖率下直接解释 Badcase 率。
 
 ### 阶段 7：Skill 契约、测试与打包
 
 - **目标**：在 Knowledge-first 的最小发布和消费链路通过后，仍在同一 MVP 内交付完整的 Skill 资产生产线；Skill 不是 P1 之外的后续功能，而是以 Knowledge-first 为前置顺序的第二条 MVP 资产路径。
-- **节点依赖**：阶段 7 不要求阶段 8 的真实 SkillHub、TeamAI 或 DSH Provider 已 `real_verified`，但要求阶段 N3 的 package、digest、安装/read-back、fallback release 和最小消费测试通过。
+- **节点依赖**：阶段 7 复用阶段 6 的消费事件与反馈契约，不要求阶段 8 的真实 SkillHub、TeamAI 或 DSH Provider 已 `real_verified`；N3 的 package、digest、安装/read-back、fallback release 和最小消费测试是本阶段的交付/退出门禁，不是进入阶段 7 的前置条件。
 - **输入**：工作流候选、Knowledge 依赖、Skill package layout、SkillHub contract 和指标配置。
 - **主要设计/开发项**：实现 Workflow Draft 和 Skill Creation Session；生成 `skills/<domain>/<name>/`、`contract/` 和测试目录；固定 `knowledge_dependencies` 的 ID/version，声明 effects、网络/数据范围、能力需求、风险等级和 profile；建立 golden/boundary/regression/security fixture；从 approved merge commit 构建 package，计算 `package_digest`，禁止 `latest` 和未提交工作区；先用 fake/admin 验证 release、撤回、旧版本 pin 和 digest read-back。
 - **输出**：Skill contract、测试集、package builder、digest、release metadata、回滚包和质量门禁。
 - **测试**：contract/golden/regression/security；恶意输入、越权 effects、依赖漂移、不可复现构建、digest mismatch、资源限制和失败回滚。
 - **证据**：merge commit、manifest、package/digest、测试报告、SBOM、release/read-back 或 fallback 记录。
-- **退出条件**：固定 commit 可重复构建；契约、依赖、测试证据完整；release/read-back 与 digest 一致；至少完成一条与 Knowledge 固定版本依赖关联的 Skill MVP 路径，包括 Skill package、安装或管理员/fake fallback、load/read-back、最小消费和回滚；Provider 状态如实记录。
+- **退出条件**：固定 commit 可重复构建；契约、依赖、测试证据完整；release/read-back 与 digest 一致；至少完成一条与 Knowledge 固定版本依赖关联的 Skill MVP 路径，包括 Skill package、安装或管理员/fake fallback、load/read-back、最小消费和回滚，并按阶段 6 契约补验 Skill 版本/digest 归因、去重、三层结果和反馈分流；Provider 状态如实记录。
 - **阻塞条件**：Skill 只有 Prompt；依赖 `latest`；构建不可复现；digest 不一致；能力声明绕过权限或人工确认。
 
 ### 阶段 8：SkillHub、TeamAI 与 DSH Provider 集成
@@ -161,7 +163,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 - **目标**：在业务侧确认的首个低风险场景中验证端到端价值，并决定 Contract Beta、Pilot Beta、Stable 或回退。
 - **输入**：试点输入卡、阶段 5/6/8 证据、非生产环境、人工基线、目标指标、维护和回滚责任。
-- **主要设计/开发项**：建立真实试点 roster；角色可兼任但必须分别记录创作/维护、审核/发布、业务结果确认、平台执行和 Go/No-Go 责任；执行固定周期 Knowledge-first 试点；每周检查采用、可靠性、反馈覆盖率、unknown、人工接管和维护负担；每月复盘价值指标和 Badcase；演练 Provider 故障、Worker 重启、数据库恢复、旧版回滚、权限撤销和敏感数据事件；形成继续、扩样、fallback、暂停、修复或退役决策。
+- **主要设计/开发项**：建立真实试点 roster；角色可兼任但必须分别记录创作/维护、审核/发布、业务结果确认、平台执行和 Go/No-Go 责任；执行固定周期 Knowledge-first 试点；先从第一受益者真实工作里的找答案/核对出处任务进入，再让第一用户在 Workbench 完成一次新增和一次修订，让审核人处理一次通过或退回；每周检查采用、可靠性、反馈覆盖率、unknown、人工接管和维护负担；每月复盘价值指标和 Badcase；演练 Provider 故障、Worker 重启、数据库恢复、旧版回滚、权限撤销和敏感数据事件；形成继续、扩样、fallback、暂停、修复或退役决策。
 - **输出**：试点报告、指标和对账数据、反馈闭环、故障演练、维护容量评估、成熟度决策和 backlog。
 - **测试**：完整 E2E、业务结果抽样、用户可用性、故障恢复、安全权限回归、覆盖率/SLO/容量检查。
 - **证据**：试点版本/环境、参与者授权、fixture/asset/package digest、消费事件、业务结果引用、反馈覆盖率、回滚、复盘和 evidence manifest。
@@ -172,7 +174,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 - 阶段 0、1 先冻结边界和契约；阶段 2 可并行验证多个 Provider，但不得反向改变 canonical source 和控制面状态机。
 - 阶段 3 可与阶段 2 并行开发 fake provider、fixture、CI 和部署基础；阶段 4 必须在真实团队资产写入前完成。
-- 阶段 5 是首个 Knowledge 业务垂直切片；阶段 6 依赖其发布/read-back，并同时为 Knowledge 和 Skill 接入消费、反馈和指标；阶段 7 在同一 MVP 内完成 Skill contract、测试、打包、安装/read-back 和最小消费，不得延期为后续产品。
+- 阶段 5 是首个 Knowledge 业务垂直切片；阶段 6 依赖其发布/read-back，先验收 Knowledge 消费与反馈及双资产通用契约；阶段 7 在同一 MVP 内完成 Skill contract、测试、打包、安装/read-back 和按阶段 6 契约补验的最小消费，不得延期为后续产品。
 - 阶段 8 依赖 immutable digest 和 Provider evidence；TeamAI、DSH 的真实集成不得成为 Knowledge MVP 的硬阻塞，但 Skill MVP 本身的 package、安装/fallback 和最小消费不得省略。
 - 阶段 9 不能用技术验收替代业务 Go/No-Go。任何 `blocked`、`unknown` 或 `manual_intervention` 都要保留责任人、超时和下一步。
 - 每个实现任务至少提供可复制的 `format/lint/typecheck`、`unit`、`integration`、`contract`、`security/secret scan`、`migration/restore`、`failure injection`、`coverage` 和目标环境 `read-back` 命令；命令、版本、退出码、输出摘要和证据 digest 进入 evidence manifest。
@@ -289,11 +291,11 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 
 ## 9. 统一验收矩阵
 
-| V-01 | 工作台与会话入口 | 首页有两个启动动作、最近创作和待处理事项；创建后进入正确的 Creation Session |
+| V-01 | 工作台与会话入口 | 首页有两个启动动作、最近创作和待处理事项；创建后进入正确的 Creation Session；首次使用能说明本次任务可获得什么、需要谁确认，回访可一键回到未完成动作；首页不得把发布数当业务价值 |
 | V-02 | Workbench Plugin 安装 | package、canonical repository、digest、安装、重启、enabled/UI read-back 可验证；安装不被报告为资产发布 |
 | V-03 | 多团队资产隔离 | 两个团队安装同一 Workbench，team/asset-space/Git/WeKnora/ACL/session/审计互相隔离 |
 | V-04 | 知识目录与索引映射 | domain/topic/path preview、canonical key、Git↔WeKnora mapping、增量、移动、退役和旧索引保留可验证 |
-| V-05 | 会话隔离与生命周期 | 多会话可并行；暂停、恢复、归档、分叉、只读可用且上下文不串线 |
+| V-05 | 会话隔离与生命周期 | 多会话可并行；暂停、恢复、归档、分叉、只读可用且上下文不串线；暂停后由首页/待办返回原阶段、草稿和证据，归档/只读展示原因和恢复或新建路径 |
 | V-06 | 草稿与并发 | session/draft/revision 可追踪；同 base revision 并发提交触发冲突和人工合并 |
 | V-07 | 双资产 schema/状态 | 合法/非法/重复/并发迁移有测试 |
 | V-08 | Skill 创建 | 模板、metadata、契约和知识依赖可生成并审核 |
@@ -302,23 +304,26 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-11 | WeKnora ingest/read-back | 来源/版本/ACL/document 可读回，检索验证成功后才 published；失败保留旧版 |
 | V-12 | Skill package/SkillHub release | 固定 merge commit、package digest、SkillHub release id/状态/digest 可读回 |
 | V-13 | SkillHub pinned digest → TeamAI → DSH | TeamAI target/installed revision/file list/digest 与 pinned digest 一致；DSH handoff/load/profile read-back 可验证 |
-| V-14 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布 |
+| V-14 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布；第一用户在预览中辨认来源/推断及版本差异，审核退回后能按意见在原会话修订；发布排队、失败或 unknown 时知道责任人、已验证到哪一步及下一步，不会误以为已生效 |
 | V-15 | 交接协议 | 下游 target、version、digest 和依赖可追踪 |
-| V-16 | 反馈分流与 Badcase | 报告、确认、去重、受影响调用数和反馈覆盖率可统计；知识、Skill、分发和平台问题进入正确治理任务 |
+| V-16 | 反馈分流与 Badcase | 报告、确认、去重、受影响调用数和反馈覆盖率可统计；用户从带来源的回答或资产详情提交一次缺失/错误/过期反馈，能看到受理/指派/修订/读回/回访状态；知识、Skill、分发和平台问题进入正确治理任务，误报或无人认领有明确回执，反馈不直接改正式资产 |
 | V-17 | 身份与责任链 | DSH principal、team/role ACL、Git service identity、approved_by/released_by/executed_by 和跨团队拒绝可审计 |
 | V-18 | PostgreSQL 控制面 | migration、事务/乐观锁、幂等、备份恢复、Worker 重启和数据库故障的 unknown/degraded 状态可验证 |
 | V-19 | 安全审计 | 无 secret 泄露、越权和不可追踪写入 |
 | V-20 | 故障恢复 | provider 半成功、超时、丢 event、重复和未知状态可对账 |
 | V-21 | 稳定发布 | released/rollback 有批准、证据、digest 和旧版本 pin |
-| V-22 | 运营价值 | 至少一个场景减少重复劳动或返工 |
+| V-22 | 运营价值 | 至少一个由业务结果 Owner 确认的真实低风险场景，记录人工基线、观察窗口和结果证据，验证找答案/重复解释/返工等实际任务是否改善；同时核算贡献与审核负担，覆盖不足或仅有上传/发布/安装计数时标记 unknown，不报告改善 |
 | V-23 | Plugin 预留契约 | P0 有 manifest/tool contract、权限边界；不要求真实业务 Plugin runtime |
 | V-24 | Harness 能力验证（P3） | Provider/discovery/load 和反馈引用有可重复证据 |
 | V-25 | 分发 contract | SkillHub/TeamLab/管理员路径中，MR、固定版本、目标交接、实际读回、回滚和 fallback 可验证 |
 | V-26 | Agent Manifest 复用（后续） | 依赖 Skill/知识可追踪，不能绕过审批；不要求首期实现 |
 | V-27 | Plugin Bundle 开发与安装门禁 | 每个阶段都完成固定版本的 build/package/digest/fresh-profile install/restart/load-report/readback/功能 E2E，并可 disable/uninstall/rollback；未确认契约不得进入正式 Plugin |
-| V-28 | Skill 消费指标与隐私 | 按实际 Skill version/digest 统计调用次数、活跃用户、分层成功、unknown、Badcase 和反馈覆盖率；重复/重试去重、团队隔离、小样本保护、敏感数据不进入报表且可对账 |
+| V-28 | Skill 消费指标与隐私 | 按实际 Skill version/digest 统计调用次数、活跃用户、分层成功、unknown、Badcase 和反馈覆盖率；重复/重试去重、团队隔离、小样本保护、敏感数据不进入报表且可对账；发布、安装、加载和测试用例不能计为业务消费；缺业务结果或反馈覆盖不足时 UI 显示来源、样本/覆盖率与 unknown，而不是宣称价值已实现 |
+| V-29 | 专家自主判断（Knowledge 阶段 5、Skill 阶段 7） | 有权专家针对指定候选与草稿修订拒绝、限定范围、暂缓或要求补证，能看到来源/推断和决策回执；拒绝、暂缓或缺证候选不能提交，无权者不能代签；补证后的新修订不得沿用旧确认，旧正式版本不能被静默覆盖，发布仍走 Git/人审/read-back |
+| V-30 | 维护容量与归因（阶段 6 起） | 责任人看到待办、估计复核时间和资源缺口，可暂缓/请求转交/升级；无接收者或 owner 缺失明确指向业务 Owner/asset owner，未接收不变更责任、不自动批准；本人能申请更正错误贡献归因，有权者核验留痕，不修改原审批身份；无权者或跨团队查看/更正被拒绝 |
+| V-31 | 团队决策与反监控（阶段 6 原型，试点验证） | 授权团队卡列基线、窗口、样本、覆盖率、unknown、维护负担和资源决策；极小样本、交叉筛选和差值反推时抑制/合并，禁止个人排行、按人消费轨迹、Agent 使用评分与从 `actor_ref` 推断个人绩效；覆盖不足不能宣称减员、节省人力或改善。业务结果与维护成本须在实际试点由不同责任方核验 |
 
-详细平台实验见[验证材料](../验证/README.md)。
+详细平台实验见[验证材料](../验证/README.md)。产品体验以[用户价值与指标](01-问题、用户与产品范围.md#2-用户与责任)、[日常反馈闭环](02-端到端知识工作流.md#51-日常反馈--周期复核--下次使用)、[专家自主权与共同成长](../产品/06-专家自主权与共同成长.md)和[工作台逐屏设计](09-工作台信息架构与核心对象.md)为设计输入；V-01、V-05、V-14、V-16、V-22、V-28–V-31 应分别附首次使用、回访、审核退回、反馈纠错、Provider `unknown`、小样本无结论、专家拒绝/补证、无人认领/转交、归因更正及反推隐私的脱敏录屏或逐步操作记录。阶段 0 先用纸面原型/脱敏 fixture 评估这些交互是否可理解，**不能将原型通过记为功能已实现**；阶段 5 实现 V-29 的 Knowledge 授权判断/修订门禁，阶段 7 扩展到 Skill；阶段 6 实现 V-30 的队列/归因更正及 V-31 的最小授权聚合与负向权限测试，低风险真实试点再观察受益者、贡献者、审核人的任务结果与负担。fixture 与产品设想均不代替真实价值验收。
 
 ## 10. Coding agent 交付规范
 
