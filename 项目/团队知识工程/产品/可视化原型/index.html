@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>团队知识工程 · 共创产品概念稿</title>
+<style>
+  :root { font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif; color:#192b2a; background:#f2f5f1; --green:#176859; --ink:#192b2a; --muted:#647670; --line:#dce6df; --warn:#80561e; --red:#9c443a; }
+  * { box-sizing:border-box; }
+  body { margin:0; line-height:1.55; }
+  button,input,textarea,select { font:inherit; }
+  button { cursor:pointer; }
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:3px solid #65c9a9; outline-offset:2px; }
+  .app { min-height:100vh; display:grid; grid-template-columns:238px minmax(0,1fr); }
+  .rail { background:#102a2d; color:#e6efe9; padding:26px 16px; display:flex; flex-direction:column; gap:22px; min-height:100vh; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:750; padding:0 7px; line-height:1.25; }
+  .logo { width:34px; height:34px; display:grid; place-items:center; background:#9bdabb; color:#154338; border-radius:10px; }
+  .tiny { font-size:11px; } .muted { color:var(--muted); } .small { font-size:12px; }
+  .rail .muted { color:#aecbc4; font-weight:400; }
+  .section-label { font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#94b0a9; margin:12px 9px 7px; }
+  .nav { display:grid; gap:4px; }
+  .nav button { border:0; border-radius:9px; text-align:left; color:#c6d8d3; background:transparent; padding:11px 12px; font-size:13px; width:100%; }
+  .nav button:hover,.nav button.active { background:#294a45; color:white; }
+  .nav button.active { box-shadow:inset 3px 0 #a7debd; }
+  .rail-note { margin-top:auto; border:1px solid #33544f; padding:13px; border-radius:11px; color:#b6cbc6; font-size:12px; }
+  .workspace { min-width:0; }
+  .top { background:white; border-bottom:1px solid var(--line); padding:17px 34px; display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:12px; }
+  .banner { background:#fff8e5; border-bottom:1px solid #eddfba; color:#795a25; font-size:12px; padding:10px 34px; }
+  main { max-width:1280px; padding:34px; margin:auto; outline:none; }
+  h1,h2,h3,p { margin-top:0; } h1 { font-size:28px; letter-spacing:-.03em; margin-bottom:8px; } h2 { font-size:18px; margin-bottom:11px; } h3 { font-size:15px; margin-bottom:6px; }
+  p { margin-bottom:11px; } .eyebrow { color:var(--green); font-size:11px; font-weight:800; letter-spacing:.12em; margin-bottom:8px; }
+  .page-header { margin-bottom:22px; } .lead { font-size:14px; color:var(--muted); max-width:760px; }
+  .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+  .span-12 { grid-column:span 12; } .span-8 { grid-column:span 8; } .span-7 { grid-column:span 7; } .span-6 { grid-column:span 6; } .span-5 { grid-column:span 5; } .span-4 { grid-column:span 4; }
+  .card { background:white; border:1px solid var(--line); border-radius:15px; padding:22px; min-width:0; box-shadow:0 10px 30px rgba(19,53,39,.04); }
+  .card.dark { color:white; background:#173635; border-color:#173635; }
+  .card.dark .muted { color:#bdd0c9; }
+  .card.tint { background:#e9f3ed; border-color:#c8e2d2; }
+  .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .between { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:17px; }
+  .btn { background:var(--green); color:white; border:1px solid transparent; border-radius:9px; padding:9px 13px; min-height:38px; font-weight:650; font-size:12px; display:inline-flex; align-items:center; justify-content:center; }
+  .btn:hover:not(:disabled) { filter:brightness(.92); }
+  .btn.secondary { background:white; color:var(--ink); border-color:#d6e1d9; }
+  .btn.ghost { color:var(--green); background:transparent; border-color:#bcd4c6; }
+  .btn.text { color:var(--green); background:transparent; padding:5px; min-height:0; }
+  .btn.danger { color:var(--red); background:#faeae8; }
+  .btn:disabled { opacity:.48; cursor:not-allowed; }
+  .badge { background:#edf3ee; color:#476157; border-radius:100px; font-weight:700; font-size:11px; padding:4px 9px; display:inline-block; }
+  .badge.good { background:#dff0e7; color:#19644f; } .badge.warn { background:#fbf0d8; color:var(--warn); } .badge.bad { background:#f9e9e7; color:var(--red); }
+  .notice { background:#f0f5f1; color:#40584b; border-radius:10px; padding:12px 14px; font-size:12px; margin:13px 0; }
+  .notice.warn { background:#fbf0d8; color:var(--warn); } .notice.bad { background:#faeae8; color:var(--red); } .notice.good { background:#e2f2e8; color:#17634d; }
+  .scope { font-size:12px; background:#ecf4ef; border-radius:9px; padding:11px 13px; margin-bottom:18px; }
+  .divider { height:1px; background:var(--line); margin:17px 0; }
+  .field { width:100%; border:1px solid #d4e0d8; border-radius:9px; background:white; padding:10px 12px; font-size:13px; color:var(--ink); }
+  .field + .field { margin-top:9px; } textarea.field { min-height:88px; resize:vertical; }
+  .field-label { display:block; margin:12px 0 5px; font-size:12px; font-weight:700; }
+  .item { padding:13px 0; border-bottom:1px solid var(--line); }
+  .item:last-child { border-bottom:0; }
+  .asset-metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  .asset-metric { border:1px solid var(--line); background:white; border-radius:13px; padding:19px 20px; }
+  .asset-metric .eyebrow { margin-bottom:6px; }
+  .asset-metric .total { display:flex; align-items:baseline; gap:7px; margin:3px 0 12px; }
+  .asset-metric .total strong { font-size:39px; line-height:1.1; letter-spacing:-.05em; }
+  .asset-metric .total span { color:var(--muted); font-size:12px; }
+  .asset-metric .metric-row { display:flex; gap:16px; padding-top:11px; border-top:1px solid var(--line); }
+  .asset-metric .metric-row > div { flex:1; min-width:0; }
+  .asset-metric .metric-row strong { display:block; font-size:17px; line-height:1.3; }
+  .asset-metric .metric-row span { color:var(--muted); font-size:11px; }
+  .asset-feed { margin-top:15px; border-left:1px solid #d8e5dc; padding-left:18px; }
+  .asset-entry { position:relative; padding:0 0 17px; }
+  .asset-entry:last-child { padding-bottom:0; }
+  .asset-entry::before { content:""; position:absolute; left:-23px; top:5px; width:9px; height:9px; background:#6ba98b; border-radius:50%; border:2px solid white; box-shadow:0 0 0 1px #bad7c4; }
+  .asset-entry h3 { margin:2px 0 4px; font-size:14px; }
+  .asset-entry p { margin:0; }
+  .asset-inline { border:0; background:none; padding:0; color:var(--green); font-weight:700; text-align:left; text-decoration:underline; text-decoration-color:#a5cbbb; text-underline-offset:3px; }
+  .asset-inline:hover { text-decoration-color:currentColor; }
+  .business-lines { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0 19px; }
+  .business-line { width:100%; text-align:left; border:1px solid #cfe1d4; background:#f4faf5; border-radius:12px; padding:15px; color:var(--ink); }
+  .business-line strong,.business-line span { display:block; }
+  .business-line span { color:var(--muted); font-size:12px; margin-top:5px; }
+  .business-line.active,.business-project.active { border-color:var(--green); background:#e4f3e9; box-shadow:inset 3px 0 var(--green); }
+  .business-map { border-top:1px solid var(--line); }
+  .business-map-row { display:grid; grid-template-columns:minmax(180px,1.35fr) repeat(3,minmax(0,1fr)); gap:10px; padding:10px 0; align-items:stretch; border-bottom:1px solid var(--line); }
+  .business-map-heading { padding:6px 0; color:var(--muted); font-size:11px; font-weight:700; }
+  .business-project { width:100%; border:1px solid var(--line); border-radius:10px; background:#f7faf7; padding:11px; text-align:left; color:var(--ink); }
+  .business-project strong,.business-project span { display:block; }
+  .business-project span { font-size:11px; color:var(--muted); margin-top:4px; }
+  .business-cell { border:1px solid #cfe1d4; background:#f0f8f2; border-radius:9px; padding:10px; font-size:12px; }
+  .business-cell.pending { background:#faf6ec; border-style:dashed; border-color:#dec9a5; }
+  .business-cell.off { border-color:transparent; background:#f7f9f7; color:#9aaba1; }
+  .business-cell strong,.business-cell span { display:block; }
+  .business-cell span { font-size:11px; color:var(--muted); margin-top:3px; }
+  .business-cell .mobile-line { display:none; }
+  .business-map-row.related .business-cell:not(.off) { box-shadow:0 0 0 1px #93c9a6; }
+  .business-map-row.dim,.business-line.dim,.business-capability.dim { opacity:.53; }
+  .business-capabilities { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; margin-top:12px; }
+  .business-capability { background:#f7faf7; border:1px solid var(--line); border-radius:10px; padding:13px; }
+  .business-capability p { margin:6px 0 0; }
+  .business-capability .tiny { display:block; margin-top:7px; }
+  .business-focus { margin-top:16px; border-top:1px solid var(--line); padding-top:16px; }
+  .business-focus .actions { margin-top:9px; }
+  .business-focus > p { margin-bottom:7px; }
+  .radar-intro { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .radar-card { display:flex; flex-direction:column; gap:10px; }
+  .radar-card .actions { margin-top:auto; }
+  .radar-card p { margin-bottom:0; }
+  .tool-filters { display:flex; gap:7px; flex-wrap:wrap; margin:12px 0; }
+  .tool-list { max-height:460px; overflow:auto; border-top:1px solid var(--line); }
+  .tool-list .item { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .tool-list .item.current { background:#f2f8f3; }
+  .tool-list .item > div { min-width:0; overflow-wrap:anywhere; }
+  .tool-search { display:flex; gap:8px; }
+  .tool-search .field { flex:1; min-width:0; }
+  .fact { display:grid; grid-template-columns:110px 1fr; gap:10px; padding:10px 0; border-bottom:1px solid #edf1ee; font-size:12px; }
+  .fact:last-child { border-bottom:0; } .fact > span:first-child { color:var(--muted); }
+  .quote { border-left:3px solid #95ccb0; background:#f5f9f5; border-radius:0 9px 9px 0; padding:12px 14px; font-size:13px; }
+  .selectable { user-select:text; cursor:text; background:#f7faf6; border:1px solid var(--line); border-radius:10px; padding:15px; font-size:13px; }
+  .selectable ::selection { background:#bce2cc; }
+  .annotation { border:1px solid var(--line); border-radius:10px; padding:14px; font-size:12px; margin-top:10px; }
+  .annotation:target { outline:2px solid #8bbf9a; } .anchor-meta { color:var(--muted); font-size:11px; word-break:break-all; }
+  .steps { padding-left:17px; font-size:13px; } .steps li { padding:0 0 11px; }
+  .conversation { display:grid; gap:11px; margin:16px 0; }
+  .message { padding:13px 15px; border-radius:12px; background:#f3f7f3; font-size:13px; max-width:90%; }
+  .message.user { background:#e8f2e9; justify-self:end; }
+  .message .tiny { display:block; margin-bottom:5px; }
+  .optional { margin-top:18px; padding:15px; border:1px solid var(--line); border-radius:11px; background:#fafcf9; }
+  .optional summary { cursor:pointer; font-size:13px; font-weight:700; }
+  .handoff { min-height:185px!important; font-size:12px; }
+  .result-tabs { display:flex; gap:5px; border-bottom:1px solid var(--line); margin-top:15px; }
+  .result-tabs button { border:0; border-bottom:2px solid transparent; color:var(--muted); background:transparent; padding:10px; font-size:12px; }
+  .result-tabs button.active { border-color:var(--green); color:var(--green); font-weight:800; }
+  .selected { background:#dcf0e3; border-radius:3px; padding:2px 4px; }
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+  .toast { position:fixed; bottom:20px; right:20px; padding:12px 18px; background:#102a2d; color:white; border-radius:10px; font-size:12px; z-index:20; max-width:320px; }
+  @media(max-width:960px) { .span-8,.span-7,.span-5,.span-4 { grid-column:span 12; } .asset-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:760px) { .app { display:block; } .rail { min-height:0; gap:5px; padding:13px; } .rail-note,.section-label { display:none; } .brand { margin-bottom:8px; } .nav { display:flex; overflow:auto; } .nav button { width:auto; white-space:nowrap; } .top { padding:12px 16px; } .top .badge { display:none; } .banner { padding:10px 16px; } main { padding:24px 15px; } h1 { font-size:23px; } .fact { grid-template-columns:85px 1fr; } .asset-metrics { grid-template-columns:1fr; } .business-lines,.business-capabilities { grid-template-columns:1fr; } .business-map-heading { display:none; } .business-map-row { grid-template-columns:1fr; gap:7px; } .business-cell .mobile-line { display:inline; } .business-cell.off { display:none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="DeepSeek Harness Desktop 宿主导航">
+    <div class="brand"><div class="logo">✦</div><div>DeepSeek Harness<br><span class="muted tiny">Desktop · 概念示意</span></div></div>
+    <div>
+      <div class="section-label">宿主任务</div><nav class="nav"><button data-route="task">◈　对话与任务</button></nav>
+      <div class="section-label">Team Knowledge Workbench</div><nav class="nav"><button data-route="home">▦　工作台</button><button data-route="knowledge">▤　知识创作会话</button><button data-route="skill">◇　Skill 创作会话</button><button data-route="tools">⌘　业务接口目录</button><button data-route="assets">▥　团队资产</button></nav>
+    </div>
+    <div class="rail-note">团队资产默认在本团队内共同使用与完善；业务接口目录用于发现和了解申请去向。宿主完成当前任务，Workbench 承接讨论与治理；这里不模拟真实授权。</div>
+  </aside>
+  <div class="workspace">
+    <header class="top"><span>DeepSeek Harness Desktop　/　<strong id="breadcrumb">Team Knowledge Workbench</strong></span><span class="badge" id="space-label">演示团队 · team-asset</span></header>
+    <div class="banner"><strong>可交互产品概念稿</strong> · 全部知识、Skill、Tool、身份、Git 审核和发布状态为虚构；无后端，不代表 DSH 现有能力。请勿输入真实产品 ID 或敏感数据。</div>
+    <main id="content" tabindex="-1"></main>
+  </div>
+</div>
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const state = {
+    route:'task', authorized:true, result:'conflict', selected:null, draft:'', evidence:'',
+    annotations:[], discussion:'尚未开始', proposal:null, decision:'未确认', review:'未提交', publication:'无新版本', skillExpanded:false, sourceExpanded:false, mapPoint:'清单适用判断', toolStatus:'ready', toolTestStatus:'ready', toolTestOptionsOpen:false, toolTab:'available', selectedTool:null, toolDomain:'all', toolSearch:'', toolSearchDraft:'', toolTestInput:'', toolTestResult:null, priceRequest:'未申请', toolResult:false, toolQueriedAt:null,
+    recapStage:'idle', recapReviewed:false, recapReuse:'pending', recapAction:'pending', recapArtifact:'pending', recapCorrection:'', handoff:'', candidateDrafts:{knowledge:'',skill:'',source:'',fact:''}, candidateSubmitted:{knowledge:false,skill:false,source:false,fact:false}, objectFocus:'project', assetTab:'progress', assetOverviewFocus:'all', assetDetail:null, diagnosticDisposition:{}
+  };
+  const root=document.getElementById('content');
+  const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const btn=(label,action,style='secondary',attr='')=>`<button class="btn ${style}" data-action="${action}" ${attr}>${label}</button>`;
+  const link=(label,route)=>`<button class="btn text" data-route="${route}">${label} →</button>`;
+  const badge=(label,tone='')=>`<span class="badge ${tone}">${label}</span>`;
+  const header=(k,title,description)=>`<div class="page-header"><div class="eyebrow">${k}</div><h1>${title}</h1><p class="lead">${description}</p></div>`;
+  const scope=`<div class="scope">◉ 演示团队 / team-asset · 本团队知识与 Skill 共享使用、共同完善；Tool 来自外部系统，查询资格另行核验。特殊资料与受控动作仍按资产策略校验。</div>`;
+  const acl=`<div class="notice bad">模拟资产空间未绑定：无法确认本团队资产访问资格。资料、评论和候选不显示；这不等于团队里没有知识。返回工作台恢复模拟绑定。</div>`;
+  const note=message=>{ document.getElementById('live').textContent=message; document.querySelector('.toast')?.remove(); const el=document.createElement('div'); el.className='toast'; el.textContent=message; document.body.appendChild(el); setTimeout(()=>el.remove(),3500); };
+  const results={
+    confirmed:{label:'已确认知识 · 仍需核对条件',tone:'good',title:'仅旧规则时期的常规任务可参考清单 A',body:'该判断只确认了特定范围，当前任务的类型和时间没有从业务系统核实。',source:'演示纪要 A · 知识 K-01 · v1'},
+    materials:{label:'只有资料 · 尚无确认结论',tone:'warn',title:'有两份资料供核对，不能直接得出当前答案',body:'模板 B 的生效时间与任务范围未知；相关度不等于适用性。',source:'演示纪要 A、模板 B · 仅为资料'},
+    conflict:{label:'来源冲突 · 暂不能据此决定',tone:'bad',title:'清单 A / 模板 B 适用边界有争议',body:'旧纪要和新模板可能对应不同任务或时间。当前不能从“B 较新”推断所有任务都应使用 B。',source:'演示纪要 A ↔ 模板 B · 知识 K-01 · v1'}
+  };
+  const published=()=>state.publication==='可引用（模拟）' && state.decision==='已模拟针对修订确认';
+  const toolStates={ready:['组织已开通 · 调用需复核','good'], 'needs-access':['待申请使用资格','warn'], disconnected:['尚未接入宿主','warn'], unknown:['接口状态未知 · 不可调用','bad']};
+  const toolBadge=()=>badge(...toolStates[state.toolStatus]);
+  const toolTabs=()=>`<div class="result-tabs" aria-label="业务接口目录视图"><button class="${state.toolTab==='available'?'active':''}" data-action="tool-tab-available" aria-pressed="${state.toolTab==='available'}">团队可发现</button><button class="${state.toolTab==='plaza'?'active':''}" data-action="tool-tab-plaza" aria-pressed="${state.toolTab==='plaza'}">待申请</button></div>`;
+  const toolCatalog=[
+    {id:'inventory',tab:'available',domain:'ERP',tags:['ERP','库存'],name:'ERP 库存查询',method:'get_product_inventory(product_id)',provider:'ERP 库存服务团队',owner:'库存业务责任方',purpose:'核对库存是否有可用量',input:'product_id · 商品 ID（演示 DEMO-001）',output:'可用库存、查询时间',risk:'只读 · 低风险示意'},
+    {id:'order',tab:'available',domain:'ERP',tags:['ERP','订单'],name:'ERP 订单状态查询',method:'get_order_status(order_id)',provider:'ERP 订单服务团队',owner:'订单业务责任方',purpose:'核对订单当前处理阶段',input:'order_id · 订单 ID',output:'处理阶段、更新时间',risk:'只读 · 用途需授权'},
+    {id:'workorder',tab:'available',domain:'MES',tags:['MES','工单'],name:'MES 工单进度查询',method:'get_work_order_progress(work_order_id)',provider:'MES 平台团队',owner:'生产业务责任方',purpose:'查询获准范围内的工单进度',input:'work_order_id · 工单 ID',output:'工单阶段、更新时间',risk:'只读 · 用途需授权'},
+    {id:'quality',tab:'available',domain:'MES',tags:['MES','质量'],name:'MES 质量检验摘要',method:'get_quality_summary(lot_id)',provider:'MES 平台团队',owner:'质量业务责任方',purpose:'查看批次质量摘要',input:'lot_id · 批次 ID',output:'获准公开的状态摘要',risk:'只读 · 敏感范围'},
+    {id:'price',tab:'plaza',domain:'采购',tags:['采购','数仓'],name:'采购部件价格查询',method:'get_part_price(part_id)',provider:'采购数仓平台',owner:'采购数据责任方',purpose:'在获批范围内核对价格',input:'part_id · 部件 ID',output:'价格字段（仅获授权后）',risk:'只读 · 数据受限'},
+    {id:'supplier',tab:'plaza',domain:'采购',tags:['采购','供应商'],name:'供应商资质状态查询',method:'get_supplier_status(supplier_id)',provider:'供应链数据平台',owner:'供应商业务责任方',purpose:'核对供应商状态与有效期',input:'supplier_id · 供应商 ID',output:'可公开的状态与有效期',risk:'只读 · 待申请'},
+    {id:'maintenance',tab:'plaza',domain:'MES',tags:['MES','设备'],name:'设备维护窗口查询',method:'get_maintenance_window(equipment_id)',provider:'设备运维平台',owner:'设备业务责任方',purpose:'查询设备维护窗口安排',input:'equipment_id · 设备 ID',output:'维护窗口摘要',risk:'只读 · 待接入'}
+  ];
+  const toolDomains=['all','ERP','MES','采购'];
+  const visibleTool=tool=>tool.tab===state.toolTab&&(state.toolDomain==='all'||tool.domain===state.toolDomain)&&[tool.name,tool.method,tool.purpose,...tool.tags].some(value=>value.toLowerCase().includes(state.toolSearch.trim().toLowerCase()));
+  const anchorHint=()=>state.selected?`<div class="notice good">已选中「${escapeHTML(state.selected.text)}」<br><span class="anchor-meta">${escapeHTML(state.selected.asset)} · ${escapeHTML(state.selected.version)} · ${escapeHTML(state.selected.paragraph)} · 文字快照（演示）</span></div>`:'<div class="notice warn">先在答案或知识正文里选中一段文字，再点评论按钮；未选择时可使用段落的预设示例短句。不能提交没有锚点的批注。</div>';
+  const contentStatus=()=>!state.proposal?'尚无修订':published()?'团队可用 · 模拟 v2':state.decision==='拒绝修订'?'候选已拒绝 · 非已停用':state.review==='待确认'||state.decision==='已模拟针对修订确认'||state.publication==='待模拟读回'||state.publication==='外部状态未知 · 待对账'?'待核对':'整理中';
+  function findContent() {
+    return `<section class="card span-12"><div class="between"><div><h2>按熟悉的线索找团队内容</h2><p class="small muted">项目、产品线是查找与关联方式；工作记录是来源，当前事实和经验须分别核对，Skill 只封装稳定流程。不是四层必须逐级升级的目录。</p></div>${link('查看团队内容','assets')}</div><div class="grid"><div class="span-6"><h3>从业务对象找</h3><div class="item"><strong>项目 A · 交接资料核对</strong><p class="small muted">当前分工有已核范围，也有待核新说法；截至时间见详情。</p><button class="btn text" data-action="focus-project">查看项目与事实 →</button></div><div class="item"><strong>产品线 P · 模板使用</strong><p class="small muted">同一条经验 K-01 关联项目 A 和产品线 P，不复制正文。</p><button class="btn text" data-action="focus-product">查看产品线 →</button></div></div><div class="span-6"><h3>从记录或判断找</h3><div class="item"><strong>演示周会纪要 · 来源 S-01</strong><p class="small muted">会议当时说过什么 ≠ 项目现在的事实；仅示意可引用定位。</p>${link('查看工作记录','record')}</div><div class="item"><strong>团队经验 · K-01 v1</strong><p class="small muted">旧规则时期的常规任务参考 A；有条件可用，R-02 可同时整理。</p>${link('查看经验与修订','knowledge')}</div></div></div><div class="notice">演示预置路径，不连接团队资料库或业务系统。真实导航顺序和栏目名称由团队使用习惯决定；此处没有导入、自动归类或权限授予。</div></section>`;
+  }
+  function objectView() {
+    const product=state.objectFocus==='product';
+    return header('WORKBENCH / 业务对象 · 非一级导航',product?'产品线 P · 模板使用':'项目 A · 交接资料核对','按团队熟悉的项目或产品线找内容；每个事实都要回答来源、何时生效、截至何时。来源记录和提炼出的知识分开显示。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>当前事实与待核线索</h2>${badge('仅虚构示例','warn')}</div>${product?'<div class="notice warn">产品线 P 目前没有经外部权威读回的“最新分工”。下方周会提及模板 C 先试用，但试用范围和生效时间待核，不把它写为产品线正式规则。</div>':'<div class="fact"><span>已核范围</span><span>项目 A 本阶段交接材料以清单索引为核对入口（演示事实 F-01）；来源：演示交接约定 v1；生效：演示周期 1；截至：演示周期 1 末。不是当前真实项目状态。</span></div><div class="notice warn">分工线索待核：周会 S-01 提到“成员 B 接手资料索引”，但生效日期、原业务系统现状和反证尚未确认；不能直接显示 B 为当前负责人，也不授予 B 发布权限。</div>'}<div class="actions">${link('查看周会来源 S-01','record')}${link('核对事实或提炼经验','knowledge')}</div></section><aside class="card span-4"><h2>团队怎样找</h2><p class="small muted">当前按 ${product?'产品线':'项目'} 查看；换轴只改变视图，同一来源和经验仍保持原 ID 与版本。</p><div class="actions">${btn('项目 A','focus-project',product?'ghost':'secondary',`aria-pressed="${!product}"`)}${btn('产品线 P','focus-product',product?'secondary':'ghost',`aria-pressed="${product}"`)}</div><div class="notice">真实实现需重验来源权限；失权时不显示受限标题、摘要或可反推内容的关联。</div></aside><section class="card span-7"><h2>来源时间线（示意）</h2><div class="item"><strong>S-01 · 演示周会纪要 v1</strong><p class="small muted">形成于演示周期 1；同时关联项目 A 与产品线 P。记载分工说法与模板 C 试用建议，不代表当下均已生效。</p>${link('打开来源详情','record')}</div><div class="item"><strong>任务复盘线索</strong><p class="small muted">DSH 中主动复盘的条件补充只有人工提交后才可在 Workbench 得到候选回执；它不是一份自动生成的纪要。</p>${link('返回任务复盘示意','task')}</div></section><section class="card span-5"><h2>经验与可选 Skill</h2><div class="item"><strong>K-01 v1 · 旧规则清单判断</strong><p class="small muted">项目 A 与产品线 P 关联的是同一条有适用边界的团队经验；v1 团队可用（模拟），R-02 仍可整理中。</p>${link('查看同一条经验','knowledge')}</div><div class="item"><strong>比较清单的稳定步骤？</strong><p class="small muted">条件、输入、异常和停止点核明且可脱敏测试后，才考虑封装 Skill；不自动创建。</p>${link('去 Skill 创作示意','skill')}</div></section><div class="span-12">${candidateBox('fact')}</div></div>`:acl);
+  }
+  function recordView() {
+    return header('WORKBENCH / 工作记录 · 业务对象内页','记录当时的说法，不代替现在的事实','来源详情是上游材料：发生时间、原件版本和可见范围必须清楚，提炼和纠错发生在各自对象上。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><div class="between"><h2>S-01 · 演示周会纪要</h2>${badge('来源定位示意 · 内容未核准','warn')}</div><div class="fact"><span>形成时间</span><span>虚构演示周期 1 · 周会当日；并非真实业务日期</span></div><div class="fact"><span>来源/版本</span><span>演示会议记录 v1；真实原件仍应留在有权系统，原件链接未接入</span></div><div class="fact"><span>可见范围</span><span>仅供虚构团队演练；真实分享、引用和原件权限须重新核查</span></div><div class="fact"><span>关联对象</span><span>项目 A · 产品线 P；关联不复制记录或知识正文</span></div><div class="quote" style="margin-top:14px">脱敏虚构摘要：周会提到“成员 B 接手资料索引”；模板 C 先试用。前者是当时的分工说法，后者是试用建议，均尚需另核生效范围与当前性。</div><div class="notice warn">“可定位来源”不等于原文已获准分享、不等于记录中的判断已确认。原系统未接入，不能查看或上传真实纪要；有错误应先回原记录更正。</div></section><aside class="card span-5"><h2>从这一份记录分出了什么？</h2><div class="item"><strong>分工事实 · 待核</strong><p class="small muted">核来源、生效时点、原系统现状和反证之后，才能显示为项目当前事实；并不形成审核岗位。</p><button class="btn text" data-action="focus-project">到项目 A 查看 →</button></div><div class="item"><strong>模板 C · 待核经验</strong><p class="small muted">试用 ≠ 通用规则；需核条件和反例，再按内容版本进入创作与核对。</p>${link('到知识创作查看','knowledge')}</div><div class="item"><strong>Skill · 尚未形成</strong><p class="small muted">记录本身不是可执行工作流，不强迫每份纪要都产出 Skill。</p></div></aside><section class="card span-12"><div class="actions">${link('回到项目 / 产品线','object')}${link('回工作台','home')}</div></section><div class="span-12">${candidateBox('source')}</div></div>`:acl);
+  }
+  function home() {
+    const work=`<section class="card span-12"><div class="between"><div><h2>跟着具体事项走，而不是“我创作过的所有资产”</h2><p class="small muted">以下关系、责任和状态均为虚构情景；原型没有登录身份、派单、订阅或跨系统待办聚合。</p></div>${link('查看团队可用版本','assets')}</div>${state.authorized?`<div class="grid"><div class="span-6"><h3>需要我处理 · 情景示例</h3><div class="item"><strong>有人明确向我请求补来源（假设）</strong><p class="small muted">知识 K-01 · 问题示意 I-01 · 锚定 v1。只有确有请求且仍有权时才是我的待办；普通评论不算。</p>${link('去讨论补证','discussion')}</div></div><div class="span-6"><h3>我关注的进展 · 情景示例</h3><div class="item"><strong>已提交的修订等待有权者核对</strong><p class="small muted">知识 K-01 · 修订示意 R-02 · 基线 v1。作为提议者可看进展，不因此拥有确认或审核权。</p>${link('看修订状态','proposal')}</div></div></div><div class="notice">当 R-02 真正发布且完成目标读回后，相关进行中项退出；正式版留在团队资产只读展示。以后若发现新问题，另建事项而不改写旧版历史。当前卡片只是说明规则，不随原型中的模拟按钮自动迁移。</div>`:'<div class="notice warn">演示空间未绑定：不展示示例事项标题或摘要；这并非“当前没有待办”。</div>'}</section>`;
+    return header('WORKBENCH / 工作台','围绕内容协作，不先选择身份','当前问题留在 DSH 对话与任务；团队共同把有价值的依据和判断完善为可复用资产。')+scope+`<div class="grid"><section class="card dark span-8"><div class="eyebrow" style="color:#a2dec2">此刻要做什么？</div><h2>在工作中找到可以参考的知识或 Skill</h2><p class="muted">从正在进行的宿主对话获取带来源的知识结果和候选 Skill 建议；无需进入第二个问答系统。</p><div class="actions">${btn('打开 DSH 任务示意','open-task')}</div></section><section class="card span-4"><h2>团队资产绑定</h2><p class="small">${state.authorized?'已模拟绑定；所有访问与授权仍需服务端验证。':'已模拟未绑定；不会显示团队资产内容。'}</p>${btn(state.authorized?'模拟未绑定':'恢复模拟绑定','toggle-access','ghost')}</section>${work}${state.authorized?findContent():'<section class="card span-12"><h2>按业务线索找内容</h2><div class="notice warn">演示空间未绑定；项目、来源与关联内容不可见，不等于团队没有记录。</div></section>'}<section class="card span-6"><h2>一起把内容讲清楚</h2><p class="muted">看到遗漏或冲突，任何本团队有权查看该内容的成员都可选中评论、补背景、附来源、讨论并提出修订。不要求先成为“专家”。</p>${link('看讨论与补证','discussion')}</section><section class="card span-6"><h2>让修订可靠生效</h2><p class="muted">讨论不自动修改正文。修订针对基线版本，正式确认、审核、发布及读回分开；谁有权执行哪项动作，由该资产的策略决定。</p>${link('看修订提议','proposal')}　${link('查看团队资产','assets')}</section><section class="card span-12"><div class="between"><div><h2>当前团队的资产</h2><p class="muted">同一资产空间中维护知识和 Skill，受控仓库是正式版本的来源；外部 Tool 请到左侧专属入口查看。</p></div>${link('查看候选能力地图','map')}</div></section></div>`;
+  }
+  function resultCard() {
+    const r=results[state.result];
+    return `<section class="card"><div class="between">${badge(r.label,r.tone)}<span class="tiny muted">知识判断 ≠ 当前任务获批</span></div><h2 style="margin-top:14px">${r.title}</h2><p class="muted small">${r.body}</p><div class="selectable" data-anchor="answer-a" data-asset="K-01" data-version="v1" tabindex="0" aria-label="可选中文字段落：答案与依据"><strong>答案片段 · 可选择文字批注</strong><p style="margin:9px 0 0">旧纪要 A 记录某类任务按清单 A 办理。新模板 B 的生效时间和适用任务尚未核对，不能直接覆盖 A 的全部范围。</p></div><div class="actions">${btn('评论选中内容（未选则评论示例短句）','anchor-answer','ghost')}${btn(state.sourceExpanded?'收起来源':'对照来源','toggle-sources','secondary')}${link('打开团队知识正文','knowledge')}</div>${state.sourceExpanded?'<div class="quote" style="margin-top:12px">演示来源 A：过去某类任务使用 A。演示来源 B：新模板，但生效条件未知。不是企业真实资料。</div>':''}<div class="fact"><span>来源/版本</span><span>${r.source}</span></div><div class="fact"><span>尚未核实</span><span>本次任务类型、日期及业务系统实时状态</span></div><div class="fact"><span>下一步</span><span>补背景或提疑问；当前业务按原流程判断/审批</span></div></section>`;
+  }
+  function toolCard() {
+    return `<section class="card span-12"><div class="between"><div><h2>当前业务数据 · 外部 Tool（只读示意）</h2><p class="muted small">知识解释依据；只有外部业务系统才能提供当前事实。以下值完全虚构，未连接 ERP。</p></div>${toolBadge()}</div><div class="fact"><span>接口与来源</span><span>get_product_inventory(product_id) · ERP 库存服务（示意）</span></div><div class="fact"><span>输入</span><span>演示商品 DEMO-001 · 不接受真实产品 ID</span></div><div class="actions">${btn('演示通过运行时校验后查询库存','query-inventory','secondary',state.toolStatus==='ready'?'':'disabled title="需要接入且通过调用身份及数据授权校验"')}${link('打开 Tool 详情','tools')}</div>${state.toolStatus==='ready'&&state.toolResult?`<div class="notice good"><strong>演示结果：可用库存 24 件（虚构）</strong><br>来源：ERP 库存服务示意 · 演示点击时间：${escapeHTML(state.toolQueriedAt)}（本地时钟，非业务系统读回）；商品 DEMO-001。不能用于业务判断。</div>`:'<div class="notice warn">未取得当前库存值。组织已开通或 Skill 被推荐，都不代表当前调用身份已获授权或已查询；未接入、无权限和状态未知时不可给出伪实时值。</div>'}</section>`;
+  }
+  const recapActions={source:'关联获准分享的工作记录 / 核来源版本',fact:'核查项目 A / 产品线 P 的事实与有效时间',experience:'提炼有条件适用的团队经验',update:'核对并更新既有知识 K-01（版本待查）',new:'新建知识候选（先核对来源）',skill:'稳定可测试时再核对 / 新建 Skill',tool:'核实外部 Tool 接入或权限',none:'暂不沉淀资产'};
+  const recapReuse={reusable:'同类任务可复用（待核证）',conditional:'有条件可复用：旧规则时期的常规任务（待核证）',special:'仅本次特殊处理',insufficient:'证据不足，先不定性'};
+  const recapArtifacts={none:'没有需归档的报告/PPT',restricted:'有产物，但不可分享或权限不明',shareable:'有产物，用户称可分享；仍需核实授权与入口'};
+  function handoffText() {
+    const lines=['【演示复盘交接｜用户核对的候选，非正式知识或运行审计】','范围：虚构的 A 清单 / B 模板核对；当次业务结果未知。','过程与证据：对话提到 A、B；未接入正式知识引用、Skill 加载/执行或 Tool 调用记录，实际使用无法确认。',`额外调整：${state.recapCorrection.trim()?'预置对话出现旧规则适用条件补充，但用户另有更正；实际调整内容待有权会话核实。':'演示对话中用户补充“旧规则时期的常规任务参考 A”；是否符合原始规则仍待核对。'}`,`讨论结论与去向：用户在本页选择“${recapReuse[state.recapReuse]}”；${recapActions[state.recapAction]}。仅是值得核查的线索，不核准来源说法、项目当前事实或正式修订。`,`来源与版本：演示纪要 A / 模板 B 仅在对话出现；项目 A、产品线 P 与工作记录 S-01 只是虚构查找示例。目标对象、原件权限、有效时间和资产基线都须另核。`];
+    if(state.recapCorrection.trim()) lines.push('待核实：用户另有过程更正；本演示不转交更正原文，也不能仅凭预置例子确认资产应修订。');
+    if(state.recapArtifact==='restricted') lines.push('任务产物：有受限或授权不明的产物；不上传、不转交内容，待业务侧授权。');
+    if(state.recapArtifact==='shareable') lines.push('任务产物：用户称可分享；须先核对来源、版本、脱敏、访问范围和资料库实际入口；资料提交不等于正式知识发布。');
+    if(state.recapArtifact==='none') lines.push('任务产物：用户表示没有需提交的报告/PPT。');
+    lines.push('下一步：只手动复制获准分享的最小线索；创作会话重新鉴权、核证与审查。');
+    return lines.join('\n');
+  }
+  function recapFlow() {
+    if(state.recapStage==='idle') return `<section class="card"><div class="between"><h2>可选支线：主动复盘</h2>${badge('未调用','warn')}</div><p class="small muted">任务仍留在宿主原生会话；想整理可复用的改进时才主动调用，不依赖“任务结束”事件。这里仅演示一个虚构对话流程，不是已安装的 Skill。</p>${btn('演示调用任务复盘 Skill','recap-start','ghost',state.authorized?'':'disabled title="演示资产空间未绑定"')}</section>`;
+    if(state.recapStage==='review') return `<section class="card"><div class="between"><h2>复盘 1/3 · 先看任务怎样做</h2>${badge('仅当前演示对话','warn')}</div><div class="fact"><span>目标与过程</span><span>比较 A 清单和 B 模板 → Agent 给出待核对的差异 → 用户补充旧规则的适用条件。是否完成业务处理：未知。</span></div><div class="fact"><span>知识 / 资料</span><span>对话提到 A、B；K-01 v1 是原型中的示例，不能证明本次实际检索或引用了它。</span></div><div class="fact"><span>Skill / Tool</span><span>仅有清单差异核对 Skill 的演示推荐；没有加载/执行记录，也没有实际 Tool 调用证据。库存演示值不能用于复盘。</span></div><div class="fact"><span>额外调整</span><span>当前演示对话里，用户补充“旧规则时期的常规任务参考 A”；其他文件或 PPT 的修改不可见。</span></div><label class="field-label" for="recap-correction">哪里看错或漏了？（可选，仅留在本地演示，不进入交接）</label><textarea id="recap-correction" class="field" placeholder="不要输入真实业务内容；原型不能验证本地文件或运行记录。">${escapeHTML(state.recapCorrection)}</textarea><div class="actions">${btn('已核对过程，讨论复用性','recap-discuss','')}${btn('暂不复盘，返回任务','recap-reset','ghost')}</div></section>`;
+    if(state.recapStage==='decide') return `<section class="card"><div class="between"><h2>复盘 2/3 · 和用户逐条讨论</h2>${badge('讨论确认 ≠ 正式审核','warn')}</div><p class="small muted">本例只讨论一处可见调整。换一个同类任务还适用吗？条件和反例是什么？如有其他实际改动，须在可授权的来源中另行核对；本原型不据输入捏造修改痕迹。</p>${state.recapCorrection.trim()?'<div class="notice warn">收到本地更正线索，原型无法验证；交接只会标记“另有更正待核实”，不会复述示例调整为已确认事实，也不转交更正原文。</div>':''}<h3>这条调整属于哪种情况？</h3><div class="actions">${Object.entries(recapReuse).map(([key,label])=>btn(label,`recap-reuse-${key}`,state.recapReuse===key?'':'ghost',`aria-pressed="${state.recapReuse===key}"`)).join('')}</div>${state.recapReuse==='pending'?'':`<div class="divider"></div><h3>这条线索先去哪儿核？</h3><p class="small muted">选择一条候选去向，不要求从记录逐级升级到 Skill。来源、分工事实、经验、具体修订各有不同核对方式；这里的讨论不是确认或发布。Tool 接口与权限由外部提供方管理。</p><div class="actions">${(state.recapReuse==='special'||state.recapReuse==='insufficient'?['none']:Object.keys(recapActions)).map(key=>btn(recapActions[key],`recap-action-${key}`,state.recapAction===key?'':'ghost',`aria-pressed="${state.recapAction===key}"`)).join('')}</div>`}<div class="divider"></div><h3>报告 / PPT 等任务产物怎么处理？</h3><p class="small muted">先核来源、版本、敏感信息和分享权限。没有真实上传入口；“用户称可分享”也不是系统已批准。</p><div class="actions">${Object.entries(recapArtifacts).map(([key,label])=>btn(label,`recap-artifact-${key}`,state.recapArtifact===key?'':'ghost',`aria-pressed="${state.recapArtifact===key}"`)).join('')}</div><div class="notice warn">受限产物不展示标题或原文，不自动上传；资料入库与可复用判断成为正式知识是两条流程。</div><div class="actions">${btn('形成待核实的交接结论','recap-finish','',state.recapReuse!=='pending'&&state.recapAction!=='pending'&&state.recapArtifact!=='pending'?'':'disabled title="先完成复用性、线索去向和产物去向讨论"')}${btn('返回过程核对','recap-review','ghost')}</div></section>`;
+    return `<section class="card"><div class="between"><h2>复盘 3/3 · 可人工复制的结论</h2>${badge('仅演示输出 · 待创作核查','warn')}</div><p class="small muted">下面只含虚构任务与本页选项，没有用户补充的原文、真实业务值或完整 trace。先检查可分享范围，再手动选中文本复制；不会自动传到 Workbench。</p><label class="field-label" for="recap-handoff">交接文本（只读，可手动选中复制）</label><textarea id="recap-handoff" class="field handoff" readonly>${escapeHTML(state.handoff)}</textarea><div class="notice">产物如获准分享，可另外在经验证的资料库入口提交来源资料；本原型没有文件上传。可复用判断仍须在创作会话核对后，才可能经确认、审核与发布成为正式知识。</div><div class="actions">${state.recapAction==='source'?link('打开来源核对（手动粘贴）','record'):''}${state.recapAction==='fact'?link('打开业务事实核对（手动粘贴）','object'):''}${['experience','update','new'].includes(state.recapAction)?link('打开知识创作（手动粘贴）','knowledge'):''}${state.recapAction==='skill'?link('打开 Skill 创作（手动粘贴）','skill'):''}${state.recapAction==='tool'?link('查看外部 Tool 前提','tools'):''}${btn('返回讨论并调整结论','recap-revise','ghost')}${btn('回到原生任务示意','recap-reset','ghost')}</div></section>`;
+  }
+  function task() {
+    return header('DSH DESKTOP / 对话与任务','先把眼前的任务做好','原生对话与业务任务是主线；下方对话仅是原型中的静态示意，不是 Workbench 重新实现的 DSH Session。复盘由用户按需主动发起。')+`<div class="grid"><div class="span-8"><section class="card"><div class="between"><h2>原生对话 · 示意</h2>${badge('预置内容，不连接 DSH','warn')}</div><div class="conversation"><div class="message user"><span class="tiny muted">用户 · 演示问题</span>这次应该用哪版清单？</div><div class="message"><span class="tiny muted">Agent · 演示回答</span>清单 A 和模板 B 可能对应不同生效时间与任务范围；先核对资料及当前业务条件，不能直接认定 B 覆盖全部情况。</div><div class="message user"><span class="tiny muted">用户 · 演示补充</span>旧规则时期的常规任务仍参考 A；当前问题仍须按原业务流程确认。</div></div><p class="muted tiny">静态对话不可编辑；没有真实检索或任务提交。需要看示意依据时，再展开下方能力示例。</p><div class="actions">${link('打开 Workbench','home')}</div><details class="optional"><summary>展开：知识结果、候选 Skill 与外部 Tool 的演示（非宿主实测）</summary><div class="result-tabs" aria-label="演示检索结果状态">${Object.entries({confirmed:'已确认',materials:'只有资料',conflict:'资料冲突'}).map(([key,text])=>`<button class="${state.result===key?'active':''}" data-action="result-${key}" aria-pressed="${state.result===key}">${text}</button>`).join('')}</div>${state.authorized?resultCard():acl}<div class="divider"></div><h3>候选 Skill</h3>${state.authorized?`<p class="small">清单差异核对（演示） · 未验证安装、加载或运行。</p>${btn(state.skillExpanded?'收起适用前提':'查看适用前提','skill-detail','secondary')}${state.skillExpanded?'<div class="notice warn">需两份可访问资料；仅整理差异，不批准业务处理。对外部 Tool 的依赖不授予调用权。</div>':''}`:acl}</details></section><div style="margin-top:16px">${recapFlow()}</div></div><aside class="card span-4"><h2>任务优先，复盘可选</h2><p class="muted small">知识、Skill 与 Tool 的真实调用都属于宿主或外部系统；本原型只显示虚构例子，无法读到 Session trace。对话“提到”不等于已经调用。</p><ol class="steps"><li>完成当前业务判断，必要时回原系统复核。</li><li>若确有改进线索，主动复盘过程与额外调整。</li><li>和用户讨论复用性，再决定资产动作及报告/PPT 去向。</li><li>人工复制脱敏候选；Workbench 另行核证。</li></ol><div class="notice warn">无自动任务结束卡、无自动上传、无真实 Skill 运行。</div></aside>${state.authorized?`<div class="span-12"><details class="optional"><summary>展开：外部 Tool 查询示意（不作为复盘运行证据）</summary>${toolCard()}</details></div>`:''}</div>`;
+  }
+  function knowledge() {
+    return header('WORKBENCH / 知识创作会话','围绕业务对象、事实和经验持续更新','从项目、产品线、工作记录或既有版本进入同一条内容；来源声称、待核线索和可引用知识是不同对象。')+scope+(state.authorized?`<div class="grid">${findContent()}</div><div class="grid" style="margin-top:16px"><div class="span-8"><section class="card"><div class="between"><h2>团队经验 · K-01 v1（演示）</h2>${badge('v1 团队可用 · 模拟','good')}</div><p class="muted small">关联项目 A、产品线 P 的是同一条知识和同一版本；适用条件须在每次任务重新核对。演示旧版保持只读，评论仍挂在 v1。</p><div class="fact"><span>适用范围</span><span>旧规则时期的常规任务；模板 B 的生效范围尚待核实</span></div><div class="fact"><span>来源与复核</span><span>演示来源 A；仅在本原型标注为已核（非真实权威）。真实来源版本、授权和反例需再查。</span></div><div class="selectable" data-anchor="knowledge-p1" data-asset="K-01" data-version="v1" tabindex="0" aria-label="可选中文字段落：知识正文"><strong>清单适用判断 · 第 1 段</strong><p style="margin:9px 0 0">旧规则时期，常规任务可参考清单 A。模板 B 的生效范围尚需核对；当前任务仍应返回业务系统确认。</p></div><div class="actions">${btn('评论选中内容（未选则评论示例短句）','anchor-knowledge','ghost')}${link('查看评论及证据','discussion')}${link('查看修订提议','proposal')}${link('查看来源记录','record')}</div><div class="divider"></div><div class="between"><h3>下一修订 R-02 · 与 v1 并存</h3>${badge(contentStatus(),published()?'good':'warn')}</div><p class="small muted">${state.proposal?'基于 v1 的特定草稿；来源核对、内容确认和发布读回在详情展开。':'尚未提出；v1 继续作为本演示中的可用版本。'}</p><div class="divider"></div><h3>事实、经验与 Skill 分开</h3><p class="muted small">项目当前分工要核来源和生效时间；经验 K-01 是带边界的描述性判断；只有稳定且可脱敏测试的步骤才考虑 Skill。报告/PPT 获授权后可另循经核实的资料库入口作为来源，本页不上传。</p><div class="actions"><button class="btn text" data-action="focus-project">看项目当前事实 →</button>${link('从稳定流程创建 Skill','skill')}</div></section><div style="margin-top:16px">${candidateBox('knowledge')}</div></div><aside class="card span-4"><h2>列表与详情看什么</h2><ol class="steps"><li>从来源 S-01 看当时说法，不自动填当前事实。</li><li>在项目 A 核生效区间和反证；K-01 核适用与不适用范围。</li><li>v1 团队可用时，R-02 仍可整理中或待核对。</li><li>草稿经针对性确认、Git/CI、人审与目标读回后，才可能成为新可用版。</li></ol><div class="notice warn">用户复盘选择“值得复用”不等于确认了项目分工或 K-01 修订；本地收件箱回执也不是发布记录。</div>${link('查看团队资产与可用版本','assets')}</aside></div><div style="margin-top:16px">${publishFlow()}</div>`:acl);
+  }
+  const candidateKind=()=>state.route==='object'?'fact':state.route==='record'?'source':state.route;
+  function candidateBox(kind) {
+    const labels={knowledge:'知识候选',skill:'Skill 候选',source:'来源核对线索',fact:'业务事实核对线索'};
+    const boundary=kind==='source'?'此处只接收获准分享的来源定位与待核问题；不登记整份纪要、不接收原件。':kind==='fact'?'此处只接收待核事实线索；项目分工、生效时间与原系统现状仍须另核，不会写成当前事实。':'此处只接收待核的内容线索；不自动创建正式内容或版本。';
+    return `<section class="card"><div class="between"><h2>从任务复盘手动带来${labels[kind]}</h2>${badge(state.candidateSubmitted[kind]?'本地模拟已收到 · 待核实':'尚未提交','warn')}</div><p class="muted small">返回宿主复盘，人工选择并复制获准分享的最小文本，再自行粘贴到这里。没有自动携带 Session、附件或运行日志；不要粘贴受限 PPT、真实客户信息及完整对话。${boundary}</p><label class="field-label" for="candidate-draft">脱敏候选（演示输入，不自动入库）</label><textarea id="candidate-draft" class="field" placeholder="请手动粘贴待核线索；本页不会自动读取原生对话。">${escapeHTML(state.candidateDrafts[kind])}</textarea><div class="actions">${btn('模拟提交候选供核查','submit-candidate','ghost')}${link('返回原任务示意','task')}</div>${state.candidateSubmitted[kind]?'<div class="notice good">仅在当前浏览器内存标为此类线索已收到；还需核对分享权限、原始资料及资产版本。没有登记原件、确认事实或创建正式内容。</div>':'<div class="notice">尚未提交；仅打开页面或粘贴文本都不代表团队已收到。</div>'}</section>`;
+  }
+  function annotationCards() {
+    return state.annotations.length?state.annotations.map((x,i)=>`<div class="annotation" id="annotation-${i}"><div class="between"><strong>团队成员的评论 #${i+1}</strong>${badge(x.status,x.status==='已回应'?'good':'warn')}</div><p class="quote" style="margin:10px 0">“${escapeHTML(x.text)}”</p><p>${escapeHTML(x.body)}</p>${x.evidence?`<p class="small"><strong>补充来源：</strong>${escapeHTML(x.evidence)}（待核对引用，不自动采信）</p>`:''}<p class="anchor-meta">锚点 ${escapeHTML(x.asset)} / ${escapeHTML(x.version)} / ${escapeHTML(x.paragraph)} / 文字快照；演示留痕，仅当前页面</p>${state.proposal?'<div class="notice warn">已有基于此讨论的修订提议。原评论继续绑定旧版 v1，不能漂移到新版本。</div>':''}</div>`).join(''):'<div class="notice">尚无团队评论。先在宿主答案或知识正文选中文段，点击「评论选中内容」。</div>';
+  }
+  function discussion() {
+    return header('WORKBENCH / 内容讨论','看到差异就留下来，不必先有“专家”身份','所有能访问该团队资产的成员都可评论、补背景、给来源、讨论或发起修订；评论不是结论的批准。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><div class="between"><h2>围绕 K-01 的讨论</h2>${badge(`${state.annotations.length} 条评论`)}</div>${annotationCards()}<div class="actions">${link('去宿主答案选中内容','task')}${link('去知识正文选中内容','knowledge')}${state.annotations.length?link('把讨论整理成修订','proposal'):''}</div></section><aside class="card span-5"><h2>对选中内容评论</h2>${anchorHint()}<label class="field-label" for="comment">问题、差异或背景</label><textarea class="field" id="comment" placeholder="例如：这里可能仅适用于旧规则时期的常规任务……">${escapeHTML(state.draft)}</textarea><label class="field-label" for="evidence">来源线索（可选）</label><input id="evidence" class="field" value="${escapeHTML(state.evidence)}" placeholder="例如：某份资料的标题或定位，勿填敏感内容"><p class="muted tiny">只示范位置、版本及文字快照；真实系统还需稳定锚点与变更后的重新定位机制。</p><div class="actions">${btn('发布团队评论（模拟）','submit-comment','',state.selected?'':'disabled title="需要先选择文段"')}</div></aside></div>`:acl);
+  }
+  function proposal() {
+    const p=state.proposal;
+    return header('WORKBENCH / 修订提议','讨论有了结论，才提出要改哪里','任一团队成员可提出针对 v1 的候选修订；不能把评论直接写入正式仓库。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>候选修订 R-02</h2>${badge(p?state.review:'尚未提出',p&&state.decision==='已模拟针对修订确认'?'good':'warn')}</div>${!state.annotations.length?'<div class="notice warn">先在答案或正文选中内容并发表评论，为提议留下原因和来源。</div>':''}<div class="fact"><span>原文 · v1</span><span>旧规则时期，常规任务可参考清单 A。模板 B 的生效范围尚需核对。</span></div>${state.proposal?`<div class="fact"><span>建议修订</span><span>${escapeHTML(p.text)}</span></div><div class="fact"><span>版本基线</span><span>${escapeHTML(p.base)} · ${escapeHTML(p.anchor.paragraph)} · ${escapeHTML(p.anchor.text)}（快照）</span></div><div class="fact"><span>提出理由</span><span>${escapeHTML(p.reason)}</span></div><div class="notice warn">${published()?'已模拟新版本读回；旧版评论依旧挂在 v1，若要迁移到 v2 必须人工核对并重新定位。':state.publication==='外部状态未知 · 待对账'?'R-02 外部结果未知，先在知识创作会话对账；旧版 v1 继续可用。':state.publication==='待模拟读回'?'R-02 已模拟审核，尚未核对目标版本；旧版 v1 继续可用。':'候选修订只在演示内存；旧版内容和评论保持不变，待确认后才可继续正式审核。'}</div>`:`<label class="field-label" for="proposed-text">建议修改后的文字</label><textarea id="proposed-text" class="field">旧规则时期的常规任务可参考清单 A；模板 B 的生效时间和适用范围须由团队核实后再形成新判断。当前任务仍按原业务流程办理。</textarea><label class="field-label" for="reason">为什么这样改</label><input id="reason" class="field" value="补足适用边界，避免把新模板当作所有任务的通用规则">`}<div class="actions">${state.proposal?(state.publication!=='无新版本'?'<div class="notice">R-02 的审核或读回流程已开始；不可在本次流程覆盖修订。外部结果未知须先对账，新问题需另建事项。</div>':btn('修改建议并重新确认','revise','ghost')):btn('提出修订（模拟）','create-proposal','',state.annotations.length?'':'disabled title="需要先留下评论"')}${link('查看来源与讨论','discussion')}${p?link('看指定修订核对','review'):''}</div></section><aside class="card span-4"><h2>版本与责任</h2><p class="muted small">提议记录基线资产、版本、原文位置与文字快照、理由以及评论引用。若原文位置变化，不可自动把旧评论贴到新版的相似句子上。</p><div class="notice">讨论与提议开放；某一修订能否正式确认，取决于本团队资产策略和具体判断的责任，不是职位标签或默认全员批准。</div></aside></div>`:acl);
+  }
+  function review() {
+    return header('WORKBENCH / 针对修订核对','一起看证据；确认是一项单独的责任','团队成员可以参与核对、指出问题和补证；“正式确认指定修订”是受控动作，需要实际有权的确认人。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>R-02 · ${state.proposal?'已有候选':'尚无提议'}</h2>${badge(published()?'演示 v2 已读回':state.publication==='外部状态未知 · 待对账'?'外部结果未知 · 待对账':state.publication==='待模拟读回'?'演示审核完成 · 待读回':state.decision,state.decision==='已模拟针对修订确认'||published()?'good':'warn')}</div><div class="quote">原资料 A：过去某类任务使用 A。原资料 B：出现新模板，但时间与任务范围未知。Agent 的比较仅作待核对线索。</div><div class="fact"><span>成员评论</span><span>${state.annotations.length} 条 · 可继续补背景/证据</span></div><div class="fact"><span>草稿修订</span><span>${state.proposal?escapeHTML(state.proposal.text):'未创建，不能确认'}</span></div><div class="fact"><span>正式判断</span><span>${state.decision}</span></div><div class="notice warn">${published()?'R-02 已模拟读回；本页保留核对记录，新的问题需另建事项。':state.publication==='外部状态未知 · 待对账'?'R-02 的外部结果未知；先在知识创作会话对账，不在本页重新判定。':state.publication==='待模拟读回'?'R-02 已模拟审核，尚未目标读回；后续在知识创作会话处理。':'本页的「模拟具备确认权限的审核」按钮仅演示有权人员对指定修订的判断；没有真实身份、授权、批准或发布。'}</div><div class="actions">${link('参与讨论／补证','discussion')}${state.proposal&&state.review==='待确认'&&state.publication==='无新版本'?btn('要求补证','request-evidence','secondary'):''}${state.proposal&&state.review==='待确认'&&state.publication==='无新版本'?btn('拒绝本修订','reject','danger'):''}${state.proposal?btn('模拟具备确认权限的审核','simulate-confirm','ghost',state.review==='待确认'&&state.publication==='无新版本'?'':'disabled title="当前修订已处理；请先重新提出修订"'):''}</div></section><aside class="card span-4"><h2>没有人能够确认时</h2><p class="muted small">显示待指派并返回当前业务处理，不假装“已转给专家”；负责人决定投入时间、缩小范围或保留逐次人工判断。</p>${link('查看团队资产中的版本','assets')}</aside></div>`:acl);
+  }
+  function skill() {
+    return header('WORKBENCH / Skill 创作会话','描述性方法不必都变成 Skill','从可核证经验中的稳定步骤出发；宿主任务里的推荐、复盘里觉得值得复用，都不证明旧 Skill 曾实际运行。')+scope+(state.authorized?`<div class="grid"><div class="span-8"><section class="card"><div class="between"><h2>清单差异核对 · 工作流草稿（演示）</h2>${badge('整理中 · 非发布版','warn')}</div><div class="fact"><span>引用与关联</span><span>团队经验 K-01 v1（演示版） · 项目 A / 产品线 P；引用同一版本，不复制正文</span></div><div class="fact"><span>当前需核对</span><span>输入资料是否有权访问、旧/新规则适用条件、人的判断点、异常和停止条件</span></div><ol class="steps"><li>核对复盘候选是否涉及稳定步骤，排除仅当次处理；描述性方法可留在知识。</li><li>描述触发、输入、人工判断、例外和停止条件，明确外部 Tool 依赖。</li><li>用脱敏样例测试正常、边界和异常情形并记录差异。</li><li>内容版本经审核发布后，目标工作区分发/安装、加载、任务执行与业务成效分别核证。</li></ol><div class="notice warn">本地用户创作的 knowledge-compounding 仅是 DSH 工作区实例；其 deposits/status 文件未接入本原型，accepted/merged 也不是正式发布或 Skill 安装。这里不执行 Skill 或真实 Tool。</div></section><div style="margin-top:16px">${candidateBox('skill')}</div></div><aside class="card span-4"><h2>Skill 与知识的区别</h2><p class="muted small">经验说明“什么条件下怎样判断”；Skill 封装“输入、稳定步骤、判断点与停止条件”。模拟草稿仅整理中，既不等于宿主已安装/加载，也没有运行记录。</p><div class="actions">${link('查看经验 K-01','knowledge')}${link('查看团队资产','assets')}${link('返回宿主任务示意','task')}</div></aside></div>`:acl);
+  }
+  function publishFlow() {
+    const unknown=state.publication==='外部状态未知 · 待对账';
+    const approval=state.publication==='待模拟读回'?'演示审核完成；尚未读回':published()?'演示读回完成':unknown?'外部状态未知，必须对账':'未开始';
+    return `<section class="card"><div class="between"><h2>K-01 · R-02 的审核与发布（创作会话内）</h2>${badge(contentStatus(),published()?'good':'warn')}</div><p class="small muted">这里展示知识创作会话的下一步；针对当前修订依次核对内容确认、Git/CI、人审及目标版本读回。按钮仅改变本地示意状态，没有真实身份或发布权限。</p><div class="fact"><span>内容确认</span><span>${state.decision}</span></div><div class="fact"><span>审核/读回</span><span>${approval}</span></div><div class="fact"><span>目标版本</span><span>${published()?'演示 v2 · 可用范围仍须核条件':'未核实可发布的新版本；v1 仍是本演示的可用版'}</span></div><div class="actions">${btn('模拟有权审核完成','audit','secondary',state.proposal&&state.decision==='已模拟针对修订确认'&&state.publication==='无新版本'?'':'disabled title="须先对特定草稿模拟内容确认"')}${btn('模拟目标版本读回','readback','secondary',state.publication==='待模拟读回'?'':'disabled title="须先模拟审核"')}${btn('模拟外部结果未知','external-unknown','ghost',state.publication==='待模拟读回'?'':'disabled title="仅待读回时演示未知"')}${link('到团队资产看只读结果','assets')}</div><div class="notice warn">真实流程中动作须按具体权限、不可变修订、版本及来源逐次重验；外部状态未知先对账，不能盲目重试。Skill 的审核发布属于 Skill 创作会话，不在这里操作。</div></section>`;
+  }
+  const assetTabs={progress:'最新进展',overview:'全局概览',diagnosis:'智能诊断'};
+  const assetDetails={
+    'event-source':{type:'资产事件 · 来源核证',title:'S-01 · 分工说法待核',version:'S-01 / v1 · 演示周期 1',status:'来源定位示意，尚未核成当前事实',source:'演示周会纪要 S-01 v1；原件链接与分享资格未接入',boundary:'周会提到“成员 B 接手资料索引”，但生效时间、当前业务系统状态和反证均未知。',next:'先核原件授权和事实时效；来源引用不授予成员 B 审核或发布权限。',create:'record',createLabel:'主动进入来源核对示意'},
+    'event-revision':{type:'资产事件 · 修订',title:'K-01 · 适用边界待补',version:'K-01 v1 / R-02（仅演示）',status:'v1 有限范围可用；R-02 另行核对',source:'演示来源 A；模板 B 的生效范围待核',boundary:'事件示例为预置演示周期，不是本周真实发布；模拟修订不计入固定周统计。',next:'对 R-02 的核对、审核与目标读回只在知识创作会话。',create:'knowledge',createLabel:'明确前往知识创作会话'},
+    product:{type:'业务对象',title:'产品线 P · 模板使用',version:'演示对象 P / 当前版本未核实',status:'职责及新模板试用范围待核',source:'演示周会来源 S-01 v1；原业务系统未接入',boundary:'模板 C 被提及试用，不等于产品线正式规则；同一经验 K-01 关联此产品线与项目 A。',next:'核生效时间与可访问来源，不据来源生成当前人员画像。',create:'product',createLabel:'主动进入业务对象核证'},
+    project:{type:'业务对象',title:'项目 A · 交接资料核对',version:'F-01 / 演示周期 1',status:'旧阶段事实有界；当前分工未知',source:'演示交接约定 v1；S-01 的新分工说法尚未核实',boundary:'F-01 只覆盖演示周期 1，不能当作今天的分工；成员 B 的接手说法没有生效证据。',next:'到原业务系统核当前状态、时效与反证；分工不产生系统审核权。',create:'project',createLabel:'主动进入业务对象核证'},
+    record:{type:'工作记录 · 来源',title:'S-01 · 演示周会纪要',version:'S-01 v1 / 演示周期 1',status:'可定位的虚构摘要，原件权限未接入',source:'演示会议记录 v1；真实原件留在有权系统',boundary:'当时的分工说法和模板 C 试用建议，均不是已经核实的当前事实或正式知识。',next:'获准访问后核原件、形成时间与引用范围；不复制完整纪要。',create:'record',createLabel:'主动进入来源核对示意'},
+    knowledge:{type:'团队经验 · 正式版本',title:'K-01 · 清单适用判断',version:'K-01 v1 / Git 提交未接入',status:'演示 v1 团队可用；真实发布证据未接入',source:'演示来源 A；原件版本、授权与 Git commit 待核',boundary:'旧规则时期的常规任务可参考清单 A；模板 B 的生效条件不明。当前任务仍要回业务系统核实。',next:'新修订 R-02 可并行，不覆盖 v1；实际讨论/修订须重新核版本和权限。',create:'knowledge',createLabel:'明确发起讨论或修订'},
+    'knowledge-release':{type:'团队经验 · 本周更新',title:'K-02 · 交接索引使用说明',version:'K-02 v2 / 演示周周五',status:'预置样例中的正式更新版；计入本周 6 篇之一',source:'虚构交接材料与修订记录；真实 Git 审核和发布回执未接入',boundary:'面向有权查看索引的团队成员；资料原件仍须按各自权限读取。',next:'后续发现范围不符，可提出新修订；阅读此版不自动创建个人事项。',create:'knowledge',createLabel:'明确进入知识创作会话'},
+    'skill-release':{type:'Skill · 本周更新',title:'例行资料核对 · Skill',version:'SK-02 v1.1 / 演示周周四',status:'预置样例中的团队可用版本；计入本周 2 个之一',source:'虚构流程设计与版本记录；真实目标安装、加载和执行回执未接入',boundary:'仅面向脱敏资料和人工确认步骤；不可推断已执行 91 次或由此产生业务成果。',next:'安装、加载和执行分别核验；需要修订时进入 Skill 创作会话。',create:'skill',createLabel:'明确进入 Skill 创作会话'},
+    revision:{type:'团队经验 · 下一修订',title:'K-01 · R-02 进度',version:'K-01 v1 → R-02（如已提出）',status:'状态取自本地演示流程',source:'讨论锚定 K-01 v1；来源 A / 模板 B 的范围待核',boundary:'无新发布时 v1 保持演示可用；外部 unknown 不是读回成功或失败。',next:'内容确认、审核、读回和对账都须在知识创作会话完成。',create:'knowledge',createLabel:'明确进入指定知识创作会话'},
+    skill:{type:'Skill · 草稿',title:'清单差异核对 · 工作流草稿',version:'草稿 / 正式版本尚无',status:'整理中，未发布',source:'引用演示知识 K-01 v1；流程及测试尚未核实',boundary:'无分发、安装、宿主加载或实际执行的证据；不计入可用 Skill。',next:'核触发、输入、人类判断、异常和停止条件；描述性经验可以不封装。',create:'skill',createLabel:'明确进入 Skill 创作会话'},
+    'tool-release':{type:'Tool · 本周开通',title:'工单进度查询 · 团队目录条目',version:'目录项 MES-WO-01 / 演示周周二',status:'预置样例中的团队已开通条目；计入本周开通 3 个之一',source:'虚构外部 Tool 目录；真实提供方、授权与开通回执未接入',boundary:'组织开放不代表任一成员已获工单数据访问权；目录引用不是接口定义。',next:'在业务接口目录按调用身份、用途与宿主健康核对实际资格。',create:'tools',createLabel:'主动进入业务接口目录'},
+    'diagnosis-conflict':{type:'AI 巡检候选 · 说法冲突',title:'清单 A 与模板 B 的适用范围待对齐',version:'项目 A / K-01 v1 / 模板 B · 范围待核',status:'发现同一任务的不同适用说法；是否在同一生效区间冲突，尚无法确认',source:'K-01 v1（演示正式版本）限定旧规则时期的常规任务；演示模板 B 提及新模板，生效时间及任务范围未核',boundary:'若时间或任务范围不同，两种说法可以并存；不能将相关文本直接合并成当前统一规则。',next:'核模板 B 的来源权限、版本、有效时间与覆盖任务，再对比 K-01 的范围；确有冲突才针对特定版本提出修订。',create:'discussion',createLabel:'主动对照范围并补证',scan:'固定演示巡检批次 · 来源版本均为虚构，未实际读取',unknown:'模板 B 的生效时间、任务类型与权威状态'},
+    'diagnosis-stale':{type:'AI 巡检候选 · 更新待复核',title:'项目 A 交接进展缺后续可核验状态',version:'项目 A / F-01 / 演示周期 1',status:'演示阶段记录已到截止点；缺少后续权威状态，不等于进展停滞',source:'F-01 仅记录演示周期 1 的交接资料索引核对入口；演示约定在周期结束后复核后续状态',boundary:'原业务系统未接入；可能已有进展而本巡检未覆盖。真实产品须先有约定复核期和成功的权威状态读取，才能报告“长期未更新”。',next:'核对演示约定的复核期限与业务系统当前状态；若确未更新，约定下次复核或请有权成员补进展。',create:'project',createLabel:'主动核对项目状态',scan:'固定演示巡检批次 · 无业务系统读回',unknown:'周期结束后的业务进展、负责人及原系统更新时间'},
+    'diagnosis-flow':{type:'AI 巡检候选 · 流程衔接',title:'交接资料核对的 Skill 衔接尚待验证',version:'限定任务：交接资料核对 / SK-02 v1.1 → 清单差异核对草稿 / K-01 v1',status:'例行核对 Skill 已有演示发布版；后续差异核对仍为草稿，业务流未获运行验证',source:'SK-02 v1.1 的安装/执行无回执；清单差异核对是未发布草稿，引用 K-01 v1；后续任务实时状态判断点须外部授权数据或人工核对',boundary:'把两个 Skill 串在流程图上不等于已完成衔接；前一步的输出契约、后一步的输入和人工停止点均待核。外部 Tool 目录可见不代表获准调用。',next:'先核 SK-02 的实际运行与输出，再核差异核对草稿的输入、异常和停止点，以及外部数据授权；明确哪一步仍须人工判断，再决定是否值得封装或补证。',create:'skill',createLabel:'主动核对 Skill 的流程与依赖',scan:'固定演示巡检批次 · 无宿主执行或 Tool 调用证据',unknown:'两步间输入/输出契约、安装/执行回执、外部数据资格与真实任务结果'}
+  };
+  const assetOpen=(id,label='看只读详情')=>btn(label,`asset-open-${id}`,'ghost');
+  const assetInline=(id,label)=>`<button type="button" class="asset-inline" data-action="asset-open-${id}">${label}</button>`;
+    const assetMetric=(name,total,unit,newLabel,newCount,useLabel,useCount,people,totalLabel='当前可用')=>`<div class="asset-metric"><div class="eyebrow">${name}</div><div class="total"><strong>${total}</strong><span>${unit} · ${totalLabel}</span></div><div class="metric-row"><div><strong>${newCount}</strong><span>本周${newLabel}</span></div><div><strong>${useCount}</strong><span>本周${useLabel}</span></div><div><strong>${people}</strong><span>使用人次</span></div></div></div>`;
+  function assetDetail() {
+    const item=assetDetails[state.assetDetail];
+    if(!item) return '';
+    const revision=state.assetDetail==='revision';
+    const status=revision?(published()?'演示 v2 已读回；旧版 v1 与评论保留':state.publication==='外部状态未知 · 待对账'?'外部结果未知 · 待对账':state.publication==='待模拟读回'?'审核示意完成 · 尚未目标读回':state.proposal?`R-02 ${contentStatus()} · v1 保持可用`:'R-02 尚未提出 · v1 保持演示可用'):item.status;
+    const diagnostic=state.assetDetail?.startsWith('diagnosis-');
+    const disposition=diagnostic?state.diagnosticDisposition[state.assetDetail]:null;
+    return `<div class="grid"><section class="card span-12"><div class="between"><div><div class="eyebrow">${item.type} / 只读详情</div><h2>${item.title}</h2></div>${badge('固定虚构示例','warn')}</div><div class="fact"><span>对象 / 版本</span><span>${item.version}</span></div><div class="fact"><span>当前阶段</span><span>${escapeHTML(status)}</span></div>${diagnostic?`<div class="fact"><span>巡检批次</span><span>${item.scan}</span></div>`:''}<div class="fact"><span>来源与证据</span><span>${item.source}</span></div><div class="fact"><span>适用 / 截至</span><span>${item.boundary}</span></div>${diagnostic?`<div class="fact"><span>尚需核对</span><span>${item.unknown}</span></div>`:''}<div class="fact"><span>待核与去向</span><span>${item.next}</span></div><div class="fact"><span>最近核实</span><span>固定演示周期 1；不代表当前日期或外部读回</span></div><div class="actions">${btn(`返回${assetTabs[state.assetTab]}`,'asset-back','secondary')}</div></section>${diagnostic?`<section class="card span-12"><h2>反馈这条线索</h2><p class="small muted">${disposition==='needs-evidence'?'本地标记：待补证；未通知或指派任何人。':disposition==='not-applicable'?'本地标记：不适用；未改动来源与正式版本。':'尚未处理；阅读详情不自动受理或派单。'}</p><div class="actions">${btn('记录待补证',`diagnosis-disposition-${state.assetDetail}-needs-evidence`,'ghost')}${btn('标记不适用',`diagnosis-disposition-${state.assetDetail}-not-applicable`,'ghost')}</div><p class="tiny muted">正式产品须记录判断范围与理由；新证据到来后重新评估，不自动关闭原始来源问题。</p></section>`:''}<section class="card span-12"><h2>继续处理 · 与阅读分开</h2><p class="small muted">只有明确选择后才离开团队资产；真实目的页必须重验身份、团队、来源权限、对象 ID、基线和动作资格。原型只定位示意页，不自动传原文、创建事项或确认版本。</p><div class="actions">${btn(item.createLabel,`asset-create-${item.create}`)}${state.assetDetail==='diagnosis-flow'?link('看限定任务的判断点','map'):''}</div><div class="notice">确认、审核、发布与目标读回不在此页操作；浏览详情不进入个人工作台。</div></section></div>`;
+  }
+  const businessLines=[
+    {id:'product',name:'产品线 P',theme:'模板适用与清单判断',note:'S-01 提到试用建议；范围待核'},
+    {id:'product-q',name:'产品线 Q',theme:'资料索引与交接',note:'演示分组；业务归属待核'},
+    {id:'product-r',name:'产品线 R',theme:'流程衔接与核验',note:'演示分组；业务归属待核'}
+  ];
+  const businessProjects=[
+    {id:'project',name:'项目 A',theme:'交接资料核对',links:{product:['清单适用判断','K-01 v1 · 演示关联'], 'product-q':['交接资料索引','归属待核 · 不作当前事实']}},
+    {id:'project-b',name:'项目 B',theme:'资料整理（示意）',links:{'product-q':['资料整理','关系待核 · 无已核版本']}},
+    {id:'project-c',name:'项目 C',theme:'流程验证（示意）',links:{'product-r':['流程验证','关系待核 · 无运行回执']}}
+  ];
+  function assetOverview() {
+    const focus=state.assetOverviewFocus;
+    const all=focus==='all';
+    const selectedLine=businessLines.find(line=>line.id===focus);
+    const selectedProject=businessProjects.find(project=>project.id===focus);
+    const lines=businessLines.map(line=>`<button type="button" class="business-line ${focus===line.id?'active':!all&&!(selectedProject&&selectedProject.links[line.id])?'dim':''}" data-action="asset-focus-${line.id}" aria-pressed="${focus===line.id}"><strong>${line.name} · ${line.theme}</strong><span>${line.note}</span></button>`).join('');
+    const headings=businessLines.map(line=>`<span>${line.name}</span>`).join('');
+    const rows=businessProjects.map(project=>`<div class="business-map-row ${!all&&focus!==project.id&&!project.links[focus]?'dim':!all?'related':''}"><button type="button" class="business-project ${focus===project.id?'active':''}" data-action="asset-focus-${project.id}" aria-pressed="${focus===project.id}"><strong>${project.name} · ${project.theme}</strong><span>${project.id==='project'?'F-01 仅覆盖演示周期 1 · 当前状态待核':'演示占位 · 无当前进展证据'}</span></button>${businessLines.map(line=>{const relation=project.links[line.id]; return relation?`<div class="business-cell ${project.id==='project'&&line.id==='product'?'':'pending'}"><strong class="mobile-line">${line.name} · </strong><strong>${relation[0]}</strong><span>${relation[1]}</span></div>`:`<div class="business-cell off"><span class="mobile-line">${line.name} · </span>关联未登记</div>`;}).join('')}</div>`).join('');
+    const capabilities=[
+      {id:'knowledge',title:'K-01 v1 · 清单适用判断',where:'项目 A ↔ 产品线 P',scope:'旧规则时期常规任务；R-02 修订候选未覆盖 v1',status:'演示可用版 · 需核实际发布证据',linked:['project','product']},
+      {id:'knowledge-release',title:'K-02 v2 · 交接索引使用说明',where:'项目 A',scope:'有权查看索引的成员；产品线 Q 归属尚未核实',status:'演示更新版 · 需核实际发布证据',linked:['project']},
+      {id:'skill-release',title:'SK-02 v1.1 · 例行资料核对',where:'项目 A',scope:'脱敏资料及人工确认；产品线 Q 归属尚未核实',status:'演示发布版 · 安装 / 加载 / 执行未核',linked:['project']}
+    ];
+    const capabilityCards=capabilities.map(capability=>`<div class="business-capability ${!all&&!capability.linked.includes(focus)?'dim':''}"><strong>${assetInline(capability.id,capability.title)}</strong><p class="small">${capability.where} · ${capability.scope}</p><span class="tiny muted">${capability.status}</span></div>`).join('');
+    const context=all?`<p>项目与产品线是两条可交叉的工作线索：有的关联来自已登记的演示来源，其余只是待核的版图位置。浅绿表示演示中有明确关联，虚线表示尚未核实；空格表示未登记，不等于业务上没有关系。</p><p class="small muted">K-01 v1 是同一个版本，关联项目 A 与产品线 P，不是两份知识。选中一条线索可查看其范围与来源。</p>`:focus==='project'?`<p>项目 A 围绕交接资料核对：F-01 仅记录演示周期 1 的入口；现在的进展及分工须回业务系统核实。产品线 P 的 K-01 v1 关联已有演示依据，产品线 Q 的归属只是待核候选。</p><p class="small muted">相关经验：${assetInline('knowledge','K-01 v1')}、${assetInline('knowledge-release','K-02 v2')}；相关 Skill：${assetInline('skill-release','SK-02 v1.1')}（未核安装/执行）。来源：${assetInline('record','S-01 v1 周会记录')}是当时说法，不能当作当前分工；原文未接入。</p>`:focus==='product'?`<p>产品线 P 关注模板适用范围。K-01 v1 在旧规则时期常规任务中可作演示参考，关联项目 A；S-01 提到模板 C 试用建议，但生效条件与任务范围尚待核。</p><p class="small muted">相关经验：${assetInline('knowledge','K-01 v1')}；${assetInline('revision','R-02 修订候选')}不覆盖 v1。历史出处：${assetInline('record','S-01 v1 周会记录')}仅可看摘要，原文未接入。</p>`:`<p>${selectedProject?'这是项目的演示占位，业务进展、归属和经验关联尚未核实。':'这是产品线的演示分组；对应项目关系与适用能力尚未核实。'}请先核对团队对象及有权来源，不能据占位关系推断已具备能力或当前状态。</p>`;
+    const label=all?'全团队':selectedProject?`${selectedProject.name} · ${selectedProject.theme}`:`${selectedLine.name} · ${selectedLine.theme}`;
+    const detailId=focus==='project'||focus==='product'?focus:null;
+    return `<div class="grid" style="margin-top:16px"><section class="card span-12"><div class="eyebrow">业务 × 能力 / 团队版图</div><h2>先看业务关系，再看能力落点</h2><p class="small muted">六个对象同时在场；下方交叉处是工作主题与证据状态，并非项目对产品线的唯一归属或自动覆盖率。所有名称和关系仅为固定虚构示例。</p><div class="between"><h3>产品线 · 工作主题</h3>${btn('看全团队','asset-focus-all','ghost',`aria-pressed="${all}"`)}</div><div class="business-lines">${lines}</div><h3>项目如何穿过产品线</h3><div class="business-map"><div class="business-map-row business-map-heading"><span>项目 / 产品线</span>${headings}</div>${rows}</div><p class="tiny muted">实线：演示中有关联版本 · 虚线：仅有候选关系、待核证 · 空白：未登记，不等于不存在。</p></section><section class="card span-12"><div class="eyebrow">可复用能力 · 同一版本只出现一次</div><h2>知识与 Skill 落在哪儿</h2><div class="business-capabilities">${capabilityCards}</div><p class="tiny muted">灰显表示与当前选择无已核关联，不等于不能用于该对象；状态仅属固定演示。这里不是针对限定任务逐判断点核验的「候选能力地图」。</p><div class="business-focus" aria-live="polite"><div class="eyebrow">${all?'全队视角':selectedProject?'项目视角':'产品线视角'} / 选中上下文</div><h3>${label}</h3>${context}${detailId?`<div class="actions">${assetOpen(detailId,'查看业务对象详情')}</div>`:''}<p class="tiny muted">长篇历史原文只在核实文档 ID / 版本、ACL 与对应 WeKnora 深链后开放；此演示没有外部文档链接。</p></div></section></div>`;
+  }
+  function assets() {
+    const tabs=`<div class="result-tabs" role="group" aria-label="团队资产视图">${Object.entries(assetTabs).map(([key,label])=>`<button class="${state.assetTab===key?'active':''}" data-action="asset-tab-${key}" aria-pressed="${state.assetTab===key}">${label}</button>`).join('')}</div>`;
+    const progress=`<div class="grid" style="margin-top:16px"><section class="span-12"><div class="between"><div><h2>本周知识资产变化</h2><p class="small muted">团队资产存量与本周动态 · 虚构演示周（周一至周日）</p></div></div><div class="asset-metrics">${assetMetric('知识',128,'篇','发布 / 更新','6 篇','引用','386 次','74')}${assetMetric('Skill',24,'个','发布 / 更新','2 个','执行','91 次','28')}${assetMetric('Tool',36,'个','开通','3 个','调用','246 次','52','团队已开通')}</div><p class="tiny muted" style="margin:10px 2px 0">演示团队 · 固定样例；本周统计不随下方本地创作状态或 Tool 试参变化。实际调用明细仍在业务接口目录按条目查看。</p></section><section class="card span-6"><div class="between"><h2>项目 / 产线进展</h2>${badge('成果 · 风险 · 事实')}</div><p class="small muted">从工作记录和业务材料梳理项目 / 产品事实；沿来源与有效时间回看依据。</p><div class="asset-feed"><div class="asset-entry"><span class="tiny muted">演示周周五 · 项目 A · 交接材料</span><h3>${assetInline('project','交接材料按索引形成阶段性核对依据')}</h3><p class="small muted">F-01 记录演示周期 1 以清单索引为核对入口；资料核对是否完成及新阶段负责人仍需核对。</p></div><div class="asset-entry"><span class="tiny muted">周四 · 产品线 P · 模板试用线索</span><h3>${assetInline('product','模板 C 的小范围试用建议待核')}</h3><p class="small muted">S-01 提到试用方向；是否进入试用、适用任务与生效时间待核。</p></div><div class="asset-entry"><span class="tiny muted">周三 · 项目 A · 分工风险线索</span><h3>${assetInline('event-source','资料索引接手说法待核')}</h3><p class="small muted">${assetInline('record','周会来源 S-01 v1')}提到成员 B 接手；当前分工和生效时间尚未确认，先核原始记录与业务系统。</p></div></div></section><section class="card span-6"><div class="between"><h2>团队经验 / 技能更新</h2>${badge('知识 · Skill · Tool')}</div><p class="small muted">沉淀与复用的变化集中在这里；候选、正式版本与实际使用分开展示。</p><div class="asset-feed"><div class="asset-entry"><span class="tiny muted">周五 · 知识 K-02 v2 · 正式更新</span><h3>${assetInline('knowledge-release','交接索引使用说明发布新版')}</h3><p class="small muted">本周 6 篇更新中的一篇；K-01 v1 的边界仍可查看，其 R-02 另行核对。</p></div><div class="asset-entry"><span class="tiny muted">周四 · Skill SK-02 v1.1 · 正式更新</span><h3>${assetInline('skill-release','例行资料核对 Skill 更新')}</h3><p class="small muted">本周 2 个更新中的一个；发布版与下方新工作流草稿不同。</p></div><div class="asset-entry"><span class="tiny muted">周三 · 知识 K-01 v1 · 修订待核</span><h3>${assetInline('event-revision','清单适用条件提出修订 R-02')}</h3><p class="small muted">v1 仍按原边界可参考；修订候选尚未完成确认与发布。</p></div><div class="asset-entry"><span class="tiny muted">周二 · Skill · 整理中</span><h3>${assetInline('skill','清单差异核对形成工作流草稿')}</h3><p class="small muted">稳定步骤与停止条件待验证；草稿不计入上方可用 Skill 存量。</p></div><div class="asset-entry"><span class="tiny muted">周二 · Tool · 目录开通</span><h3>${assetInline('tool-release','工单进度查询加入团队 Tool 列表')}</h3><p class="small muted">本周 3 个开通条目中的一个；是否可调用仍需按身份与用途核对。</p></div></div></section><section class="card span-12"><div class="between"><p class="small" style="margin:0"><strong>用于团队周报：</strong>项目 / 产线的成果、风险和当前事实可从获授权的原材料整理并核实；右侧的知识、Skill 变化可作为资产进展引用。有来源的后续安排也可以纳入，不必为了凑周报强写计划。</p></div></section></div>`;
+    const overview=assetOverview();
+    const diagnosticCards=[['diagnosis-conflict','事实说法冲突','清单 A 与模板 B 的适用范围待对齐','K-01 v1 限旧规则时期常规任务；模板 B 的生效时间和任务范围未知，是否同一范围冲突仍待核。','对齐版本、任务范围与生效时间，再决定是否修订。'],['diagnosis-stale','进展更新待复核','项目 A 交接进展缺后续可核验状态','F-01 覆盖演示周期 1；演示约定在周期结束后复核，但业务系统未接入，不能认定项目停滞。','补权威状态或约定复核，不把未读到当作未发生。'],['diagnosis-flow','业务流衔接缺口','交接资料核对的 Skill 衔接尚待验证','SK-02 v1.1 有演示发布版，后续清单差异核对仍是草稿；两步之间的输入输出、安装/执行、Tool 资格和人工停止点尚未核实。','核限定任务的步骤及依赖，不以 Skill 推荐或目录可见推断流程跑通。']].map(([id,type,title,evidence,next])=>`<section class="card span-4 radar-card"><div class="eyebrow">${type}</div><h2>${title}</h2><p class="small"><strong>巡检线索：</strong>${evidence}</p><p class="small muted"><strong>建议核对：</strong>${next}</p><p class="tiny muted">${state.diagnosticDisposition[id]==='needs-evidence'?'本地反馈 · 待补证':state.diagnosticDisposition[id]==='not-applicable'?'本地反馈 · 不适用':'尚未人工确认'}</p><div class="actions">${assetOpen(id,'查看证据与建议')}</div></section>`).join('');
+    const diagnosis=`<div class="grid" style="margin-top:16px"><section class="card span-12"><div class="radar-intro"><div><div class="eyebrow">AI 巡检雷达</div><h2>主动找出值得团队核查的变化</h2><p class="small muted">对照可访问的项目事实、知识版本和限定业务流，生成冲突、更新与流程衔接的候选线索；不是等成员先提出问题。</p></div></div><p class="tiny muted">本次示例范围：项目 A、K-01 v1、模板 B、SK-02 v1.1 和限定任务判断点。原业务系统与宿主执行回执未接入，最近成功巡检时间无法核实；正式接入后应标明扫描时间及不可达来源，不把未发现当作无问题。</p></section>${diagnosticCards}<section class="card span-12"><p class="small" style="margin:0">线索经人核对后可补来源、修订适用范围、约定复核、核 Tool 前提或保留人工处理。系统不自动修改正式资产、发布 Skill 或生成个人待办；明确承接时才进入对应流程。能力地图仍只覆盖选定任务的判断点。</p></section></div>`;
+    return header('WORKBENCH / 团队资产','团队资产','分别看进展、内容全貌和待核问题；先读团队资产内的详情，再决定是否进入创作会话。')+scope+(state.authorized?tabs+(state.assetDetail?`<div style="margin-top:16px">${assetDetail()}</div>`:state.assetTab==='progress'?progress:state.assetTab==='overview'?overview:diagnosis):acl);
+  }
+  function tools() {
+    const available=state.toolTab==='available';
+    const found=toolCatalog.filter(visibleTool);
+    const selected=found.find(tool=>tool.id===state.selectedTool)||found[0];
+    const filters=toolDomains.map(domain=>btn(domain==='all'?'全部领域':domain,`tool-domain-${domain}`,state.toolDomain===domain?'secondary':'ghost',`aria-pressed="${state.toolDomain===domain}"`)).join('');
+    const list=found.length?found.map(tool=>`<div class="item ${tool.id===selected.id?'current':''}"><div><strong>${escapeHTML(tool.name)}</strong><p class="tiny muted">${escapeHTML(tool.method)} · ${escapeHTML(tool.provider)}</p><div class="row">${tool.tags.map(tag=>badge(escapeHTML(tag))).join('')}${badge(tool.risk,'warn')}</div>${available?'<p class="tiny muted" style="margin:7px 0 0">本团队实际调用次数：暂无法统计 · 无宿主成功调用回执</p>':''}</div>${btn('详情',`tool-detail-${tool.id}`,'ghost',`aria-label="查看${escapeHTML(tool.name)}详情"`)}</div>`).join(''):'<div class="notice">当前筛选下没有可见示例条目；不代表目录中没有 Tool。右侧无可显示的详情。</div>';
+    const detail=selected?`<div class="between"><h2>${escapeHTML(selected.name)} · 详情</h2>${badge(available?'组织开放 · 团队可发现':'目录可见 · 未开通','warn')}</div><p class="small muted">${escapeHTML(selected.method)} · 目录 ID ${escapeHTML(selected.id)}（虚构） · 来源：外部目录模拟数据</p><div class="row">${selected.tags.map(tag=>badge(escapeHTML(tag))).join('')}</div><div class="fact"><span>提供方 / 数据责任方</span><span>${escapeHTML(selected.provider)} / ${escapeHTML(selected.owner)}</span></div><div class="fact"><span>用途与风险</span><span>${escapeHTML(selected.purpose)} · ${escapeHTML(selected.risk)}</span></div><div class="fact"><span>输入参数</span><span>${escapeHTML(selected.input)}；必填字符串，具体约束依提供方 schema 核对</span></div><div class="fact"><span>返回摘要</span><span>${escapeHTML(selected.output)}；仅展示目录允许公开的结构</span></div><div class="fact"><span>接入与授权</span><span>${available?'组织开放且团队可发现；'+(selected.id==='inventory'?'库存试参当前演示前提：'+escapeHTML(toolStates[state.toolTestStatus][0])+'；不代表真实授权或接入':'此接口的身份授权、团队接入和运行健康均未核实'):'尚未向本团队开通；审批、宿主接入与身份授权均未核实'}</span></div><div class="fact"><span>相关 Skill</span><span>仅示意依赖关系；推荐、安装和实际执行均未验证</span></div>${available&&selected.id==='inventory'?`<div class="divider"></div><h3>试参示意 · 固定脱敏值</h3><p class="small muted">正式产品只允许经提供方批准的低风险只读测试通道；此处仅本地演示，不访问 ERP、不证明当前身份有权调用。</p><label class="field-label" for="tool-test-input">product_id · 必填 · 演示 ID</label><input id="tool-test-input" class="field" value="${escapeHTML(state.toolTestInput)}" placeholder="仅填 DEMO-001，勿输入真实 ID"><div class="actions">${btn('模拟参数测试','tool-test','secondary',state.toolTestStatus==='ready'?'':'disabled title="本地试参条件未就绪"')}</div><details class="optional" data-tool-test-options ${state.toolTestOptionsOpen?'open':''}><summary>本地试参情景（仅此库存示例）</summary><p class="small muted">以下按钮只是让这一个库存示例演示“条件就绪或不就绪时能否试参”，不是团队的真实接入、身份授权或接口健康状态；也不影响列表及其他 Tool。真实试参要走经批准的测试通道。</p><div class="actions">${btn('演示条件就绪','tool-test-ready','ghost')}${btn('演示待授权','tool-test-needs-access','ghost')}${btn('演示未接入','tool-test-disconnected','ghost')}${btn('演示状态未知','tool-test-unknown','ghost')}</div></details>${state.toolTestResult?'<div class="notice good">本地模拟响应：商品 DEMO-001 · 可用库存 24 件（固定虚构值）；不是 ERP 或沙箱读回。演示点击时间：'+escapeHTML(state.toolTestResult)+'（本地时钟）。不计入团队真实调用次数。</div>':''}`:available?'<div class="notice warn">此条没有核验过的低风险测试通道；这里只展示参数结构。请回宿主任务按实际授权流程查询。</div>':`<div class="notice warn">广场条目不可试参；先核实提供方的审批、接入及测试资格。${selected.id==='price'?state.priceRequest==='未申请'?'下方按钮仅记录本地申请意向。':'已记录本地申请意向，未提交或获批。':'没有经验证的申请链接，请向数据责任方核对去向。'}</div>${selected.id==='price'?`<div class="actions">${btn(state.priceRequest==='未申请'?'模拟记录申请意向':'申请意向已记录（模拟）','tool-apply','ghost',state.priceRequest==='未申请'?'':'disabled')}</div>`:''}`}<div class="actions">${link('回宿主任务示意','task')}</div>`:'<div class="notice">从列表选择一个接口，查看参数结构、业务范围及使用前提。</div>';
+    return (state.authorized?toolTabs()+`<div class="grid" style="margin-top:16px"><section class="card span-5"><div class="between"><h2>${available?'团队可发现的接口':'待申请的接口'}</h2>${badge('虚构目录 · 非接口读回','warn')}</div><p class="tiny muted">ERP / MES / 采购是演示提供方标签，真实分类随目录返回；无标签应显示未分类。搜索在此只过滤预置条目，真实产品须在授权范围内由服务端分页检索。</p><label class="field-label" for="tool-search">搜索名称、接口 ID 或用途（输入后点搜索）</label><div class="tool-search"><input id="tool-search" class="field" value="${escapeHTML(state.toolSearchDraft)}" placeholder="如 ERP、工单、价格"><button class="btn secondary" data-action="tool-search-submit">搜索</button><button class="btn ghost" data-action="tool-search-clear">清空</button></div><div class="tool-filters" aria-label="业务域标签">${filters}</div><p class="tiny muted">匹配 ${found.length} 条虚构条目 · 目录时间：固定示例（非实时）</p><div class="tool-list">${list}</div></section><section class="card span-7">${detail}</section></div>`:acl);
+  }
+  const mapPoints=[['清单适用判断','只有资料 / 待确认','warn','来源冲突；任务与时间范围未核对。'],['例外是否升级','依赖人','warn','维持人的判断和解释。'],['任务实时状态','业务系统/外部 Tool 负责','warn','需通过获授权的业务接口查询；本演示未取得实时状态。'],['临时特殊审批','逐次人工决定','warn','不属于应填补的文档缺口。']];
+  function map() {
+    const first=published()?['清单适用判断','仅限范围可参考（模拟）','good','旧规则时期的常规任务可参考 A，其他任务待核对。']:mapPoints[0];
+    const points=[first,...mapPoints.slice(1)]; const selected=points.find(point=>point[0]===state.mapPoint)||points[0];
+    return header('WORKBENCH / 候选能力地图','哪些判断能复用，哪些仍要人处理','仅一类虚构任务的桌面梳理；不以知识或 Skill 数量、个人工作量冒充组织能力。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><h2>示例任务：核对交接资料</h2><p class="muted small">限定分母：1 类任务、4 个示意判断点。点击查看问题与行动。</p>${points.map(point=>`<div class="item between"><div><strong>${point[0]}</strong><br><span class="small muted">${point[3]}</span></div><div class="row">${badge(point[1],point[2])}<button class="btn text" data-point="${point[0]}">查看 →</button></div></div>`).join('')}</section><aside class="card span-5"><h2>${selected[0]}</h2>${badge(selected[1],selected[2])}<p class="small muted" style="margin-top:14px">${selected[3]}</p><div class="fact"><span>真实结果</span><span>未知 · 待任务中验证</span></div><div class="fact"><span>可做什么</span><span>${selected[0]==='清单适用判断'?'补证并核对确认范围':selected[0]==='任务实时状态'?'核对接口接入与授权；回原系统确认':'约定人的判断责任'}</span></div>${selected[0]==='任务实时状态'?link('查看业务接口目录','tools'):link('回到团队协作','discussion')}</aside><section class="card span-12"><h3>不要推算整个组织的覆盖率</h3><p class="muted small">分别看任务是否完成、依据是否可靠、能否复用、能否更新、投入是否值得；这里没有用户访谈、真实使用效果或个人绩效榜。</p></section></div>`:acl);
+  }
+  const views={home,task,object:objectView,record:recordView,knowledge,discussion,proposal,review,skill,assets,tools,map};
+  const names={home:'Team Knowledge Workbench',task:'对话与任务',object:'团队内容 / 业务对象',record:'团队内容 / 工作记录',knowledge:'知识创作会话',discussion:'知识创作会话 / 内容讨论',proposal:'知识创作会话 / 修订提议',review:'知识创作会话 / 修订核对',skill:'Skill 创作会话',assets:'团队资产',tools:'业务接口目录',map:'团队资产 / 候选能力地图'};
+  function render() {
+    document.getElementById('breadcrumb').textContent=names[state.route];
+    document.getElementById('space-label').textContent=state.authorized?'演示团队 · team-asset':'模拟未绑定';
+    document.querySelectorAll('.rail [data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===state.route||(['object','record'].includes(state.route)&&el.dataset.route==='home')||(['discussion','proposal','review'].includes(state.route)&&el.dataset.route==='knowledge')||(state.route==='map'&&el.dataset.route==='assets')));
+    root.innerHTML=views[state.route]();
+  }
+  function setAnchor(container,text) {
+    state.selected={asset:container.dataset.asset,version:container.dataset.version,paragraph:container.dataset.anchor,text:text.trim().slice(0,180)};
+    state.route='discussion'; render(); root.focus();
+  }
+  document.addEventListener('mouseup',event=>{
+    const container=event.target.closest('.selectable'); if(!container || !state.authorized) return;
+    const selection=window.getSelection(); if(!selection || selection.isCollapsed || !selection.toString().trim()) return;
+    if(!container.contains(selection.anchorNode)||!container.contains(selection.focusNode)) return;
+    const text=selection.toString().trim(); if(text.length>180) { state.selected=null; note('为便于定位，请选中较短的一段文字（不超过 180 字）。'); return; }
+    state.selected={asset:container.dataset.asset,version:container.dataset.version,paragraph:container.dataset.anchor,text};
+    note('已标记选中文字；点击「评论这段」或进入内容讨论即可评论。');
+  });
+  document.addEventListener('input',event=>{
+    if(event.target.id==='comment') state.draft=event.target.value;
+    if(event.target.id==='evidence') state.evidence=event.target.value;
+    if(event.target.id==='recap-correction') state.recapCorrection=event.target.value;
+    if(event.target.id==='candidate-draft') { const kind=candidateKind(); state.candidateDrafts[kind]=event.target.value; state.candidateSubmitted[kind]=false; }
+    if(event.target.id==='tool-search' && state.route==='tools' && state.authorized) state.toolSearchDraft=event.target.value;
+    if(event.target.id==='tool-test-input' && state.route==='tools' && state.authorized) { state.toolTestInput=event.target.value; state.toolTestResult=null; }
+  });
+  document.addEventListener('toggle',event=>{
+    if(event.target.matches?.('details[data-tool-test-options]')) state.toolTestOptionsOpen=event.target.open;
+  },true);
+  document.addEventListener('click',event=>{
+    const el=event.target.closest('[data-route],[data-action],[data-point]'); if(!el || el.disabled) return;
+    if(!state.authorized && !['home','task'].includes(el.dataset.route) && el.dataset.route) { note('演示空间未绑定，不能访问项目、来源或内容详情。'); return; }
+    if(el.dataset.route) { state.route=el.dataset.route; if(state.route==='assets') state.assetDetail=null; if(state.route==='tools') { state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; } render(); root.focus(); return; }
+    if(el.dataset.point) { state.mapPoint=el.dataset.point; render(); root.focus(); return; }
+    const action=el.dataset.action;
+    if(action==='recap-reset') { if(!state.authorized) { note('演示资产空间未绑定，不能访问团队复盘内容。'); return; } state.recapStage='idle'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; render(); root.focus(); return; }
+    if(!state.authorized && !['toggle-access','open-task'].includes(action) && !action.startsWith('result-')) { note('演示资产空间未绑定，不能访问团队资产或提交内容。'); return; }
+    if(action==='asset-back') { if(state.route!=='assets'||!state.assetDetail) return; state.assetDetail=null; render(); root.focus(); return; }
+    if(action.startsWith('diagnosis-disposition-')) { const match=/^diagnosis-disposition-(diagnosis-(?:conflict|stale|flow))-(needs-evidence|not-applicable)$/.exec(action); if(state.route!=='assets'||state.assetTab!=='diagnosis'||!match||state.assetDetail!==match[1]) return; state.diagnosticDisposition[match[1]]=match[2]; render(); root.focus(); return; }
+    if(action.startsWith('asset-focus-')) { const focus=action.slice(12); if(state.route!=='assets'||state.assetTab!=='overview'||state.assetDetail||!['all',...businessLines.map(line=>line.id),...businessProjects.map(project=>project.id)].includes(focus)) return; state.assetOverviewFocus=focus; render(); root.focus(); return; }
+    if(action.startsWith('asset-tab-')) { const tab=action.slice(10); if(state.route!=='assets'||!Object.hasOwn(assetTabs,tab)) return; state.assetTab=tab; state.assetDetail=null; render(); root.focus(); return; }
+    if(action.startsWith('asset-open-')) { const id=action.slice(11); if(state.route!=='assets'||state.assetDetail||!Object.hasOwn(assetDetails,id)) return; state.assetDetail=id; render(); root.focus(); return; }
+    if(action.startsWith('asset-create-')) { if(state.route!=='assets'||!state.assetDetail) return; const target=action.slice(13); if(target!==assetDetails[state.assetDetail].create) return; if(target==='product'||target==='project') { state.objectFocus=target; state.route='object'; } else state.route=target; state.assetDetail=null; render(); root.focus(); note('仅定位创作或核证示意页；未创建待办、转交来源或授予权限。'); return; }
+    if(action==='focus-project'||action==='focus-product') { state.objectFocus=action==='focus-product'?'product':'project'; state.route='object'; render(); root.focus(); return; }
+    if(action==='recap-start') { state.recapStage='review'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; }
+    if(action==='recap-discuss') { state.recapReviewed=true; state.recapStage='decide'; }
+    if(action==='recap-review') { state.recapStage='review'; state.recapReviewed=false; state.handoff=''; state.recapReuse='pending'; state.recapAction='pending'; }
+    if(action.startsWith('recap-reuse-')) { state.recapReuse=action.slice(12); state.recapAction='pending'; state.handoff=''; }
+    if(action.startsWith('recap-action-')) { state.recapAction=action.slice(13); state.handoff=''; }
+    if(action.startsWith('recap-artifact-')) { state.recapArtifact=action.slice(15); state.handoff=''; }
+    if(action==='recap-finish') {
+      if(!state.recapReviewed || state.recapReuse==='pending' || state.recapAction==='pending' || state.recapArtifact==='pending') { note('请先核对过程，并讨论复用性、资产动作和产物去向。'); return; }
+      if(['special','insufficient'].includes(state.recapReuse) && state.recapAction!=='none') { note('特殊处理或证据不足时暂不建立通用资产。'); return; }
+      state.handoff=handoffText(); state.recapStage='done'; note('只生成本地演示文本，需人工检查并手动复制；未向 Workbench 提交。');
+    }
+    if(action==='recap-revise') { state.recapStage='decide'; state.handoff=''; }
+    if(action==='submit-candidate') {
+      const kind=candidateKind();
+      if(!state.candidateDrafts[kind]?.trim()) { note('请先自行粘贴可分享的脱敏候选；仅打开页面不会创建事项。'); return; }
+      state.candidateSubmitted[kind]=true; note('仅在本地演示中收到候选；未验证来源、运行记录或正式权限。');
+    }
+    if(action==='toggle-access') { state.authorized=!state.authorized; if(!state.authorized) { state.selected=null; state.draft=''; state.evidence=''; state.toolResult=false; state.toolQueriedAt=null; state.toolTestStatus='ready'; state.toolTestOptionsOpen=false; state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; state.priceRequest='未申请'; state.recapStage='idle'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; state.candidateDrafts={knowledge:'',skill:'',source:'',fact:''}; state.candidateSubmitted={knowledge:false,skill:false,source:false,fact:false}; state.objectFocus='project'; state.assetOverviewFocus='all'; state.assetDetail=null; state.diagnosticDisposition={}; if(!['home','task'].includes(state.route)) state.route='home'; } render(); note('仅切换演示状态，真实权限仍需服务端验证。'); return; }
+    if(action==='tool-tab-available'||action==='tool-tab-plaza') { if(state.route!=='tools') return; state.toolTab=action.slice(9); state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; render(); root.focus(); return; }
+    if(action.startsWith('tool-domain-')) { const domain=action.slice(12); if(state.route!=='tools'||!toolDomains.includes(domain)) return; state.toolDomain=domain; if(!toolCatalog.some(tool=>tool.id===state.selectedTool&&visibleTool(tool))) state.selectedTool=null; state.toolTestInput=''; state.toolTestResult=null; render(); root.focus(); return; }
+    if(action==='tool-search-submit'||action==='tool-search-clear') { if(state.route!=='tools') return; state.toolSearch=action==='tool-search-clear'?'':state.toolSearchDraft; state.toolSearchDraft=state.toolSearch; if(!toolCatalog.some(tool=>tool.id===state.selectedTool&&visibleTool(tool))) state.selectedTool=null; state.toolTestInput=''; state.toolTestResult=null; render(); document.getElementById('tool-search').focus(); return; }
+    if(action.startsWith('tool-detail-')) { const id=action.slice(12); if(state.route!=='tools'||!toolCatalog.some(tool=>tool.id===id&&visibleTool(tool))) return; state.selectedTool=id; state.toolTestInput=''; state.toolTestResult=null; render(); root.focus(); return; }
+    if(action==='tool-test') { if(state.route!=='tools'||state.toolTab!=='available'||(state.selectedTool||toolCatalog.filter(visibleTool)[0]?.id)!=='inventory'||state.toolTestStatus!=='ready'||!toolCatalog.some(tool=>tool.id==='inventory'&&visibleTool(tool))) { note('当前条目不可试参；需核对目录、身份、环境及测试通道。'); return; } if(state.toolTestInput.trim()!=='DEMO-001') { note('仅接受固定虚构 ID DEMO-001；请勿输入真实产品信息。'); return; } state.toolTestResult=new Date().toLocaleString('zh-CN'); note('仅产生固定本地模拟结果；没有访问 ERP 或增加团队真实调用次数。'); }
+    if(action==='tool-apply') { if(state.route!=='tools'||state.toolTab!=='plaza'||state.selectedTool!=='price') return; state.priceRequest='申请意向已记录（模拟）'; note('仅在本页内存中记录申请意向，未提交、未受理、未授权；需按提供方正式流程办理。'); }
+    if(['tool-test-ready','tool-test-needs-access','tool-test-disconnected','tool-test-unknown'].includes(action)) { if(state.route!=='tools'||state.toolTab!=='available'||(state.selectedTool||toolCatalog.filter(visibleTool)[0]?.id)!=='inventory') return; state.toolTestStatus=action.slice(10); state.toolTestResult=null; note('仅切换 ERP 库存示例的本地试参条件，不改变真实授权、接入或调用次数。'); }
+    if(action==='query-inventory') { if(state.toolStatus!=='ready') { note('未满足模拟查询条件；请先核对接入与真实授权。'); return; } state.toolResult=true; state.toolQueriedAt=new Date().toLocaleString('zh-CN'); note('仅显示虚构值，没有调用 ERP；真实调用须在宿主中重新校验身份和数据范围。'); }
+    if(action==='open-task') state.route='task';
+    if(action.startsWith('result-')) state.result=action.slice(7);
+    if(action==='skill-detail') state.skillExpanded=!state.skillExpanded;
+    if(action==='toggle-sources') state.sourceExpanded=!state.sourceExpanded;
+    if(action==='anchor-answer'||action==='anchor-knowledge') {
+      const anchor=action==='anchor-answer'?'answer-a':'knowledge-p1';
+      const container=document.querySelector(`[data-anchor="${anchor}"]`);
+      const current=window.getSelection();
+      const selected=current&&!current.isCollapsed&&container.contains(current.anchorNode)&&container.contains(current.focusNode)?current.toString().trim():'';
+      const remembered=state.selected?.paragraph===anchor?state.selected.text:'';
+      const fallback=anchor==='answer-a'?'新模板 B 的生效时间和适用任务尚未核对':'模板 B 的生效范围尚需核对';
+      setAnchor(container,selected||remembered||fallback); return;
+    }
+    if(action==='submit-comment') {
+      if(!state.selected || !state.draft.trim()) { note('先选择文段，并写下具体问题或补充内容。'); return; }
+      state.annotations.push({...state.selected,body:state.draft.trim(),evidence:state.evidence.trim(),status:'待讨论'});
+      state.draft=''; state.evidence=''; state.selected=null; state.discussion='已有人补充'; note('团队评论已留在旧版对应位置；未修改正式正文。');
+    }
+    if(action==='create-proposal') {
+      if(state.proposal) { note('当前修订已存在；不能覆盖已有修订。'); return; }
+      if(!state.annotations.length) { note('请先留下与原文绑定的评论。'); return; }
+      const text=document.getElementById('proposed-text').value.trim(), reason=document.getElementById('reason').value.trim();
+      if(!text||!reason) { note('修订文字和理由都不能为空。'); return; }
+      state.proposal={base:'v1',anchor:{...state.annotations[0]},text,reason}; state.review='待确认'; state.decision='未确认'; state.publication='无新版本';
+      note('已创建候选修订；尚未成为正式知识。');
+    }
+    if(action==='revise') { if(state.route!=='proposal'||!state.proposal||state.publication!=='无新版本') { note('审核或读回流程已开始；不可回退本修订，外部结果未知时先对账。'); return; } state.proposal=null; state.decision='未确认'; state.review='未提交'; state.publication='无新版本'; note('旧修订确认不沿用；请提出新的修订。'); }
+    if(action==='request-evidence'||action==='reject'||action==='simulate-confirm') {
+      if(state.route!=='review'||!state.proposal||state.review!=='待确认'||state.publication!=='无新版本') { note('当前修订已处理或审核流程已开始；不能在核对页回退或重判。'); return; }
+      if(action==='request-evidence') { state.decision='要求补证'; state.review='待补证'; }
+      if(action==='reject') { state.decision='拒绝修订'; state.review='已拒绝'; }
+      if(action==='simulate-confirm') { state.decision='已模拟针对修订确认'; state.review='待正式审核'; note('仅演示具备授权的责任人确认指定修订，不代表当前访问者拥有该权限。'); }
+    }
+    if(action==='audit') { if(state.route!=='knowledge'||!state.proposal||state.decision!=='已模拟针对修订确认'||state.publication!=='无新版本') { note('请回知识创作会话，对已确认的指定修订模拟审核。'); return; } state.publication='待模拟读回'; note('仅演示人审和 CI 完成，未真实访问 Git。'); }
+    if(action==='readback') { if(state.route!=='knowledge'||state.publication!=='待模拟读回') { note('请在知识创作会话核对待读回的指定修订。'); return; } state.publication='可引用（模拟）'; note('仅演示版本读回成功。正式使用仍需核对任务条件。'); }
+    if(action==='external-unknown') { if(state.route!=='knowledge'||state.publication!=='待模拟读回') { note('只有知识创作会话中待读回的修订才能进入外部状态未知。'); return; } state.publication='外部状态未知 · 待对账'; note('未知不等于失败或成功，需要对账。'); }
+    render(); root.focus();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
