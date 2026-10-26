@@ -120,6 +120,96 @@
   .annotation { border:1px solid var(--line); border-radius:10px; padding:14px; font-size:12px; margin-top:10px; }
   .annotation:target { outline:2px solid #8bbf9a; } .anchor-meta { color:var(--muted); font-size:11px; word-break:break-all; }
   .steps { padding-left:17px; font-size:13px; } .steps li { padding:0 0 11px; }
+  .creation-steps { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:9px; margin:0 0 16px; }
+  .creator-options { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
+  .creator-options .btn[aria-pressed="true"] { border-color:var(--green); background:#e9f3ed; color:var(--green); }
+  .creator-card { border:1px solid var(--line); border-radius:10px; padding:14px; margin:12px 0; background:#fafcf9; }
+  .creator-card p:last-child { margin-bottom:0; }
+  .creator-path { overflow-wrap:anywhere; font-size:12px; background:#f0f5f1; padding:12px; border-radius:9px; }
+  .creation-step { text-align:left; border:1px solid var(--line); background:white; border-radius:11px; padding:12px; color:var(--ink); min-width:0; }
+  .knowledge-steps { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .knowledge-draft-body { white-space:pre-wrap; user-select:text; cursor:text; line-height:1.65; margin:8px 0; overflow-wrap:anywhere; }
+  .knowledge-draft-body::selection,.knowledge-draft-body ::selection { background:#bce2cc; }
+  .knowledge-draft-body mark,.knowledge-comment mark { background:#d9edba; color:inherit; box-shadow:inset 0 -2px #75a85d; padding:0; }
+  .knowledge-selection { margin:10px 0; padding:8px 12px; background:#eff7e8; border-left:3px solid #75a85d; overflow-wrap:anywhere; }
+  .knowledge-comment-anchor { color:var(--muted); font-size:11px; }
+  .knowledge-inline-comment { max-width:680px; margin:12px 0; border:1px solid #bad5c2; border-radius:10px; padding:13px; background:#f6faf6; }
+  .knowledge-inline-comment textarea { min-height:76px; }
+  .knowledge-change { background:#edf6ee; padding:12px; border-radius:10px; margin:10px 0; }
+  .knowledge-change ins { background:#c8eed5; text-decoration:none; }
+  .knowledge-change del { background:#f8dada; }
+  .knowledge-change p { margin:6px 0; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .knowledge-route-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:16px 0; }
+  .knowledge-route-card { border:1px solid var(--line); border-radius:10px; padding:15px; background:#fafcf9; }
+  .knowledge-route-card h3 { margin:0 0 8px; }
+  .knowledge-route-card p { margin:8px 0; }
+  .knowledge-route-card details { margin-top:10px; }
+  .knowledge-route-card summary { cursor:pointer; }
+  .knowledge-main { max-width:1280px; }
+  .knowledge-reading { display:grid; grid-template-columns:minmax(0,2fr) minmax(260px,1fr); gap:22px; align-items:start; }
+  .knowledge-reading > * { min-width:0; }
+  #knowledge-fact-comparison { position:sticky; top:18px; }
+  .knowledge-comparison { position:sticky; top:18px; padding:17px; border:1px solid #cfe1d4; background:#f6faf6; border-radius:12px; font-size:12px; overflow-wrap:anywhere; }
+  .knowledge-comparison h3 { margin:0 0 9px; font-size:15px; }
+  .knowledge-comparison .fact { grid-template-columns:80px minmax(0,1fr); }
+  .knowledge-fact-row.focused { border-left:3px solid #75a85d; padding-left:12px; background:#fafcf9; }
+  .knowledge-fact-focus { display:block; width:100%; padding:0; border:0; background:none; text-align:left; color:var(--ink); font:inherit; cursor:pointer; }
+  .knowledge-fact-focus:focus-visible { outline:2px solid var(--green); outline-offset:3px; }
+  .knowledge-fact-focus[aria-pressed="true"] { color:var(--green); }
+  .knowledge-mobile-comparison { display:none; }
+  .knowledge-matrix { border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:16px 0; }
+  .knowledge-matrix-row { display:grid; grid-template-columns:minmax(150px,1.25fr) repeat(3,minmax(0,1fr)); border-bottom:1px solid var(--line); }
+  .knowledge-matrix-row:last-child { border-bottom:0; }
+  .knowledge-matrix-row > * { border-right:1px solid var(--line); padding:13px; min-width:0; }
+  .knowledge-matrix-row > *:last-child { border-right:0; }
+  .knowledge-matrix-head { background:#e9f3ed; font-size:12px; font-weight:750; }
+  .knowledge-matrix-object { background:#f6f9f5; font-size:12px; }
+  .knowledge-matrix-object strong,.knowledge-matrix-object span { display:block; }
+  .knowledge-matrix-object span { color:var(--muted); margin-top:5px; }
+  .knowledge-matrix-cell { background:white; color:var(--ink); font-size:12px; padding:0!important; }
+  .knowledge-matrix-cell button { display:flex; flex-direction:column; align-items:flex-start; gap:5px; width:100%; min-height:92px; padding:13px; border:0; background:transparent; color:var(--ink); text-align:left; line-height:1.4; overflow-wrap:anywhere; cursor:pointer; }
+  .knowledge-matrix-cell button:hover,.knowledge-matrix-cell button[aria-pressed="true"] { background:#e9f3ed; box-shadow:inset 3px 0 var(--green); }
+  .knowledge-matrix-cell button:focus-visible { outline:3px solid var(--green); outline-offset:-3px; }
+  .knowledge-matrix-cell button span { color:var(--muted); }
+  .knowledge-matrix-cell.empty { background:#fafaf7; color:var(--muted); padding:13px!important; }
+  .knowledge-matrix-cell.reviewed { background:#f2f8f2; }
+  .knowledge-leads { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+  .knowledge-leads button[aria-pressed="true"] { border-color:var(--green); background:#e9f3ed; }
+  .knowledge-coverage { border:1px solid var(--line); border-radius:12px; padding:12px 16px; margin-top:14px; }
+  .knowledge-coverage summary { cursor:pointer; font-weight:750; }
+  .knowledge-coverage summary:focus-visible { outline:3px solid var(--green); outline-offset:3px; }
+  .knowledge-coverage-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 18px; margin-top:14px; }
+  .knowledge-coverage-item { border-top:1px solid var(--line); padding:8px 0; font-size:12px; line-height:1.5; }
+  .knowledge-coverage-item strong,.knowledge-coverage-item span { display:block; }
+  .knowledge-coverage-item span { color:var(--muted); }
+  .knowledge-detail { border:1px solid #cfe1d4; background:#f8fbf8; border-radius:12px; padding:18px; margin:14px 0; }
+  .knowledge-fact-group { margin:22px 0; border-top:1px solid var(--line); padding-top:14px; }
+  .knowledge-fact-row { border-bottom:1px solid var(--line); padding:14px 0; font-size:13px; }
+  .knowledge-fact-row > p { margin:5px 0; }
+  .knowledge-fact-row .actions { margin-top:5px; }
+  .knowledge-comment { border-left:3px solid #9acbb1; padding:8px 12px; background:#f6faf6; margin:9px 0; font-size:12px; overflow-wrap:anywhere; }
+  .knowledge-essay { border:1px solid var(--line); border-radius:12px; background:#fafcf9; padding:17px; margin:16px 0; }
+  .knowledge-essay p { font-size:13px; margin:12px 0 4px; }
+  .knowledge-essay .actions { margin-top:5px; }
+  .knowledge-issue-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0; }
+  .knowledge-issue-list button { display:block; width:100%; min-height:138px; padding:17px; border:1px solid var(--line); border-radius:12px; background:#fafcf9; text-align:left; color:var(--ink); cursor:pointer; }
+  .knowledge-issue-list button[aria-pressed="true"],.knowledge-issue-list button:hover { border-color:var(--green); background:#edf6ee; }
+  .knowledge-issue-list button:focus-visible { outline:3px solid var(--green); outline-offset:2px; }
+  .knowledge-issue-list strong,.knowledge-issue-list span { display:block; margin-bottom:8px; }
+  .knowledge-issue-list span { font-size:12px; color:var(--muted); line-height:1.5; }
+  .knowledge-evidence { margin-top:20px; border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .knowledge-evidence > summary { cursor:pointer; font-weight:750; }
+  .knowledge-flow { display:grid; gap:0; margin:15px 0; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .knowledge-flow .fact { padding:11px 13px; grid-template-columns:88px minmax(0,1fr); }
+  .knowledge-flow .fact:last-child { border-bottom:0; }
+  .knowledge-flow strong { display:block; font-size:12px; }
+  .knowledge-flow span { display:block; color:var(--muted); margin-top:2px; }
+  @media(max-width:760px) { .knowledge-issue-list { grid-template-columns:1fr; } .knowledge-matrix { border:0; } .knowledge-matrix-row { display:grid; grid-template-columns:1fr; border:1px solid var(--line); border-radius:10px; margin:10px 0; overflow:hidden; } .knowledge-matrix-head { display:none; } .knowledge-matrix-row > * { border-right:0; border-bottom:1px solid var(--line); } .knowledge-matrix-row > *:last-child { border-bottom:0; } .knowledge-matrix-cell::before { content:attr(data-kind-label) ' · '; color:var(--green); font-weight:800; display:block; padding:10px 13px 0; } .knowledge-matrix-cell.empty::before { padding:0; } .knowledge-coverage-list { grid-template-columns:1fr; } }
+  .creation-step strong,.creation-step span { display:block; }
+  .creation-step strong { font-size:13px; } .creation-step span { color:var(--muted); font-size:11px; margin-top:4px; }
+  .creation-step.active { border-color:var(--green); background:#e9f3ed; box-shadow:inset 3px 0 var(--green); }
+  .creation-intro { margin-bottom:16px; } .creation-intro p:last-child { margin-bottom:0; }
+  .creation-summary .fact { grid-template-columns:75px 1fr; }
   .conversation { display:grid; gap:11px; margin:16px 0; }
   .message { padding:13px 15px; border-radius:12px; background:#f3f7f3; font-size:13px; max-width:90%; }
   .message.user { background:#e8f2e9; justify-self:end; }
@@ -133,8 +223,8 @@
   .selected { background:#dcf0e3; border-radius:3px; padding:2px 4px; }
   .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
   .toast { position:fixed; bottom:20px; right:20px; padding:12px 18px; background:#102a2d; color:white; border-radius:10px; font-size:12px; z-index:20; max-width:320px; }
-  @media(max-width:960px) { .span-8,.span-7,.span-5,.span-4 { grid-column:span 12; } .asset-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @media(max-width:760px) { .app { display:block; } .rail { min-height:0; gap:5px; padding:13px; } .rail-note,.section-label { display:none; } .brand { margin-bottom:8px; } .nav { display:flex; overflow:auto; } .nav button { width:auto; white-space:nowrap; } .top { padding:12px 16px; } .top .badge { display:none; } .banner { padding:10px 16px; } main { padding:24px 15px; } h1 { font-size:23px; } .fact { grid-template-columns:85px 1fr; } .asset-metrics { grid-template-columns:1fr; } .business-lines,.business-capabilities { grid-template-columns:1fr; } .business-map-heading { display:none; } .business-map-row { grid-template-columns:1fr; gap:7px; } .business-cell .mobile-line { display:inline; } .business-cell.off { display:none; } }
+  @media(max-width:960px) { .knowledge-reading { display:block; } .knowledge-reading > .knowledge-comparison,.knowledge-reading > #knowledge-fact-comparison { display:none; } .knowledge-mobile-comparison { display:block; margin:12px 0 16px; } .knowledge-route-grid { grid-template-columns:1fr; } .span-8,.span-7,.span-5,.span-4 { grid-column:span 12; } .asset-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .creation-steps { grid-template-columns:repeat(3,minmax(0,1fr)); } .knowledge-steps { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:760px) { .creation-steps { grid-template-columns:repeat(2,minmax(0,1fr)); } .app { display:block; } .rail { min-height:0; gap:5px; padding:13px; } .rail-note,.section-label { display:none; } .brand { margin-bottom:8px; } .nav { display:flex; overflow:auto; } .nav button { width:auto; white-space:nowrap; } .top { padding:12px 16px; } .top .badge { display:none; } .banner { padding:10px 16px; } main { padding:24px 15px; } h1 { font-size:23px; } .fact { grid-template-columns:85px 1fr; } .asset-metrics { grid-template-columns:1fr; } .business-lines,.business-capabilities { grid-template-columns:1fr; } .business-map-heading { display:none; } .business-map-row { grid-template-columns:1fr; gap:7px; } .business-cell .mobile-line { display:inline; } .business-cell.off { display:none; } }
 </style>
 </head>
 <body>
@@ -143,7 +233,7 @@
     <div class="brand"><div class="logo">✦</div><div>DeepSeek Harness<br><span class="muted tiny">Desktop · 概念示意</span></div></div>
     <div>
       <div class="section-label">宿主任务</div><nav class="nav"><button data-route="task">◈　对话与任务</button></nav>
-      <div class="section-label">Team Knowledge Workbench</div><nav class="nav"><button data-route="home">▦　工作台</button><button data-route="knowledge">▤　知识创作会话</button><button data-route="skill">◇　Skill 创作会话</button><button data-route="tools">⌘　业务接口目录</button><button data-route="assets">▥　团队资产</button></nav>
+      <div class="section-label">Team Knowledge Workbench</div><nav class="nav"><button data-route="home">▦　工作台</button><button data-route="knowledge">▤　导入材料</button><button data-route="tools">⌘　业务接口目录</button><button data-route="assets">▥　团队资产</button></nav>
     </div>
     <div class="rail-note">团队资产默认在本团队内共同使用与完善；业务接口目录用于发现和了解申请去向。宿主完成当前任务，Workbench 承接讨论与治理；这里不模拟真实授权。</div>
   </aside>
@@ -159,12 +249,13 @@
   const state = {
     route:'task', authorized:true, result:'conflict', selected:null, draft:'', evidence:'',
     annotations:[], discussion:'尚未开始', proposal:null, decision:'未确认', review:'未提交', publication:'无新版本', skillExpanded:false, sourceExpanded:false, mapPoint:'清单适用判断', toolStatus:'ready', toolTestStatus:'ready', toolTestOptionsOpen:false, toolTab:'available', selectedTool:null, toolDomain:'all', toolSearch:'', toolSearchDraft:'', toolTestInput:'', toolTestResult:null, priceRequest:'未申请', toolResult:false, toolQueriedAt:null,
-    recapStage:'idle', recapReviewed:false, recapReuse:'pending', recapAction:'pending', recapArtifact:'pending', recapCorrection:'', handoff:'', candidateDrafts:{knowledge:'',skill:'',source:'',fact:''}, candidateSubmitted:{knowledge:false,skill:false,source:false,fact:false}, objectFocus:'project', assetTab:'progress', assetOverviewFocus:'all', assetDetail:null, diagnosticDisposition:{}
+    recapStage:'idle', recapReviewed:false, recapReuse:'pending', recapAction:'pending', recapArtifact:'pending', recapCorrection:'', handoff:'', candidateDrafts:{knowledge:'',skill:'',source:'',fact:''}, candidateSubmitted:{knowledge:false,skill:false,source:false,fact:false}, knowledgeStep:'import', knowledgeOrigin:'', knowledgeFileName:'', knowledgeImportError:'', knowledgeImportRevision:0, knowledgeMatched:false, knowledgeIssue:null, knowledgeFactFocus:'a-test', knowledgeEvidenceOpen:false, knowledgeCell:null, knowledgeFocus:null, knowledgeReviews:{}, knowledgeFactComments:{}, knowledgeFactDrafts:{}, knowledgeGenerationRevision:0, knowledgeCommentTarget:null, knowledgeCommentSelection:null, knowledgeCommentDraft:'', knowledgeEditIssue:null, knowledgeEditDraft:'', knowledgePublishIntent:'', legacyOpen:false, skillStep:'fit', skillCase:'normal', skillCaseReviews:{}, objectFocus:'project', assetTab:'progress', assetOverviewFocus:'all', assetDetail:null, diagnosticDisposition:{}
   };
   const root=document.getElementById('content');
   const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const btn=(label,action,style='secondary',attr='')=>`<button class="btn ${style}" data-action="${action}" ${attr}>${label}</button>`;
   const link=(label,route)=>`<button class="btn text" data-route="${route}">${label} →</button>`;
+  const knowledgeLink=label=>`<button class="btn text" data-route="knowledge" data-knowledge-target="legacy">${label} →</button>`;
   const badge=(label,tone='')=>`<span class="badge ${tone}">${label}</span>`;
   const header=(k,title,description)=>`<div class="page-header"><div class="eyebrow">${k}</div><h1>${title}</h1><p class="lead">${description}</p></div>`;
   const scope=`<div class="scope">◉ 演示团队 / team-asset · 本团队知识与 Skill 共享使用、共同完善；Tool 来自外部系统，查询资格另行核验。特殊资料与受控动作仍按资产策略校验。</div>`;
@@ -192,23 +283,179 @@
   const visibleTool=tool=>tool.tab===state.toolTab&&(state.toolDomain==='all'||tool.domain===state.toolDomain)&&[tool.name,tool.method,tool.purpose,...tool.tags].some(value=>value.toLowerCase().includes(state.toolSearch.trim().toLowerCase()));
   const anchorHint=()=>state.selected?`<div class="notice good">已选中「${escapeHTML(state.selected.text)}」<br><span class="anchor-meta">${escapeHTML(state.selected.asset)} · ${escapeHTML(state.selected.version)} · ${escapeHTML(state.selected.paragraph)} · 文字快照（演示）</span></div>`:'<div class="notice warn">先在答案或知识正文里选中一段文字，再点评论按钮；未选择时可使用段落的预设示例短句。不能提交没有锚点的批注。</div>';
   const contentStatus=()=>!state.proposal?'尚无修订':published()?'团队可用 · 模拟 v2':state.decision==='拒绝修订'?'候选已拒绝 · 非已停用':state.review==='待确认'||state.decision==='已模拟针对修订确认'||state.publication==='待模拟读回'||state.publication==='外部状态未知 · 待对账'?'待核对':'整理中';
+  const creationSteps=(kind,steps,current)=>`<nav class="creation-steps" aria-label="${kind==='knowledge'?'知识':'Skill'}创作步骤">${steps.map(([id,title,status])=>`<button class="creation-step ${current===id?'active':''}" data-action="${kind}-step-${id}" aria-current="${current===id?'step':'false'}"><strong>${title}</strong><span>${status}</span></button>`).join('')}</nav>`;
+  // Manual, redacted fixture: the exact local digest identifies a report, not authorization or model extraction.
+  const knowledgeSample=`【脱敏周报结构示例｜2026-10-19—23｜不是完整原文】
+一 KPI：五项指标与原因，仅作为报告周期快照。
+二 核心采购：项目 A 替代评估与订单、包装协议；间接采购：MRO 应急、服务续约；流程：SRM 验收、培训及预计上线。
+三 供应商：开发、待核准入评估、特定质量异常及后续分析、月评准备。
+四 降本：需求整合、货代竞价、VMI 三种不同策略；金额与效果待业务系统核对。
+五 风险：原料价格复核与拟锁价；产品线 C 交期预测、当次物流处理与替代待评。
+六 下周：采购执行、供应商、成本及流程四组计划，均非完成事实。
+附录仅有两个附件引用，附件未读取；尾部包装不属于周报正文。`;
+  const knowledgeFileDigest='85018947cb5bd65e694b4f2a1e3f31769abc51c4f61fd8a6a96e30b93b4301c2';
+  const knowledgeObjects=[
+    {id:'project-a',name:'项目 A',hint:'替代料与交付'},
+    {id:'line-c',name:'产品线 C',hint:'物流与替代风险'},
+    {id:'indirect',name:'包装与间接采购',hint:'协议、MRO、服务'},
+    {id:'shared',name:'跨项目采购专题',hint:'供应商、成本与流程'},
+    {id:'unassigned',name:'待关联事项',hint:'报表与计划不强塞项目'}
+  ];
+  const knowledgeKinds={fact:'事实 · 有时效',experience:'经验 · 有条件',rule:'规则 · 需批准'};
+  // Ranges follow report line numbers. Separators belong to their adjacent headings; attachments are references only.
+  const knowledgeRanges=[
+    {id:'header',lines:'1–8',title:'标题、周期与报告背景',status:'context',reason:'确定时点与来源身份；不产生独立知识。'},
+    {id:'kpi-heading',lines:'9–12',title:'KPI 表头与统计列',status:'context',reason:'确认报告周期、实际、目标、变化和原因的列定义；不抄录指标值。'},
+    {id:'kpi-otd',lines:'13',title:'KPI · 采购订单按时交付',status:'source',reason:'交付率和物流影响只描述当期，核订单与统计口径。',candidates:['shared-kpi']},
+    {id:'kpi-pqr',lines:'14',title:'KPI · 物料合格率',status:'source',reason:'合格率和抽检说明仅当期，核质量报表。',candidates:['shared-kpi']},
+    {id:'kpi-ppv',lines:'15',title:'KPI · 降本进度',status:'source',reason:'金额、目标和归因属周期报表，不等于项目成效长期有效。',candidates:['shared-kpi']},
+    {id:'kpi-ito',lines:'16',title:'KPI · 库存周转',status:'source',reason:'高价值部件消耗及回归预期须回库存系统核。',candidates:['shared-kpi']},
+    {id:'kpi-urgent',lines:'17',title:'KPI · 紧急订单占比',status:'source',reason:'需求预测改善是周报归因，不能推断以后均适用。',candidates:['shared-kpi']},
+    {id:'kpi-end',lines:'18–20',title:'章节间分隔',status:'context',reason:'空行与分隔线不含独立主张。'},
+    {id:'direct',lines:'21–26',title:'主料采购、项目 A 替代与预计交付',status:'matrix',reason:'分开处理试验、订单、交付预期与跨职能判断。',candidates:['a-test','a-method']},
+    {id:'packaging',lines:'27–29',title:'包装协议续签与需求整合',status:'matrix',reason:'协议结果是当期事实，汇总议价只作有条件方法线索。',candidates:['packaging-fact','shared-method']},
+    {id:'mro',lines:'30–33',title:'MRO 需求与紧急保供',status:'matrix',reason:'数量不入知识；应急案例的效果、停止条件另核。',candidates:['mro-fact','mro-method']},
+    {id:'service',lines:'34–36',title:'IT／行政服务续约',status:'matrix',reason:'本次谈判结果不等于普遍采购规则或长期报价。',candidates:['service-fact']},
+    {id:'srm',lines:'37–43',title:'SRM 验收、培训及预计上线',status:'matrix',reason:'验收与培训自述、上线预测分别核，不推断已投产。',candidates:['shared-srm']},
+    {id:'supplier',lines:'44–50',title:'供应商开发与准入评估',status:'matrix',reason:'开发及评估并非正式准入；评分门槛需找批准版本。',candidates:['supplier-entry','supplier-rule']},
+    {id:'quality',lines:'51–54',title:'特定批次异常、处置与分析要求',status:'matrix',reason:'当次处置、根因未完成与制度依据分开。',candidates:['quality-fact','quality-method','quality-rule']},
+    {id:'supplier-month',lines:'55–59',title:'月度供应商绩效准备',status:'source',reason:'汇总进展及拟发布结果留业务记录，不当作已公布榜单。'},
+    {id:'cost-heading',lines:'60–63',title:'降本项目表头',status:'context',reason:'区分本周节省与预计年化，不把预测效果当作已实现。'},
+    {id:'cost-demand',lines:'64',title:'降本 · 需求整合与阶梯谈判',status:'matrix',reason:'检验采购量承诺、质量交付及合同边界，不复制单价和节约金额。',candidates:['shared-method']},
+    {id:'cost-freight',lines:'65',title:'降本 · 货代竞价',status:'matrix',reason:'另核竞价可比性、服务等级和签约，不与需求整合混同。',candidates:['freight-method']},
+    {id:'cost-vmi',lines:'66–67',title:'降本 · VMI 模式',status:'matrix',reason:'仓储、所有权、资金占用及实际效果须核，不把建设计划当已落地。',candidates:['vmi-method']},
+    {id:'cost-summary',lines:'68–72',title:'降本汇总及后续目标',status:'source',reason:'累计金额和月底目标分别是时点统计和将来目标，留报表／任务。'},
+    {id:'price',lines:'73–79',title:'价格波动、已做成本复核与计划锁价',status:'matrix',reason:'市场时点说法、已启动动作和未来拟签合同不同；锁价无规则依据。',candidates:['price-fact','price-method','price-rule']},
+    {id:'risk-divider',lines:'80',title:'风险段落分隔',status:'context',reason:'空行无独立主张。'},
+    {id:'delivery',lines:'81–85',title:'产品线 C 交期预测与应对',status:'matrix',reason:'未发生的停线风险、当次物流安排及待评替代分开。',candidates:['c-risk','c-response','c-rule']},
+    {id:'plan-heading',lines:'86–90',title:'计划章节标题及分隔',status:'context',reason:'只用于标识下周四组任务的时态。'},
+    {id:'plans-procurement',lines:'91–93',title:'下周采购执行计划',status:'plan',reason:'订单转换与到货验收尚未完成；留任务并回查实际进展。',candidates:['c-risk']},
+    {id:'plans-supplier',lines:'94–96',title:'下周供应商工作计划',status:'plan',reason:'质量复核和现场评估尚未完成；不称原因已查清或已准入。',candidates:['supplier-entry','quality-fact']},
+    {id:'plans-cost',lines:'97–99',title:'下周成本与战略采购计划',status:'plan',reason:'议价目标与 VMI 划转是将来事项，留任务待核。',candidates:['vmi-method']},
+    {id:'plans-process',lines:'100–101',title:'下周团队与流程计划',status:'plan',reason:'模块全面上线及培训考核仅计划，须后续验证。',candidates:['shared-srm']},
+    {id:'attachment-divider',lines:'102–103',title:'计划与附件间分隔',status:'context',reason:'空行与分隔线不含独立主张。'},
+    {id:'attachments',lines:'104–106',title:'两项附件引用',status:'unread',reason:'只看到调阅名称；附件内容未读取、未解析，也未获授权。'},
+    {id:'wrapper',lines:'107–111',title:'代码围栏与尾部包装',status:'excluded',reason:'不属于周报正文；不作为知识或来源主张。'}
+  ];
+  const knowledgeCandidates=[
+    {id:'shared-kpi',object:'unassigned',kind:'fact',title:'五项 KPI 仅为报告期快照',ranges:['kpi-otd','kpi-pqr','kpi-ppv','kpi-ito','kpi-urgent'],source:'各指标及原因列只作周期说明，不复制数值。',inference:'各自口径和期末值回报表核，不能成为长期资产。',when:'本报告期，后续变化不可提前确认为最终值',gap:'逐项核统计时点、口径与权威报表。',next:'仅留来源或报表系统。',disposition:'exclude'},
+    {id:'a-test',object:'project-a',kind:'fact',title:'备选料试验、订单与预计交货',ranges:['direct'],source:'周报将小试、下单和后续交货放在同一段。',inference:'阶段进展不证明全面验证或实际到货。',when:'小试与订单为周报自述；交货是预期',gap:'核试验记录、采购订单、实际到货。',next:'回项目与采购系统核时点事实。',disposition:'verify'},
+    {id:'a-method',object:'project-a',kind:'experience',title:'备选料联合评估的判断顺序',ranges:['direct'],source:'采购与技术共同评估备选型号及样品。',inference:'技术适配、试验和采购可行性可能形成有条件判断，不凭一次案例推广。',when:'该项目阶段；复用范围待核',gap:'核角色、测试结论、失败条件、反例与已有正式版。',scope:'备选料需跨职能评估的项目情景（待核）',exception:'未经验证或技术条件不满足时停止类推',evidence:'周报二.1（脱敏定位）；试验原件待核',next:'待核经验，可继续补条件但不得直接送审。',disposition:'draft',topic:'procurement',slug:'alternative-part-review'},
+    {id:'packaging-fact',object:'indirect',kind:'fact',title:'包装协议续签是本次交易进展',ranges:['packaging'],source:'周报提到续签和采购量整合。',inference:'本期条款及预估效果不是跨期采购价格。',when:'报告期交易自述；未来效果未核',gap:'核合同有效期、履约及节约口径。',next:'合同与采购系统留存，不转长期知识。',disposition:'verify'},
+    {id:'mro-fact',object:'indirect',kind:'fact',title:'MRO 采购与当次紧急调拨',ranges:['mro'],source:'周报列出需求处理及设备抢修物料调拨。',inference:'当次恢复说法不能证明长期供应能力。',when:'报告期内发生说法',gap:'核调拨、设备恢复及停机影响记录。',next:'留设备与采购业务记录。',disposition:'verify'},
+    {id:'mro-method',object:'indirect',kind:'experience',title:'紧急保供渠道的取舍案例',ranges:['mro'],source:'一次紧急配件采购改用可用渠道。',inference:'可核何时采用替代采购渠道及停产风险，但个案速度不能成为承诺。',when:'单次案例；可复用性未证',gap:'核质量验收、授权、总成本、效果与不可用情形。',next:'保留待核案例，暂不开放知识草稿。',disposition:'verify'},
+    {id:'service-fact',object:'indirect',kind:'fact',title:'服务续约谈判是本次交易结果',ranges:['service'],source:'周报记录维保续约的谈判结果。',inference:'本次报价变动不能推出通用价格或谈判制度。',when:'本报告期',gap:'核合同生效与服务边界。',next:'留有权合同记录，不复制金额。',disposition:'verify'},
+    {id:'shared-srm',object:'shared',kind:'fact',title:'SRM 验收与培训不等于已上线',ranges:['srm','plans-process'],source:'周报提验收、培训，并将上线和后续考核写作预期。',inference:'测试及培训进展不能证明模块投产或预估效率达成。',when:'验收／培训为周报自述；上线和效果为预测／计划',gap:'核验收记录、上线读回、培训结果及评估时点。',next:'回系统项目记录核证，不固化预测。',disposition:'verify'},
+    {id:'supplier-entry',object:'shared',kind:'fact',title:'潜在供应商开发与拟准入',ranges:['supplier','plans-supplier'],source:'周报写评估完成、拟录入名录和后续现场评估。',inference:'评估通过不等于已经准入，未来评估不等于完成。',when:'本期评估自述；未来安排待执行',gap:'核准入决定、有效期和权威名录状态。',next:'回供应商系统核证。',disposition:'verify'},
+    {id:'supplier-rule',object:'shared',kind:'rule',title:'准入门槛说法 · 待找批准依据',ranges:['supplier'],source:'周报使用评分等级与拟录入表述。',inference:'个案评估不能证明准入等级规则已经获批或适用所有品类。',when:'本期来源说法，正式生效范围未知',gap:'找正式制度 ID、版本、批准记录及例外范围。',next:'仅作为制度核证信号，不形成规则。',disposition:'verify'},
+    {id:'quality-fact',object:'shared',kind:'fact',title:'批次质量异常与当次处置',ranges:['quality','plans-supplier'],source:'周报记异常、退货处置并要求后续复核。',inference:'要求分析不等于根因已查清或改进已生效。',when:'报告期内特定批次；后续复核未完成',gap:'核检验、退货和纠正措施闭环。',next:'回质量与供应商系统核证。',disposition:'verify'},
+    {id:'quality-method',object:'shared',kind:'experience',title:'质量异常的核验与止损线索',ranges:['quality'],source:'周报依次提检验发现、隔离处置及后续原因分析。',inference:'可能形成处置顺序，但该批次结果不能代替正式流程。',when:'单次质量事件',gap:'核责任、结果、反例与是否已有同类知识。',next:'保留案例待核，不先建新目录。',disposition:'verify'},
+    {id:'quality-rule',object:'shared',kind:'rule',title:'8D／RCA 时限说法 · 待核制度',ranges:['quality'],source:'周报对该次事件提出分析期限和绩效处理。',inference:'当次要求不等于通用供应商规则。',when:'本次处理，规则有效期未知',gap:'找正式制度及批准者、适用品类和例外。',next:'仅回原规则核对；不可补成新规则。',disposition:'verify'},
+    {id:'shared-method',object:'shared',related:['indirect'],kind:'experience',title:'需求整合的降本评估方法',ranges:['packaging','cost-demand'],source:'包装与结构件两个范围都描述合并需求、再谈条件。',inference:'可比较需求、交付和质量约束；折扣与本周金额不是长期判断。',when:'跨场景方法仍待验证',gap:'核独立案例、质量／交付取舍、反例与已有知识版本。',scope:'跨项目汇总采购需求且须核质量交付的场景（待核）',exception:'质量或交付无法保证时停止按降本结论推广',evidence:'周报二.1及四（脱敏定位）；合同原件待核',next:'可补条件，来源权限与既有版未核不送审。',disposition:'draft',topic:'procurement',slug:'demand-consolidation-check'},
+    {id:'freight-method',object:'shared',kind:'experience',title:'货代竞价与服务边界',ranges:['cost-freight'],source:'降本表单列重新竞价和服务商签约。',inference:'与需求整合不同，需核运力、服务等级、价格有效期。',when:'本期项目；跨期效果未核',gap:'核合同条件、实际交付、异常情形及可比口径。',next:'保留待核经验，不复制报价。',disposition:'verify'},
+    {id:'vmi-method',object:'shared',kind:'experience',title:'VMI 对库存资金与责任的取舍',ranges:['cost-vmi','plans-cost'],source:'降本表描述厂边仓方式，计划中还有建设与物料划转。',inference:'策略线索不同于已建成的仓储能力；收益说法未核。',when:'推进中；后续划转仍是计划',gap:'核所有权、验收与实际周转效果及不适用情形。',next:'保留待核经验，后续回业务系统核实际进度。',disposition:'verify'},
+    {id:'price-fact',object:'shared',kind:'fact',title:'原料价格波动与成本复核',ranges:['price'],source:'周报记市场波动和采购、财务联合复核。',inference:'市场数值有时效；已开展复核不代表合同已锁价。',when:'近两周说法；下周签约是计划',gap:'核行情来源、成本复核记录与后续合同状态。',next:'价格回有权业务系统，保留核证线索。',disposition:'verify'},
+    {id:'price-method',object:'shared',kind:'experience',title:'调价申请先核成本构成',ranges:['price'],source:'周报提及在接受涨价前与财务复核成本。',inference:'可讨论拆解核查方法，不据此规定统一拒绝门槛。',when:'当前处置，复用条件待核',gap:'核成本证据、替代方案、反例及责任分工。',next:'待核经验，不直接进入可发布草稿。',disposition:'verify'},
+    {id:'price-rule',object:'shared',kind:'rule',title:'拟锁价安排 · 不是已批准规则',ranges:['price'],source:'周报把锁价合同放在下周计划。',inference:'拟签合同不能升格为已生效制度。',when:'未来计划',gap:'核合同实际签订、批准范围和制度依据。',next:'留任务并核既有规则，不生成规则知识。',disposition:'exclude'},
+    {id:'c-risk',object:'line-c',kind:'fact',title:'预计延误与停线风险',ranges:['delivery','plans-procurement'],source:'周报说交期可能延误、产线可能受影响。',inference:'风险预测不是已停线，后续验收计划不是已到货。',when:'报告期预测，后续事件未发生',gap:'核物流节点、到货与生产排程。',next:'回产品线和物流系统核现状。',disposition:'verify'},
+    {id:'c-response',object:'line-c',kind:'experience',title:'物流加急与本地替代的取舍',ranges:['delivery'],source:'周报记当次改运安排与替代品评估。',inference:'加急是当次处置、替代评估未得结果；不能推断风险已解除。',when:'当次风险，复用条件未知',gap:'核实际效果、审批范围、费用和不可用情形。',next:'保留案例，未核复用条件前不建新知识。',disposition:'verify'},
+    {id:'c-rule',object:'line-c',kind:'rule',title:'当次运费分担 · 非通用规则',ranges:['delivery'],source:'周报描述该次物流成本安排。',inference:'一次费用分配不能变成普适规则。',when:'当次安排',gap:'核批准范围及是否存在正式制度。',next:'仅留有权合同／事项来源。',disposition:'exclude'}
+  ];
+  // Issues are coherent decisions to investigate, not a list of source fragments to promote.
+  const knowledgeIssues=[
+    {id:'issue-alternative',question:'何时可以让备选料进入联合评估，而不是把小试或下单当作替代成功？',title:'备选料联合评估的判断顺序',inference:'在技术适配与采购可行性需共同核对时，可把样品试验、质量与交付约束一起评估；这只是待核的评估思路，不证明本次替代已获准。',scope:'备选料需要采购与技术共同评估的项目情景（待核）',exception:'未经适配验证、质量或交付条件不满足时，不以本案例类推或批准替代。',evidence:'周报二.1（脱敏定位）；试验原件与批准链待核',support:'项目 A 的备选型号、小试与首批订单构成一次过程例证；订单、试验结论及交货预期仍须分别核证。',limit:'仅一次项目经历；预计交货未发生，未读附件不可补作第二例；未见失败反例与正式批准。',gap:'核试验结果、授权角色、真实交付、反例以及既有知识 ID／版本。',related:['a-test','a-method'],objects:'项目 A',slug:'alternative-part-review'},
+    {id:'issue-consolidation',question:'合并采购需求何时值得做，怎样防止降本遮蔽质量与交付风险？',title:'需求整合的降本评估方法',inference:'先确认需求是否可合并，再比较质量、交付与承诺量约束，才讨论议价空间；本周折扣或节省金额不能成为长期收益承诺。',scope:'跨项目采购需求可比较，且质量与交付约束能单独核查的场景（待核）',exception:'质量、交期或履约责任不能保证时停止以降本理由推广；不能把货代竞价和 VMI 混成同一种方法。',evidence:'周报二.1及四（脱敏定位）；合同与实际履约待核',support:'包装协议和结构件需求整合分别提到汇总需求、谈判条件；属两处来源说法，不等于独立验证过成效。',limit:'本期交易与年化预估均未由合同／业务系统核对；货代竞价、VMI 是不同机制，不能充当本议题的支持案例。',gap:'核合同范围、质量／交付取舍、反例、履约结果及已有知识 ID／版本。',related:['packaging-fact','shared-method'],objects:'包装与间接采购 · 跨项目采购专题',slug:'demand-consolidation-check'}
+  ];
+  const knowledgeRangeById=new Map(knowledgeRanges.map(range=>[range.id,range]));
+  if(knowledgeRanges.some(range=>(range.candidates||[]).some(id=>!knowledgeCandidates.some(item=>item.id===id)))||knowledgeCandidates.some(item=>!item.ranges.length||item.ranges.some(id=>!knowledgeRangeById.get(id)?.candidates?.includes(item.id)))||new Set(knowledgeCandidates.map(item=>item.id)).size!==knowledgeCandidates.length) throw Error('周报人工覆盖清单与线索不一致');
+  if(knowledgeIssues.some(issue=>issue.related.some(id=>!knowledgeCandidates.some(item=>item.id===id)))) throw Error('知识议题的来源线索缺失');
+  const knowledgeQuestions={
+    'a-test':'小试、下单与预计交货是不同阶段；不能把预计到货写成已到货。',
+    'shared-srm':'验收、培训和计划上线并非同一状态；不能把上线预测写成投产事实。',
+    'supplier-entry':'拟准入和正式名录状态不同，后续现场评估也不是已完成。',
+    'quality-fact':'要求提交 RCA 不是已完成根因分析；须核后续闭环。',
+    'price-fact':'成本复核是周报自述，下周拟锁价不是已签合同。',
+    'c-risk':'交期延误和停线仍是预测，计划验收不能冒充实际到货。',
+    'c-response':'已安排加急不代表实际送达或风险解除。',
+    'vmi-method':'推进 VMI 与仓库已建成、物料已划转是不同状态。'
+  };
+  const knowledgeSteps=()=>`<nav class="creation-steps knowledge-steps" aria-label="材料整理四步">${[['import','1 · 导入来源'],['facts','2 · 事实梳理'],['experience','3 · 经验总结'],['intake','4 · 加入知识库']].map(([id,title])=>`<button class="creation-step ${state.knowledgeStep===id?'active':''}" data-action="knowledge-step-${id}" aria-current="${state.knowledgeStep===id?'step':'false'}"><strong>${title}</strong></button>`).join('')}</nav>`;
+  const knowledgeIsSample=()=>state.knowledgeMatched&&(state.candidateDrafts.knowledge===knowledgeSample||state.knowledgeOrigin==='file');
+  const knowledgeReview=issue=>state.knowledgeReviews[issue.id]||(state.knowledgeReviews[issue.id]={body:`${issue.inference}\n\n适用时：${issue.scope}\n\n不适用或停止：${issue.exception}`,status:'pending',comments:[],versions:[],pending:false,error:'',lastChange:'人工编排初稿'});
+  const knowledgeFactPoints=knowledgeCandidates.filter(item=>item.kind==='fact').map(item=>({id:item.id,object:item.object,title:item.title,claim:item.source,interpretation:item.inference,when:item.when,source:item.ranges.map(id=>`行 ${knowledgeRangeById.get(id).lines}`).join('、'),gap:item.gap}));
+  const knowledgeFactDraft=point=>state.knowledgeFactDrafts[point.id]||(state.knowledgeFactDrafts[point.id]={body:point.interpretation,versions:[],pending:false,error:'',lastChange:'人工编排初稿'});
+  const knowledgeDraftBody=(draft,target)=>{const selection=state.knowledgeCommentTarget===target?state.knowledgeCommentSelection:null, body=draft.body, valid=selection&&selection.version===draft.versions.length+1&&selection.body===body&&body.slice(selection.start,selection.end)===selection.text; return `<div class="knowledge-draft-body" data-draft-target="${target}" data-draft-version="${draft.versions.length+1}" tabindex="0" aria-label="当前待核草稿正文，可选中文字画线评论">${valid?`${escapeHTML(body.slice(0,selection.start))}<mark>${escapeHTML(selection.text)}</mark>${escapeHTML(body.slice(selection.end))}`:escapeHTML(body)}</div>`; };
+  const knowledgeDraftHistory=(draft,target)=>`<div class="tiny muted">当前待核草稿 v${draft.versions.length+1} · ${escapeHTML(draft.lastChange)} · 非正式知识版本</div>${draft.pending?'<div class="notice warn" role="status">正在生成完整新待核稿 · 本地预置回复演示。</div>':''}${draft.error?`<div class="notice bad" role="alert">${escapeHTML(draft.error)} · 当前稿没有变化；评论已留在下方，可修改后重试。</div>`:''}${draft.versions.length?`<details class="knowledge-coverage" data-draft-history="${target}"><summary>旧稿与评论 · ${draft.versions.length} 版（可回退）</summary>${draft.versions.map((version,index)=>`<div class="knowledge-comment"><strong>待核草稿 v${index+1}</strong><p>${escapeHTML(version.body)}</p><p class="tiny muted">${version.comment?`由评论「${escapeHTML(version.comment)}」推进下一版；${version.selection?`画线选段「${escapeHTML(version.selection.text)}」，锚定 v${version.selection.version}。`:'整段评论。'}`:version.reason==='从旧稿回退'?'回退前的版本。':'人工改写前的版本。'}</p>${btn('以此旧稿生成新的待核版',`knowledge-draft-restore-${target}-${index}`,'ghost',draft.pending?'disabled title="正在生成"':'')}</div>`).join('')}</details>`:''}`;
+  const knowledgeCommentPanel=(target,label)=>state.knowledgeCommentTarget===target?`<div class="knowledge-inline-comment"><strong>评论「${escapeHTML(label)}」</strong>${state.knowledgeCommentSelection?`<div class="knowledge-selection">选中 · v${state.knowledgeCommentSelection.version}：<mark>${escapeHTML(state.knowledgeCommentSelection.text)}</mark></div>`:'<p class="tiny muted">针对整段当前待核稿</p>'}<label class="field-label" for="knowledge-comment-text">希望改哪里？用一句话说清即可</label><textarea class="field" id="knowledge-comment-text" placeholder="例如：这里是预计到货，不是已经到货">${escapeHTML(state.knowledgeCommentDraft)}</textarea><div class="actions">${btn('按评论生成新稿','knowledge-comment-save','secondary')}${btn('取消','knowledge-comment-cancel','ghost')}</div><p class="tiny muted">仅本地预置演示，支持有限修改方向；未覆盖的评论保留原稿。请勿输入受限信息。</p></div>`:'';
+  const knowledgeDiff=(before,after)=>{let start=0,end=0; while(start<before.length&&start<after.length&&before[start]===after[start]) start++; while(end<before.length-start&&end<after.length-start&&before[before.length-end-1]===after[after.length-end-1]) end++; const prefix=before.slice(Math.max(0,start-26),start), suffix=after.slice(after.length-end,Math.min(after.length,after.length-end+26)); return `<div class="knowledge-change" aria-label="上一稿与当前稿的变动"><strong>刚刚改了什么 · 完整正文见上方</strong><p>${start>26?'…':''}${escapeHTML(prefix)}${before.length-start-end?`<del>${escapeHTML(before.slice(start,before.length-end))}</del>`:''}${after.length-start-end?`<ins>${escapeHTML(after.slice(start,after.length-end))}</ins>`:''}${escapeHTML(suffix)}${end>26?'…':''}</p><span class="tiny muted">红色为旧稿移除，绿色为新稿内容；只用于本地比较，不是已核证的修改。</span></div>`;};
+  const knowledgeRevisionFeedback=(draft,target)=>draft.versions.length&&!draft.pending&&!draft.error&&draft.lastChange!=='人工编排初稿'?`<div class="knowledge-revision-feedback" tabindex="-1" data-revision-feedback="${target}" aria-live="polite"><strong>完整新稿已替换当前待核稿 · v${draft.versions.length+1}</strong>${knowledgeDiff(draft.versions.at(-1).body,draft.body)}<div class="actions">${btn('继续评论这段',`knowledge-comment-again-${target}`,'ghost')}${btn('查看旧稿与评论',`knowledge-history-${target}`,'ghost')}${btn('回退上一稿',`knowledge-draft-restore-${target}-${draft.versions.length-1}`,'ghost')}</div></div>`:'';
+  const knowledgeRouteCard=(title,what,where,missing,details)=>`<section class="knowledge-route-card"><h3>${title}</h3><p class="small muted">${what}</p><p><strong>建议去向：</strong>${where}</p><p class="small"><strong>还需核实：</strong>${missing}</p><details><summary>为什么这样分流？</summary><p class="small muted">${details}</p></details></section>`;
+  const knowledgeComments=comments=>comments.map(comment=>`<div class="knowledge-comment"><strong>本地评论 · ${comment.result==='applied'?'已生成待核草稿':comment.result==='failed'?'演示生成失败':comment.result==='cancelled'?'离开页面，修订已取消': '待处理'}</strong>${comment.selection?`<p class="knowledge-comment-anchor">画线选段 · 草稿 v${comment.selection.version}：「${escapeHTML(comment.selection.text)}」</p>`:'<p class="knowledge-comment-anchor">针对整段草稿</p>'}<p>${escapeHTML(comment.text)}</p>${comment.result==='applied'?`<p class="tiny muted">依据待核，草稿 ${escapeHTML(comment.from)} → ${escapeHTML(comment.to)}；非审核或发布。</p>`:''}</div>`).join('');
+  const knowledgeDemoResponse=(type,item,comment)=>{
+    const request=comment.text;
+    if(/失败|无法生成|模拟报错/.test(request)) throw Error('本地预置演示失败');
+    if(type==='fact') {
+      if(/到货|交货|延期|预测|预期|预计|计划/.test(request)) return `报告期来源提到：${item.claim} 当前只能按“${item.when}”理解，不把预计交货、拟执行安排或风险预测写成已到货、已完成或已停线。需核对${item.gap}在权威记录中的结果，才能判断截至现在的状态。`;
+      if(/时态|时间|当期|现状|当前|生效/.test(request)) return `这条梳理限于报告期：${item.claim} 来源所述的进展与随后计划应分别标注，报告期说法不能直接充当现在的事实。${item.when}；后续按${item.gap}核验，未取得结果前维持待核。`;
+      if(/来源|证据|核实|核对|审批|批准|条件|风险|结果/.test(request)) return `待核事实点：${item.claim} ${item.when}；这是来源说法而非已验证现状。下一步核对${item.gap}，并与${item.source}所指的材料范围对照；不足以据此确认后续结果或批准状态。`;
+    } else {
+      if(/结果|试验|验证|成效|交付/.test(request)) return `讨论顺序：${item.inference} 先核实际试验、交付或履约结果，再判断是否值得复用；${item.limit}\n\n适用边界：${item.scope} 停止或不适用：${item.exception} 仍须${item.gap}`;
+      if(/适用|条件|边界|反例|停止|范围/.test(request)) return `可供下次讨论的方法：${item.inference}\n\n只在${item.scope}时作为待核思路；${item.exception} 本例的局限是：${item.limit} 后续须${item.gap}`;
+      if(/来源|证据|核实|核对|审批|批准|风险|预测|计划/.test(request)) return `从已有来源可讨论的判断：${item.inference} 这不是批准、制度或已验证成效。${item.limit}\n\n使用前先核${item.gap} 仅在${item.scope}适用；遇到${item.exception}时停止类推。`;
+    }
+    throw Error('本地预置演示没有覆盖此评论');
+  };
+  function knowledgeReplaceDraft(draft,body,comment,reason='') {
+    const next=body.trim();
+    if(!next||next===draft.body||next.length>4000) throw Error('回复为空、与当前稿相同或过长');
+    const previous=`v${draft.versions.length+1}`;
+    draft.versions.push({body:draft.body,comment:comment?.text||'',selection:comment?.selection||null,reason}); draft.body=next; draft.error='';
+    draft.lastChange=comment?'本地预置回复演示':reason==='从旧稿回退'?'从旧稿回退 · 待核':'人工改写 · 待核';
+    if(comment) { comment.result='applied'; comment.from=previous; comment.to=`v${draft.versions.length+1}`; }
+  }
+  function knowledgeResetMaterial(text,origin,fileName='',matched=text===knowledgeSample) {
+    state.knowledgeGenerationRevision++;
+    state.knowledgeImportRevision++;
+    state.candidateDrafts.knowledge=text; state.candidateSubmitted.knowledge=false;
+    state.knowledgeOrigin=origin; state.knowledgeFileName=fileName; state.knowledgeMatched=matched;
+    state.knowledgeIssue=null; state.knowledgeFactFocus='a-test'; state.skillCase='normal'; state.knowledgeEvidenceOpen=false; state.knowledgeCell=null; state.knowledgeFocus=null; state.knowledgeReviews={}; state.knowledgeFactComments={}; state.knowledgeFactDrafts={}; state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; state.knowledgeEditIssue=null; state.knowledgeEditDraft='';
+    state.knowledgePublishIntent=''; state.knowledgeStep='import';
+  }
+  function knowledgeLeave() {
+    state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft='';
+    state.knowledgeImportRevision++; state.knowledgeGenerationRevision++;
+    for(const draft of Object.values(state.knowledgeReviews)) { if(draft.pending) draft.comments.filter(comment=>comment.result==='pending').forEach(comment=>{comment.result='cancelled';}); draft.pending=false; }
+    for(const [id,draft] of Object.entries(state.knowledgeFactDrafts)) { if(draft.pending) (state.knowledgeFactComments[id]||[]).filter(comment=>comment.result==='pending').forEach(comment=>{comment.result='cancelled';}); draft.pending=false; }
+  }
+  const skillCases={normal:{title:'正常 · 阶段与日期齐全',input:'合成周报注明订单已下达、预计交货日与小试结果，尚无签收回执。',expected:'分别列已发生进展与预计交货；缺签收证据不写“已到货”。',gap:'须在真实获准样例中复核来源版本、输入时点和最终产物。'},boundary:{title:'边界 · 计划与实际混写',input:'来源同时有本期培训记录及下周拟上线安排。',expected:'把培训进展与上线计划分开，避免把未来事项写成已经上线。',gap:'需核正式上线回执、任务适用范围与人工修改理由。'},exception:{title:'异常 · Tool 无权或口径不同',input:'数字的来源期间未明确；目录可见，但无实际授权调用证据。',expected:'停在未核实；若未来可查，还须先对齐时间、单位、指标定义与范围。',gap:'没有真实 Tool 值、调用身份或数据权利，不得判定两边数值冲突。'}};
+  // Local comparison fixtures describe possible readings, not retrieved or verified assets.
+  const factComparisons={
+    'a-test':{status:'同范围已有且一致 · 仅合成示意',tone:'good',asset:'F-RPT v1 · 虚构项目阶段记录',scope:'同一演示报告期的项目 A 阶段描述；并非当前业务状态。',basis:'预置来源说法与虚构 F-RPT v1 均区分订单与预计交货。',next:'核真实订单、签收与形成时间后，才决定引用或补证；本页未查真实库。'},
+    'shared-srm':{status:'相关说法可能有差异 · 未裁定',tone:'warn',asset:'F-DEMO v1 · 虚构流程阶段记录',scope:'演示记录声称“上线”，本周报结构说验收、培训及预计上线；形成时间与范围未对齐。',basis:'两份表述仅为合成比较材料；没有读回真实记录或上线回执。',next:'核版本、发生与生效时点、上线回执及来源权限，再判断是否冲突或只是后续变化。'},
+    'packaging-fact':{status:'疑似新增 · 仍需查重',tone:'warn',asset:'未确定对应正式资产 ID／版本',scope:'本期包装协议与交易条件，不构成可长期引用的价格知识。',basis:'仅本地固定示例，无授权检索范围和查重回执。',next:'先核合同权限与有效期、已有记录和用途；可回业务对象补事实，不直接建知识。'}
+  };
+  const experienceComparisons={
+    'issue-alternative':{status:'疑似新增方法 · 尚未查重',tone:'warn',asset:'现有知识 ID／精确版本未查询',scope:'项目 A 备选料评估；一次项目不能证明跨项目稳定适用。',basis:'本地脱敏结构和一条过程线索；试验原件、失败反例未读取。',next:'先核可访问知识的版本、适用范围和反例；可能引用／补证旧版，查重后才考虑新增。'},
+    'issue-consolidation':{status:'相关已有说法 · 适用性待裁定',tone:'warn',asset:'K-COST v1 · 虚构演示知识（非 K-01）',scope:'假设旧稿只谈合并议价，未说明质量与交期；有效期、来源与当前任务适用性未知。',basis:'两段均是本地合成写法，不是已读取的正式知识或真实冲突。',next:'核准确版本、来源/权限、生效时点及实际反例，优先引用或补证；确有边界缺失才提修订。'}
+  };
+  const comparisonPanel=(item,kind)=>{const comparison=(kind==='fact'?factComparisons:experienceComparisons)[item.id]; return `<aside class="knowledge-comparison" aria-label="${kind==='fact'?'事实':'经验'}已有内容对照"><h3>已有内容对照 · ${escapeHTML(item.title)}</h3>${badge(comparison?.status||'无法判断 · 未查询真实库',comparison?.tone||'warn')}<div class="fact"><span>对照对象</span><span>${escapeHTML(comparison?.asset||'没有可核的资产 ID／版本；未检索不等于没有。')}</span></div><div class="fact"><span>适用范围</span><span>${escapeHTML(comparison?.scope||'当前材料形成时间和真实知识索引范围均未核实。')}</span></div><div class="fact"><span>判断依据</span><span>${escapeHTML(comparison?.basis||'此条只有本地预置的来源线索，未做真实查重或权威核证。')}</span></div><div class="fact"><span>下一步</span><span>${escapeHTML(comparison?.next||'先核来源权限、准确资产版本、时间与适用条件；无法据此判新增或冲突。')}</span></div>${kind==='fact'&&item.id==='shared-kpi'?`<div class="notice warn"><strong>引用数字 · 未核实</strong><p>此结构示例只有五项 KPI 的存在，不含原始数值，也未读取附件或调用 Tool。不能把本地 DEMO-001 库存试参或待申请的价格接口当作本周 KPI 核对。</p><p>真实核验须有获准的来源值与期间、指标定义、单位／币种、统计范围，确认调用身份与用途，取得相同口径的业务 Tool 回执后才可比较；口径不齐或无权则保持未核实。</p></div>`:''}<p class="tiny muted">仅固定合成对照；没有查询真实知识库、核准来源或裁定冲突。当前待核稿与正式资产版本各自独立。</p></aside>`;};
   function findContent() {
-    return `<section class="card span-12"><div class="between"><div><h2>按熟悉的线索找团队内容</h2><p class="small muted">项目、产品线是查找与关联方式；工作记录是来源，当前事实和经验须分别核对，Skill 只封装稳定流程。不是四层必须逐级升级的目录。</p></div>${link('查看团队内容','assets')}</div><div class="grid"><div class="span-6"><h3>从业务对象找</h3><div class="item"><strong>项目 A · 交接资料核对</strong><p class="small muted">当前分工有已核范围，也有待核新说法；截至时间见详情。</p><button class="btn text" data-action="focus-project">查看项目与事实 →</button></div><div class="item"><strong>产品线 P · 模板使用</strong><p class="small muted">同一条经验 K-01 关联项目 A 和产品线 P，不复制正文。</p><button class="btn text" data-action="focus-product">查看产品线 →</button></div></div><div class="span-6"><h3>从记录或判断找</h3><div class="item"><strong>演示周会纪要 · 来源 S-01</strong><p class="small muted">会议当时说过什么 ≠ 项目现在的事实；仅示意可引用定位。</p>${link('查看工作记录','record')}</div><div class="item"><strong>团队经验 · K-01 v1</strong><p class="small muted">旧规则时期的常规任务参考 A；有条件可用，R-02 可同时整理。</p>${link('查看经验与修订','knowledge')}</div></div></div><div class="notice">演示预置路径，不连接团队资料库或业务系统。真实导航顺序和栏目名称由团队使用习惯决定；此处没有导入、自动归类或权限授予。</div></section>`;
+    return `<section class="card span-12"><div class="between"><div><h2>按熟悉的线索找团队内容</h2><p class="small muted">项目、产品线是查找与关联方式；工作记录是来源，当前事实和经验须分别核对，Skill 只封装稳定流程。不是四层必须逐级升级的目录。</p></div>${link('查看团队内容','assets')}</div><div class="grid"><div class="span-6"><h3>从业务对象找</h3><div class="item"><strong>项目 A · 交接资料核对</strong><p class="small muted">当前分工有已核范围，也有待核新说法；截至时间见详情。</p><button class="btn text" data-action="focus-project">查看项目与事实 →</button></div><div class="item"><strong>产品线 P · 模板使用</strong><p class="small muted">同一条经验 K-01 关联项目 A 和产品线 P，不复制正文。</p><button class="btn text" data-action="focus-product">查看产品线 →</button></div></div><div class="span-6"><h3>从记录或判断找</h3><div class="item"><strong>演示周会纪要 · 来源 S-01</strong><p class="small muted">会议当时说过什么 ≠ 项目现在的事实；仅示意可引用定位。</p>${link('查看工作记录','record')}</div><div class="item"><strong>团队经验 · K-01 v1</strong><p class="small muted">旧规则时期的常规任务参考 A；有条件可用，R-02 可同时整理。</p>${knowledgeLink('查看经验与修订')}</div></div></div><div class="notice">演示预置路径，不连接团队资料库或业务系统。真实导航顺序和栏目名称由团队使用习惯决定；此处没有导入、自动归类或权限授予。</div></section>`;
   }
   function objectView() {
     const product=state.objectFocus==='product';
-    return header('WORKBENCH / 业务对象 · 非一级导航',product?'产品线 P · 模板使用':'项目 A · 交接资料核对','按团队熟悉的项目或产品线找内容；每个事实都要回答来源、何时生效、截至何时。来源记录和提炼出的知识分开显示。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>当前事实与待核线索</h2>${badge('仅虚构示例','warn')}</div>${product?'<div class="notice warn">产品线 P 目前没有经外部权威读回的“最新分工”。下方周会提及模板 C 先试用，但试用范围和生效时间待核，不把它写为产品线正式规则。</div>':'<div class="fact"><span>已核范围</span><span>项目 A 本阶段交接材料以清单索引为核对入口（演示事实 F-01）；来源：演示交接约定 v1；生效：演示周期 1；截至：演示周期 1 末。不是当前真实项目状态。</span></div><div class="notice warn">分工线索待核：周会 S-01 提到“成员 B 接手资料索引”，但生效日期、原业务系统现状和反证尚未确认；不能直接显示 B 为当前负责人，也不授予 B 发布权限。</div>'}<div class="actions">${link('查看周会来源 S-01','record')}${link('核对事实或提炼经验','knowledge')}</div></section><aside class="card span-4"><h2>团队怎样找</h2><p class="small muted">当前按 ${product?'产品线':'项目'} 查看；换轴只改变视图，同一来源和经验仍保持原 ID 与版本。</p><div class="actions">${btn('项目 A','focus-project',product?'ghost':'secondary',`aria-pressed="${!product}"`)}${btn('产品线 P','focus-product',product?'secondary':'ghost',`aria-pressed="${product}"`)}</div><div class="notice">真实实现需重验来源权限；失权时不显示受限标题、摘要或可反推内容的关联。</div></aside><section class="card span-7"><h2>来源时间线（示意）</h2><div class="item"><strong>S-01 · 演示周会纪要 v1</strong><p class="small muted">形成于演示周期 1；同时关联项目 A 与产品线 P。记载分工说法与模板 C 试用建议，不代表当下均已生效。</p>${link('打开来源详情','record')}</div><div class="item"><strong>任务复盘线索</strong><p class="small muted">DSH 中主动复盘的条件补充只有人工提交后才可在 Workbench 得到候选回执；它不是一份自动生成的纪要。</p>${link('返回任务复盘示意','task')}</div></section><section class="card span-5"><h2>经验与可选 Skill</h2><div class="item"><strong>K-01 v1 · 旧规则清单判断</strong><p class="small muted">项目 A 与产品线 P 关联的是同一条有适用边界的团队经验；v1 团队可用（模拟），R-02 仍可整理中。</p>${link('查看同一条经验','knowledge')}</div><div class="item"><strong>比较清单的稳定步骤？</strong><p class="small muted">条件、输入、异常和停止点核明且可脱敏测试后，才考虑封装 Skill；不自动创建。</p>${link('去 Skill 创作示意','skill')}</div></section><div class="span-12">${candidateBox('fact')}</div></div>`:acl);
+    return header('WORKBENCH / 业务对象 · 非一级导航',product?'产品线 P · 模板使用':'项目 A · 交接资料核对','按团队熟悉的项目或产品线找内容；每个事实都要回答来源、何时生效、截至何时。来源记录和提炼出的知识分开显示。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>当前事实与待核线索</h2>${badge('仅虚构示例','warn')}</div>${product?'<div class="notice warn">产品线 P 目前没有经外部权威读回的“最新分工”。下方周会提及模板 C 先试用，但试用范围和生效时间待核，不把它写为产品线正式规则。</div>':'<div class="fact"><span>已核范围</span><span>项目 A 本阶段交接材料以清单索引为核对入口（演示事实 F-01）；来源：演示交接约定 v1；生效：演示周期 1；截至：演示周期 1 末。不是当前真实项目状态。</span></div><div class="notice warn">分工线索待核：周会 S-01 提到“成员 B 接手资料索引”，但生效日期、原业务系统现状和反证尚未确认；不能直接显示 B 为当前负责人，也不授予 B 发布权限。</div>'}<div class="actions">${link('查看周会来源 S-01','record')}${link('核对事实或提炼经验','knowledge')}</div></section><aside class="card span-4"><h2>团队怎样找</h2><p class="small muted">当前按 ${product?'产品线':'项目'} 查看；换轴只改变视图，同一来源和经验仍保持原 ID 与版本。</p><div class="actions">${btn('项目 A','focus-project',product?'ghost':'secondary',`aria-pressed="${!product}"`)}${btn('产品线 P','focus-product',product?'secondary':'ghost',`aria-pressed="${product}"`)}</div><div class="notice">真实实现需重验来源权限；失权时不显示受限标题、摘要或可反推内容的关联。</div></aside><section class="card span-7"><h2>来源时间线（示意）</h2><div class="item"><strong>S-01 · 演示周会纪要 v1</strong><p class="small muted">形成于演示周期 1；同时关联项目 A 与产品线 P。记载分工说法与模板 C 试用建议，不代表当下均已生效。</p>${link('打开来源详情','record')}</div><div class="item"><strong>任务复盘线索</strong><p class="small muted">DSH 中主动复盘的条件补充只有人工提交后才可在 Workbench 得到候选回执；它不是一份自动生成的纪要。</p>${link('返回任务复盘示意','task')}</div></section><section class="card span-5"><h2>经验与可选 Skill</h2><div class="item"><strong>K-01 v1 · 旧规则清单判断</strong><p class="small muted">项目 A 与产品线 P 关联的是同一条有适用边界的团队经验；v1 团队可用（模拟），R-02 仍可整理中。</p>${knowledgeLink('查看同一条经验')}</div><div class="item"><strong>比较清单的稳定步骤？</strong><p class="small muted">条件、输入、异常和停止点核明且可脱敏测试后，才考虑封装 Skill；不自动创建。</p>${link('去 Skill 创作示意','skill')}</div></section><div class="span-12">${candidateBox('fact')}</div></div>`:acl);
   }
   function recordView() {
     return header('WORKBENCH / 工作记录 · 业务对象内页','记录当时的说法，不代替现在的事实','来源详情是上游材料：发生时间、原件版本和可见范围必须清楚，提炼和纠错发生在各自对象上。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><div class="between"><h2>S-01 · 演示周会纪要</h2>${badge('来源定位示意 · 内容未核准','warn')}</div><div class="fact"><span>形成时间</span><span>虚构演示周期 1 · 周会当日；并非真实业务日期</span></div><div class="fact"><span>来源/版本</span><span>演示会议记录 v1；真实原件仍应留在有权系统，原件链接未接入</span></div><div class="fact"><span>可见范围</span><span>仅供虚构团队演练；真实分享、引用和原件权限须重新核查</span></div><div class="fact"><span>关联对象</span><span>项目 A · 产品线 P；关联不复制记录或知识正文</span></div><div class="quote" style="margin-top:14px">脱敏虚构摘要：周会提到“成员 B 接手资料索引”；模板 C 先试用。前者是当时的分工说法，后者是试用建议，均尚需另核生效范围与当前性。</div><div class="notice warn">“可定位来源”不等于原文已获准分享、不等于记录中的判断已确认。原系统未接入，不能查看或上传真实纪要；有错误应先回原记录更正。</div></section><aside class="card span-5"><h2>从这一份记录分出了什么？</h2><div class="item"><strong>分工事实 · 待核</strong><p class="small muted">核来源、生效时点、原系统现状和反证之后，才能显示为项目当前事实；并不形成审核岗位。</p><button class="btn text" data-action="focus-project">到项目 A 查看 →</button></div><div class="item"><strong>模板 C · 待核经验</strong><p class="small muted">试用 ≠ 通用规则；需核条件和反例，再按内容版本进入创作与核对。</p>${link('到知识创作查看','knowledge')}</div><div class="item"><strong>Skill · 尚未形成</strong><p class="small muted">记录本身不是可执行工作流，不强迫每份纪要都产出 Skill。</p></div></aside><section class="card span-12"><div class="actions">${link('回到项目 / 产品线','object')}${link('回工作台','home')}</div></section><div class="span-12">${candidateBox('source')}</div></div>`:acl);
   }
   function home() {
     const work=`<section class="card span-12"><div class="between"><div><h2>跟着具体事项走，而不是“我创作过的所有资产”</h2><p class="small muted">以下关系、责任和状态均为虚构情景；原型没有登录身份、派单、订阅或跨系统待办聚合。</p></div>${link('查看团队可用版本','assets')}</div>${state.authorized?`<div class="grid"><div class="span-6"><h3>需要我处理 · 情景示例</h3><div class="item"><strong>有人明确向我请求补来源（假设）</strong><p class="small muted">知识 K-01 · 问题示意 I-01 · 锚定 v1。只有确有请求且仍有权时才是我的待办；普通评论不算。</p>${link('去讨论补证','discussion')}</div></div><div class="span-6"><h3>我关注的进展 · 情景示例</h3><div class="item"><strong>已提交的修订等待有权者核对</strong><p class="small muted">知识 K-01 · 修订示意 R-02 · 基线 v1。作为提议者可看进展，不因此拥有确认或审核权。</p>${link('看修订状态','proposal')}</div></div></div><div class="notice">当 R-02 真正发布且完成目标读回后，相关进行中项退出；正式版留在团队资产只读展示。以后若发现新问题，另建事项而不改写旧版历史。当前卡片只是说明规则，不随原型中的模拟按钮自动迁移。</div>`:'<div class="notice warn">演示空间未绑定：不展示示例事项标题或摘要；这并非“当前没有待办”。</div>'}</section>`;
-    return header('WORKBENCH / 工作台','围绕内容协作，不先选择身份','当前问题留在 DSH 对话与任务；团队共同把有价值的依据和判断完善为可复用资产。')+scope+`<div class="grid"><section class="card dark span-8"><div class="eyebrow" style="color:#a2dec2">此刻要做什么？</div><h2>在工作中找到可以参考的知识或 Skill</h2><p class="muted">从正在进行的宿主对话获取带来源的知识结果和候选 Skill 建议；无需进入第二个问答系统。</p><div class="actions">${btn('打开 DSH 任务示意','open-task')}</div></section><section class="card span-4"><h2>团队资产绑定</h2><p class="small">${state.authorized?'已模拟绑定；所有访问与授权仍需服务端验证。':'已模拟未绑定；不会显示团队资产内容。'}</p>${btn(state.authorized?'模拟未绑定':'恢复模拟绑定','toggle-access','ghost')}</section>${work}${state.authorized?findContent():'<section class="card span-12"><h2>按业务线索找内容</h2><div class="notice warn">演示空间未绑定；项目、来源与关联内容不可见，不等于团队没有记录。</div></section>'}<section class="card span-6"><h2>一起把内容讲清楚</h2><p class="muted">看到遗漏或冲突，任何本团队有权查看该内容的成员都可选中评论、补背景、附来源、讨论并提出修订。不要求先成为“专家”。</p>${link('看讨论与补证','discussion')}</section><section class="card span-6"><h2>让修订可靠生效</h2><p class="muted">讨论不自动修改正文。修订针对基线版本，正式确认、审核、发布及读回分开；谁有权执行哪项动作，由该资产的策略决定。</p>${link('看修订提议','proposal')}　${link('查看团队资产','assets')}</section><section class="card span-12"><div class="between"><div><h2>当前团队的资产</h2><p class="muted">同一资产空间中维护知识和 Skill，受控仓库是正式版本的来源；外部 Tool 请到左侧专属入口查看。</p></div>${link('查看候选能力地图','map')}</div></section></div>`;
+    return header('WORKBENCH / 工作台','先带来材料，再让能力变好','眼前任务仍在 DSH 原生会话；工作台从外部纪要、材料及外部调试的 Skill 中学习和核验，减少下次重复解释。')+scope+`<div class="grid"><section class="card tint span-12"><div class="between"><div><h2>读材料的同时，核对已有内容</h2><p class="small muted">导入来源后直接梳理事实和经验；已有内容对照就放在正文旁，相关 Skill 的合成比较放在最后的去向预览里。材料不会自动入库或生成待办。</p></div>${badge('本地合成样例','warn')}</div><div class="actions">${link('导入材料，开始四步梳理','knowledge')}</div></section><section class="card dark span-8"><div class="eyebrow" style="color:#a2dec2">此刻要做什么？</div><h2>在工作中找到可以参考的知识或 Skill</h2><p class="muted">从正在进行的宿主对话获取带来源的知识结果和候选 Skill 建议；无需进入第二个问答系统。</p><div class="actions">${btn('打开 DSH 任务示意','open-task')}</div></section><section class="card span-4"><h2>团队资产绑定</h2><p class="small">${state.authorized?'已模拟绑定；所有访问与授权仍需服务端验证。':'已模拟未绑定；不会显示团队资产内容。'}</p>${btn(state.authorized?'模拟未绑定':'恢复模拟绑定','toggle-access','ghost')}</section>${work}${state.authorized?findContent():'<section class="card span-12"><h2>按业务线索找内容</h2><div class="notice warn">演示空间未绑定；项目、来源与关联内容不可见，不等于团队没有记录。</div></section>'}<section class="card span-6"><h2>一起把内容讲清楚</h2><p class="muted">看到遗漏或冲突，任何本团队有权查看该内容的成员都可选中评论、补背景、附来源、讨论并提出修订。不要求先成为“专家”。</p>${link('看讨论与补证','discussion')}</section><section class="card span-6"><h2>让修订可靠生效</h2><p class="muted">讨论不自动修改正文。修订针对基线版本，正式确认、审核、发布及读回分开；谁有权执行哪项动作，由该资产的策略决定。</p>${link('看修订提议','proposal')}　${link('查看团队资产','assets')}</section><section class="card span-12"><div class="between"><div><h2>当前团队的资产</h2><p class="muted">同一资产空间中维护知识和 Skill，受控仓库是正式版本的来源；外部 Tool 请到左侧专属入口查看。</p></div>${link('查看候选能力地图','map')}</div></section></div>`;
   }
   function resultCard() {
     const r=results[state.result];
-    return `<section class="card"><div class="between">${badge(r.label,r.tone)}<span class="tiny muted">知识判断 ≠ 当前任务获批</span></div><h2 style="margin-top:14px">${r.title}</h2><p class="muted small">${r.body}</p><div class="selectable" data-anchor="answer-a" data-asset="K-01" data-version="v1" tabindex="0" aria-label="可选中文字段落：答案与依据"><strong>答案片段 · 可选择文字批注</strong><p style="margin:9px 0 0">旧纪要 A 记录某类任务按清单 A 办理。新模板 B 的生效时间和适用任务尚未核对，不能直接覆盖 A 的全部范围。</p></div><div class="actions">${btn('评论选中内容（未选则评论示例短句）','anchor-answer','ghost')}${btn(state.sourceExpanded?'收起来源':'对照来源','toggle-sources','secondary')}${link('打开团队知识正文','knowledge')}</div>${state.sourceExpanded?'<div class="quote" style="margin-top:12px">演示来源 A：过去某类任务使用 A。演示来源 B：新模板，但生效条件未知。不是企业真实资料。</div>':''}<div class="fact"><span>来源/版本</span><span>${r.source}</span></div><div class="fact"><span>尚未核实</span><span>本次任务类型、日期及业务系统实时状态</span></div><div class="fact"><span>下一步</span><span>补背景或提疑问；当前业务按原流程判断/审批</span></div></section>`;
+    return `<section class="card"><div class="between">${badge(r.label,r.tone)}<span class="tiny muted">知识判断 ≠ 当前任务获批</span></div><h2 style="margin-top:14px">${r.title}</h2><p class="muted small">${r.body}</p><div class="selectable" data-anchor="answer-a" data-asset="K-01" data-version="v1" tabindex="0" aria-label="可选中文字段落：答案与依据"><strong>答案片段 · 可选择文字批注</strong><p style="margin:9px 0 0">旧纪要 A 记录某类任务按清单 A 办理。新模板 B 的生效时间和适用任务尚未核对，不能直接覆盖 A 的全部范围。</p></div><div class="actions">${btn('评论选中内容（未选则评论示例短句）','anchor-answer','ghost')}${btn(state.sourceExpanded?'收起来源':'对照来源','toggle-sources','secondary')}${knowledgeLink('打开团队知识正文')}</div>${state.sourceExpanded?'<div class="quote" style="margin-top:12px">演示来源 A：过去某类任务使用 A。演示来源 B：新模板，但生效条件未知。不是企业真实资料。</div>':''}<div class="fact"><span>来源/版本</span><span>${r.source}</span></div><div class="fact"><span>尚未核实</span><span>本次任务类型、日期及业务系统实时状态</span></div><div class="fact"><span>下一步</span><span>补背景或提疑问；当前业务按原流程判断/审批</span></div></section>`;
   }
   function toolCard() {
     return `<section class="card span-12"><div class="between"><div><h2>当前业务数据 · 外部 Tool（只读示意）</h2><p class="muted small">知识解释依据；只有外部业务系统才能提供当前事实。以下值完全虚构，未连接 ERP。</p></div>${toolBadge()}</div><div class="fact"><span>接口与来源</span><span>get_product_inventory(product_id) · ERP 库存服务（示意）</span></div><div class="fact"><span>输入</span><span>演示商品 DEMO-001 · 不接受真实产品 ID</span></div><div class="actions">${btn('演示通过运行时校验后查询库存','query-inventory','secondary',state.toolStatus==='ready'?'':'disabled title="需要接入且通过调用身份及数据授权校验"')}${link('打开 Tool 详情','tools')}</div>${state.toolStatus==='ready'&&state.toolResult?`<div class="notice good"><strong>演示结果：可用库存 24 件（虚构）</strong><br>来源：ERP 库存服务示意 · 演示点击时间：${escapeHTML(state.toolQueriedAt)}（本地时钟，非业务系统读回）；商品 DEMO-001。不能用于业务判断。</div>`:'<div class="notice warn">未取得当前库存值。组织已开通或 Skill 被推荐，都不代表当前调用身份已获授权或已查询；未接入、无权限和状态未知时不可给出伪实时值。</div>'}</section>`;
@@ -235,7 +482,26 @@
     return header('DSH DESKTOP / 对话与任务','先把眼前的任务做好','原生对话与业务任务是主线；下方对话仅是原型中的静态示意，不是 Workbench 重新实现的 DSH Session。复盘由用户按需主动发起。')+`<div class="grid"><div class="span-8"><section class="card"><div class="between"><h2>原生对话 · 示意</h2>${badge('预置内容，不连接 DSH','warn')}</div><div class="conversation"><div class="message user"><span class="tiny muted">用户 · 演示问题</span>这次应该用哪版清单？</div><div class="message"><span class="tiny muted">Agent · 演示回答</span>清单 A 和模板 B 可能对应不同生效时间与任务范围；先核对资料及当前业务条件，不能直接认定 B 覆盖全部情况。</div><div class="message user"><span class="tiny muted">用户 · 演示补充</span>旧规则时期的常规任务仍参考 A；当前问题仍须按原业务流程确认。</div></div><p class="muted tiny">静态对话不可编辑；没有真实检索或任务提交。需要看示意依据时，再展开下方能力示例。</p><div class="actions">${link('打开 Workbench','home')}</div><details class="optional"><summary>展开：知识结果、候选 Skill 与外部 Tool 的演示（非宿主实测）</summary><div class="result-tabs" aria-label="演示检索结果状态">${Object.entries({confirmed:'已确认',materials:'只有资料',conflict:'资料冲突'}).map(([key,text])=>`<button class="${state.result===key?'active':''}" data-action="result-${key}" aria-pressed="${state.result===key}">${text}</button>`).join('')}</div>${state.authorized?resultCard():acl}<div class="divider"></div><h3>候选 Skill</h3>${state.authorized?`<p class="small">清单差异核对（演示） · 未验证安装、加载或运行。</p>${btn(state.skillExpanded?'收起适用前提':'查看适用前提','skill-detail','secondary')}${state.skillExpanded?'<div class="notice warn">需两份可访问资料；仅整理差异，不批准业务处理。对外部 Tool 的依赖不授予调用权。</div>':''}`:acl}</details></section><div style="margin-top:16px">${recapFlow()}</div></div><aside class="card span-4"><h2>任务优先，复盘可选</h2><p class="muted small">知识、Skill 与 Tool 的真实调用都属于宿主或外部系统；本原型只显示虚构例子，无法读到 Session trace。对话“提到”不等于已经调用。</p><ol class="steps"><li>完成当前业务判断，必要时回原系统复核。</li><li>若确有改进线索，主动复盘过程与额外调整。</li><li>和用户讨论复用性，再决定资产动作及报告/PPT 去向。</li><li>人工复制脱敏候选；Workbench 另行核证。</li></ol><div class="notice warn">无自动任务结束卡、无自动上传、无真实 Skill 运行。</div></aside>${state.authorized?`<div class="span-12"><details class="optional"><summary>展开：外部 Tool 查询示意（不作为复盘运行证据）</summary>${toolCard()}</details></div>`:''}</div>`;
   }
   function knowledge() {
-    return header('WORKBENCH / 知识创作会话','围绕业务对象、事实和经验持续更新','从项目、产品线、工作记录或既有版本进入同一条内容；来源声称、待核线索和可引用知识是不同对象。')+scope+(state.authorized?`<div class="grid">${findContent()}</div><div class="grid" style="margin-top:16px"><div class="span-8"><section class="card"><div class="between"><h2>团队经验 · K-01 v1（演示）</h2>${badge('v1 团队可用 · 模拟','good')}</div><p class="muted small">关联项目 A、产品线 P 的是同一条知识和同一版本；适用条件须在每次任务重新核对。演示旧版保持只读，评论仍挂在 v1。</p><div class="fact"><span>适用范围</span><span>旧规则时期的常规任务；模板 B 的生效范围尚待核实</span></div><div class="fact"><span>来源与复核</span><span>演示来源 A；仅在本原型标注为已核（非真实权威）。真实来源版本、授权和反例需再查。</span></div><div class="selectable" data-anchor="knowledge-p1" data-asset="K-01" data-version="v1" tabindex="0" aria-label="可选中文字段落：知识正文"><strong>清单适用判断 · 第 1 段</strong><p style="margin:9px 0 0">旧规则时期，常规任务可参考清单 A。模板 B 的生效范围尚需核对；当前任务仍应返回业务系统确认。</p></div><div class="actions">${btn('评论选中内容（未选则评论示例短句）','anchor-knowledge','ghost')}${link('查看评论及证据','discussion')}${link('查看修订提议','proposal')}${link('查看来源记录','record')}</div><div class="divider"></div><div class="between"><h3>下一修订 R-02 · 与 v1 并存</h3>${badge(contentStatus(),published()?'good':'warn')}</div><p class="small muted">${state.proposal?'基于 v1 的特定草稿；来源核对、内容确认和发布读回在详情展开。':'尚未提出；v1 继续作为本演示中的可用版本。'}</p><div class="divider"></div><h3>事实、经验与 Skill 分开</h3><p class="muted small">项目当前分工要核来源和生效时间；经验 K-01 是带边界的描述性判断；只有稳定且可脱敏测试的步骤才考虑 Skill。报告/PPT 获授权后可另循经核实的资料库入口作为来源，本页不上传。</p><div class="actions"><button class="btn text" data-action="focus-project">看项目当前事实 →</button>${link('从稳定流程创建 Skill','skill')}</div></section><div style="margin-top:16px">${candidateBox('knowledge')}</div></div><aside class="card span-4"><h2>列表与详情看什么</h2><ol class="steps"><li>从来源 S-01 看当时说法，不自动填当前事实。</li><li>在项目 A 核生效区间和反证；K-01 核适用与不适用范围。</li><li>v1 团队可用时，R-02 仍可整理中或待核对。</li><li>草稿经针对性确认、Git/CI、人审与目标读回后，才可能成为新可用版。</li></ol><div class="notice warn">用户复盘选择“值得复用”不等于确认了项目分工或 K-01 修订；本地收件箱回执也不是发布记录。</div>${link('查看团队资产与可用版本','assets')}</aside></div><div style="margin-top:16px">${publishFlow()}</div>`:acl);
+    if(!state.authorized) return header('WORKBENCH / 知识创作会话','来源与知识分开处理','演示空间未绑定；不能读取材料或议题。')+acl;
+    const ready=knowledgeIsSample(), issue=knowledgeIssues.find(candidate=>candidate.id===state.knowledgeIssue), review=issue?knowledgeReview(issue):null;
+    const source=`<section class="card"><h2>导入一份材料</h2><p class="small">仅粘贴获准分享的脱敏文字；不要导入受限报告、供应商价格或客户资料。文件也只在本机读取，不会上传。</p><label class="field-label" for="candidate-draft">材料文字</label><textarea id="candidate-draft" class="field" placeholder="粘贴脱敏周报，或选择 TXT / MD / CSV 文件。">${escapeHTML(state.candidateDrafts.knowledge)}</textarea><label class="field-label" for="knowledge-file">选择本地文本文件</label><input id="knowledge-file" class="field" type="file" accept=".txt,.md,.csv,text/plain,text/markdown,text/csv"><p class="tiny muted">UTF-8 TXT / MD / CSV · 不超过 200 KB · 本地预览，不是资料归档</p><div class="actions">${btn('载入脱敏周报结构示例','knowledge-demo','secondary')}${btn('继续事实梳理','knowledge-step-facts','')}</div><div class="notice knowledge-import-feedback ${state.knowledgeImportError?'warn':''}">${state.knowledgeImportError?escapeHTML(state.knowledgeImportError):state.knowledgeFileName?`本地读取 ${escapeHTML(state.knowledgeFileName)}；${ready?'完整文件指纹命中人工编排演示；并非实时解析或授权证明。':'未命中演示样本，无法抽取。'}`:state.knowledgeOrigin==='sample'?'脱敏结构缩写已载入；只供演示人工编排，不是完整原文。':state.candidateDrafts.knowledge.trim()?'已录入文字；任意材料的真实抽取未接入。':'尚无材料。'}</div><div class="knowledge-flow" aria-label="来源与知识不同层次"><div class="fact"><strong>来源阅读</strong><div>仅本地 · 未登记／未归档／未索引<span>正式产品先核原系统定位、版本、分享、保留期及阅读索引 ACL；获准才可进入 WeKnora 来源阅读层，Wiki 页面/关系也须核依据与权限。</span></div></div><div class="fact"><strong>知识提炼</strong><div>先梳理事实，再总结有条件的经验<span>来源保留当时的说法；经验还须核适用条件、依据、反例、停止点及正式版关系。</span></div></div></div></section>`;
+    const coverageLabels={context:'背景',matrix:'已分析 · 有线索',source:'已分析 · 仅留时点来源',plan:'已分析 · 计划待核',unread:'未读取',excluded:'非正文排除'};
+    const coverage=`<details class="knowledge-coverage"><summary>逐段范围清单 · ${knowledgeRanges.length} 段覆盖 111 个显示行 · 附件未读</summary><p class="small muted">仅固定指纹的本地完整文件可对照这些行号；脱敏结构示例不含完整原文。逐段有去向不等于每段都成为知识。</p><div class="knowledge-coverage-list">${knowledgeRanges.map(range=>`<div class="knowledge-coverage-item"><strong>行 ${range.lines} · ${escapeHTML(range.title)}</strong><span>${coverageLabels[range.status]}${range.candidates?.length?` · 关联 ${range.candidates.length} 条处理线索`:''}；${escapeHTML(range.reason)}</span></div>`).join('')}</div></details>`;
+    const matrix=`<div class="knowledge-matrix" role="group" aria-label="来源证据矩阵：按业务对象与事实、经验、规则下钻"><div class="knowledge-matrix-row knowledge-matrix-head"><div>业务对象</div><div>事实 · 有时效</div><div>经验 · 有条件</div><div>规则 · 需批准</div></div>${knowledgeObjects.map(object=>`<div class="knowledge-matrix-row"><div class="knowledge-matrix-object"><strong>${object.name}</strong><span>${object.hint}</span></div>${Object.entries(knowledgeKinds).map(([kind,label])=>{ const items=knowledgeCandidates.filter(item=>item.object===object.id&&item.kind===kind), active=state.knowledgeCell===`${object.id}:${kind}`; return items.length?`<div class="knowledge-matrix-cell" data-kind-label="${label}"><button type="button" data-action="knowledge-cell-${object.id}-${kind}" aria-pressed="${active}" aria-controls="knowledge-matrix-detail" aria-label="${object.name} · ${label}：${items.length} 条来源线索"><strong>${items.length} 条${kind==='rule'?'待核制度信号':'处理线索'}</strong><span>${items.map(item=>escapeHTML(item.title)).join('；')}</span><span>展开看证据与非知识去向</span></button></div>`:`<div class="knowledge-matrix-cell empty" data-kind-label="${label}">无可核条目 · 不为填格制造知识</div>`; }).join('')}</div>`).join('')}</div>`;
+    const cellItems=state.knowledgeCell?knowledgeCandidates.filter(item=>`${item.object}:${item.kind}`===state.knowledgeCell):[], focus=cellItems.find(item=>item.id===state.knowledgeFocus);
+    const detail=`<div class="knowledge-detail" id="knowledge-matrix-detail">${cellItems.length?`<h3>本格来源线索 · 只用于核查</h3><div class="knowledge-leads">${cellItems.map(item=>btn(escapeHTML(item.title),`knowledge-focus-${item.id}`,'ghost',`aria-pressed="${item.id===state.knowledgeFocus}"`)).join('')}</div>${focus?`<div class="fact"><span>源范围</span><span>${focus.ranges.map(id=>{const range=knowledgeRangeById.get(id); return `行 ${range.lines} · ${escapeHTML(range.title)}`;}).join('；')} · ${escapeHTML(focus.source)}（脱敏概述）</span></div><div class="fact"><span>时态</span><span>${escapeHTML(focus.when)}</span></div><div class="fact"><span>处理去向</span><span>${escapeHTML(focus.next)}</span></div><div class="notice warn">${escapeHTML(focus.gap)}${knowledgeQuestions[focus.id]?` ${escapeHTML(knowledgeQuestions[focus.id])}`:''} · 这不是已核实的事实或已批准的规则。</div>`:''}`:'点击非空格子查看证据与分流；此处不要求逐条打勾，也不会据格子数生产知识。'}</div>`;
+    const factGroups=knowledgeObjects.map(object=>{const points=knowledgeFactPoints.filter(point=>point.object===object.id); if(!points.length) return ''; return `<section class="knowledge-fact-group" aria-label="${escapeHTML(object.name)}的事实梳理"><h3>${escapeHTML(object.name)} <span class="tiny muted">· ${points.length} 条待核事实</span></h3>${points.map(point=>{const comments=state.knowledgeFactComments[point.id]||[], draft=knowledgeFactDraft(point), target=`fact:${point.id}`, focused=state.knowledgeFactFocus===point.id; return `<div class="knowledge-fact-row ${focused?'focused':''}" id="knowledge-fact-${point.id}"><button type="button" class="knowledge-fact-focus" data-action="knowledge-fact-focus-${point.id}" aria-pressed="${focused}"><strong>${escapeHTML(point.title)}</strong> · 查看已有内容对照</button> ${badge(escapeHTML(point.when),'warn')}<div class="tiny muted">来源当时的说法与当前事实不同；下方只修改待核梳理稿。</div>${knowledgeDraftBody(draft,target)}${knowledgeCommentPanel(target,point.title)}${knowledgeDraftHistory(draft,`fact-${point.id}`)}${knowledgeRevisionFeedback(draft,`fact-${point.id}`)}${knowledgeComments(comments)}<div class="actions">${btn(`评论整段${comments.length?`（${comments.length}）`:''}`,`knowledge-fact-comment-${point.id}`,'ghost',draft.pending?'disabled title="正在生成"':'')}</div><details class="knowledge-coverage"><summary>看来源说法、行段与待核点</summary><p>当期来源说法（脱敏概述）：${escapeHTML(point.claim)}</p><p class="tiny muted">来源：${escapeHTML(point.source)} · 需核：${escapeHTML(point.gap)}。当前状态仍须回业务系统确认。</p></details>${focused?`<div class="knowledge-mobile-comparison">${comparisonPanel(point,'fact')}</div>`:''}</div>`;}).join('')}</section>`;}).join('');
+    const facts=`<section class="card"><h2>事实梳理</h2>${ready?`<p class="small muted">按项目／产品线连续阅读并评论待核事实，选择某条时右侧显示其已有内容对照；窄屏对照紧随该条。无需逐条确认，来源证据可按需展开。</p><div class="knowledge-reading"><div>${factGroups}</div><div id="knowledge-fact-comparison">${comparisonPanel(knowledgeFactPoints.find(point=>point.id===state.knowledgeFactFocus)||knowledgeFactPoints[0],'fact')}</div></div><div class="notice">五项 KPI 仅是报告期快照；四组下周计划仍属计划。附件未读，原始数值与合同信息不展示。其他制度信号须回批准版本核查，不能在事实清单里确认为规则。</div><details class="knowledge-evidence" data-knowledge-evidence ${state.knowledgeEvidenceOpen?'open':''}><summary>核查整份来源的范围与处理线索 · ${knowledgeRanges.length} 段／${knowledgeCandidates.length} 条（非知识进度）</summary>${coverage}${matrix}${detail}</details>`:`<div class="notice warn">${state.candidateDrafts.knowledge.trim()?'未命中演示样本；真实抽取未接入，不能生成事实、矩阵或范围覆盖。':'先导入材料或载入脱敏结构示例。'}</div>`}<div class="actions">${btn('返回来源','knowledge-step-import','ghost')}${ready?btn('继续经验总结','knowledge-step-experience',''):btn('载入脱敏周报结构示例','knowledge-demo','secondary')}</div></section>`;
+    const issueCards=`<div class="knowledge-issue-list" aria-label="待核方法经验">${knowledgeIssues.map(candidate=>{const current=state.knowledgeReviews[candidate.id]; return `<button type="button" data-action="knowledge-issue-${candidate.id}" aria-pressed="${candidate.id===state.knowledgeIssue}"><strong>${escapeHTML(candidate.title)}</strong><span>下次遇到：${escapeHTML(candidate.question)}</span><span>${current?.status==='reviewed'?'✓ 已本地看过 · 核证未完成':current?.status==='excluded'?'— 暂不沉淀':current?.status==='needs-evidence'?'! 继续待核':'○ 待讨论'} · ${escapeHTML(candidate.objects)}</span></button>`;}).join('')}</div>`;
+    const issueDetail=issue?`<article class="knowledge-essay" id="knowledge-issue-detail"><div class="between"><h3>${escapeHTML(issue.title)}</h3>${badge(review.status==='reviewed'?'已本地看过 · 待核证':review.status==='excluded'?'暂不沉淀':review.status==='needs-evidence'?'继续待核':'待讨论',review.status==='reviewed'?'good':'warn')}</div><p class="small muted">下次遇到：${escapeHTML(issue.question)} · ${escapeHTML(issue.objects)}</p><div class="knowledge-fact-row"><strong>当前方法经验稿 · 待核</strong>${knowledgeDraftBody(review,`experience:${issue.id}`)}${knowledgeCommentPanel(`experience:${issue.id}`,issue.title)}${knowledgeDraftHistory(review,`experience-${issue.id}`)}${knowledgeRevisionFeedback(review,`experience-${issue.id}`)}${knowledgeComments(review.comments)}<div class="actions">${btn('评论整段经验稿',`knowledge-method-comment-${issue.id}`,'ghost',review.pending?'disabled title="正在生成"':'')}${btn(state.knowledgeEditIssue===issue.id?'取消改写':'直接改写整段',`knowledge-method-edit-${issue.id}`,'secondary',review.pending?'disabled title="正在生成"':'')}</div>${state.knowledgeEditIssue===issue.id?`<label class="field-label" for="knowledge-method-body">用自然语言改写整段经验（仅本地）</label><textarea class="field" id="knowledge-method-body">${escapeHTML(state.knowledgeEditDraft)}</textarea><div class="actions">${btn('保留修改',`knowledge-method-save-${issue.id}`,'secondary')}${btn('取消','knowledge-method-cancel','ghost')}</div>`:''}</div><details class="knowledge-coverage"><summary>为什么这样判断？看支持、反例和来源</summary><p>${escapeHTML(issue.support)}</p><p class="small muted">局限与反例：${escapeHTML(issue.limit)}</p><p class="small muted">脱敏来源：${escapeHTML(issue.evidence)}；关联 ${issue.related.map(id=>knowledgeCandidates.find(item=>item.id===id).ranges.map(range=>`行 ${knowledgeRangeById.get(range).lines}`).join('、')).join('；')}。</p><p class="small muted">仍需核对：${escapeHTML(issue.gap)} 现有正式知识 ID／精确基线未查询，来源权限也未验证。</p></details><div class="actions">${btn('这段值得继续核对',`knowledge-review-${issue.id}`,'secondary')}${btn('先补证',`knowledge-question-${issue.id}`,'ghost')}${btn('本次不沉淀',`knowledge-exclude-${issue.id}`,'ghost')}</div><p class="tiny muted">上述选择仅是本地整理标记，不表示事实核证或正式批准。</p></article>`:'<div class="notice">选一段方法直接读、评论或改写；也可以不选任何经验，直接看去向。</div>';
+    const summaries=knowledgeIssues.map(candidate=>{const current=state.knowledgeReviews[candidate.id], status=current?.status||'pending'; return `<div class="item"><strong>${escapeHTML(candidate.title)}</strong> ${badge(status==='excluded'?'本次暂不沉淀':status==='reviewed'?'本地看过 · 待正式核证':status==='needs-evidence'?'继续待核':'未讨论',status==='reviewed'?'good':'warn')}<p class="small muted">${status==='reviewed'?`条件性新建目录示例：knowledge/supply-chain/procurement/${escapeHTML(candidate.slug)}/；已有版未查，不得以此覆盖。`:status==='excluded'?'仅留来源或任务线索，不创建新知识。':'不生成可提交的知识版本；可返回这段方法继续讨论。'}</p></div>`;}).join('');
+    const skillHypotheses={normal:{original:'假设原版把订单与预计交货合写成“交货完成”',human:'假设人工稿写“订单已下达，交付待签收”'},boundary:{original:'假设原版将拟上线写为“已上线”',human:'假设人工稿保留“预计上线，待回执”'},exception:{original:'假设原版据未核的数字下结论',human:'假设人工稿先停在“无权／口径未齐，未核实”'}};
+    const skillExample=skillCases[state.skillCase], skillWritings=skillHypotheses[state.skillCase];
+    const skillComparison=`<section class="knowledge-route-card" aria-label="已有 Skill 模拟对照"><div class="between"><h3>现有 Skill 要不要优化？</h3>${badge('SK-01 v1 · 合成假设','warn')}</div><p class="small muted">只针对虚构的“采购周报辅助整理”场景；原版与人工写法均为预置假设，人工稿不是标准答案，未运行 Skill、模型、subagent 或 Tool；材料形成时点未知，不能当真实同输入时点复测。</p><div class="actions">${Object.entries(skillCases).map(([id,item])=>btn(item.title,`knowledge-skill-case-${id}`,state.skillCase===id?'secondary':'ghost',`aria-pressed="${state.skillCase===id}"`)).join('')}</div><div class="fact"><span>合成输入</span><span>${escapeHTML(skillExample.input)}</span></div><div class="fact"><span>假设原版</span><span>${escapeHTML(skillWritings.original)}</span></div><div class="fact"><span>假设人工</span><span>${escapeHTML(skillWritings.human)}</span></div><div class="fact"><span>先核差异</span><span>${escapeHTML(skillExample.expected)} ${escapeHTML(skillExample.gap)}</span></div><div class="notice warn">可能是 Skill 步骤、知识依据、输入时态、适用范围或 Tool 权限／口径问题；有权真实样例、精确版本及正常／边界／异常的可复测试验未取得，不能判定已优化、测试通过或需要新建 Skill。</div><div class="actions">${link('确有现有版问题，再看 Skill 深层核对','skill')}</div></section>`;
+    const overall=`<section class="card" id="knowledge-overall"><h2>加入知识库 · 先看各板块去哪儿</h2><p class="small muted">不是把整份材料放进同一个目录。以下是本地演示的去向建议，不是核准或已提交结果。</p><div class="knowledge-route-grid" aria-label="来源、事实、经验及其他线索的独立去向">${knowledgeRouteCard('来源记录','材料保留写下它时的说法。','留在有权原系统；另获许可后可受控归档、进入来源阅读层。','原件版本、分享与复制许可、可见范围和保留期限。','来源阅读与正式知识是两条线；阅读索引获准后才可考虑带出处的 Wiki，不能把 Wiki 当作已核证知识。')}${knowledgeRouteCard('项目／产品线事实',`${knowledgeFactPoints.length} 条报告期事实线索；本地评论 ${Object.values(state.knowledgeFactComments).reduce((total,comments)=>total+comments.length,0)} 条。`,'回到对应业务对象及权威业务记录核实当前状态。','实际发生、生效或截至时间，以及后续变化与反证。','报告期说法、预测、计划和现行事实必须分开；事实不自动写进方法经验目录。')}${knowledgeRouteCard('方法经验',`${knowledgeIssues.filter(candidate=>state.knowledgeReviews[candidate.id]?.status==='reviewed').length} 条本地标记值得继续核对。`,'先核是否已有适用知识；可引用、补证、修订，真正新增才考虑团队知识。','已有知识的准确版本、可复用条件、反例与维护责任。','真正新增须核 taxonomy 后才预览 knowledge/&lt;domain&gt;/&lt;topic&gt;/&lt;slug&gt;/；批准正文走 Git 审核，目标版本与权限需从 WeKnora 读回。')}${knowledgeRouteCard('规则信号','准入、RCA 时限、锁价等说法。','找对应的已批准制度或规则版本。','审批依据与生效范围，不能凭周报提议认作规则。','未读附件也不能充作已批准依据。')}${knowledgeRouteCard('当期数字与一次性事项','KPI、下周计划和临时处置。','KPI 留报表，计划回原任务，处置留有权原系统。','统计口径、实际进展及原任务记录。','不为了填满知识目录而把当期快照、报价或临时安排写成长期知识。')}</div><h3>两段方法的本地整理结果</h3>${summaries}${skillComparison}<div class="notice warn" role="status"><strong>当前仅预览，尚不能提交。</strong>来源资格、事实核证、已有知识版本与查重、反例和审核权限都未验证；本页不会归档、生成 Wiki、写 Git 或报 WeKnora 已读回。</div><div class="actions">${btn('返回经验继续修改','knowledge-step-experience','secondary')}${btn('返回事实核对','knowledge-step-facts','ghost')}</div></section>`;
+    const experience=`<section class="card"><h2>经验总结</h2>${ready?`<p class="small muted">左侧读并评论完整待核方法，右侧就当前议题对照已有内容与证据缺口；窄屏时对照紧随正文。仅固定合成示意，尚未查真实知识库。</p>${issueCards}<div class="knowledge-reading"><div>${issueDetail}${issue?`<div class="knowledge-mobile-comparison">${comparisonPanel(issue,'experience')}</div>`:''}</div>${issue?comparisonPanel(issue,'experience'):''}</div><div class="notice"><strong>其他线索：</strong>KPI 和本期交易留时点来源；货代竞价、VMI、紧急保供与质量处置可继续核条件；产品线 C 的风险仍是预测，下周计划未完成；准入、RCA 时限、锁价和一次性运费安排不能认作通用规则。附件未读。</div><div class="actions">${btn('返回事实梳理','knowledge-step-facts','ghost')}${btn('继续加入知识库 · 查看去向','knowledge-step-intake','secondary')}</div>`:`<div class="notice warn">尚无可演示的经验总结：${state.candidateDrafts.knowledge.trim()?'材料未命中固定样本；真实抽取未接入。':'尚未导入材料。'}</div><div class="actions">${btn('返回导入来源','knowledge-step-import','ghost')}</div>`}</section>`;
+    const legacy=`<details class="optional" data-legacy-knowledge ${state.legacyOpen?'open':''}><summary>查看已有 K-01 v1 的评论与修订记录</summary><div class="selectable" data-anchor="knowledge-p1" data-asset="K-01" data-version="v1" tabindex="0"><strong>K-01 v1 · 旧规则清单判断</strong><p>旧规则时期，常规任务可参考清单 A。模板 B 的生效范围尚需核对。</p></div><div class="actions">${btn('评论这段文字','anchor-knowledge','ghost')}${link('内容讨论','discussion')}${link('修订提议','proposal')}${link('指定修订核对','review')}</div>${state.proposal?publishFlow():''}</details>`;
+    return header('WORKBENCH / 材料整理','从材料出发，边读边核对','导入来源后，事实与经验在正文旁对照已有内容；最后分别预览知识去向及相关 Skill 的合成比较。')+knowledgeSteps()+`<div class="knowledge-main">${{import:source,facts,experience,intake:ready?overall:`<section class="card"><h2>加入知识库 · 去向预览</h2><div class="notice warn">尚无可分流的固定演示样本，不能为任意材料生成知识路径或正式发布回执。</div><div class="actions">${btn('返回导入来源','knowledge-step-import','ghost')}</div></section>`}[state.knowledgeStep]}${legacy}</div>`;
   }
   const candidateKind=()=>state.route==='object'?'fact':state.route==='record'?'source':state.route;
   function candidateBox(kind) {
@@ -247,7 +513,7 @@
     return state.annotations.length?state.annotations.map((x,i)=>`<div class="annotation" id="annotation-${i}"><div class="between"><strong>团队成员的评论 #${i+1}</strong>${badge(x.status,x.status==='已回应'?'good':'warn')}</div><p class="quote" style="margin:10px 0">“${escapeHTML(x.text)}”</p><p>${escapeHTML(x.body)}</p>${x.evidence?`<p class="small"><strong>补充来源：</strong>${escapeHTML(x.evidence)}（待核对引用，不自动采信）</p>`:''}<p class="anchor-meta">锚点 ${escapeHTML(x.asset)} / ${escapeHTML(x.version)} / ${escapeHTML(x.paragraph)} / 文字快照；演示留痕，仅当前页面</p>${state.proposal?'<div class="notice warn">已有基于此讨论的修订提议。原评论继续绑定旧版 v1，不能漂移到新版本。</div>':''}</div>`).join(''):'<div class="notice">尚无团队评论。先在宿主答案或知识正文选中文段，点击「评论选中内容」。</div>';
   }
   function discussion() {
-    return header('WORKBENCH / 内容讨论','看到差异就留下来，不必先有“专家”身份','所有能访问该团队资产的成员都可评论、补背景、给来源、讨论或发起修订；评论不是结论的批准。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><div class="between"><h2>围绕 K-01 的讨论</h2>${badge(`${state.annotations.length} 条评论`)}</div>${annotationCards()}<div class="actions">${link('去宿主答案选中内容','task')}${link('去知识正文选中内容','knowledge')}${state.annotations.length?link('把讨论整理成修订','proposal'):''}</div></section><aside class="card span-5"><h2>对选中内容评论</h2>${anchorHint()}<label class="field-label" for="comment">问题、差异或背景</label><textarea class="field" id="comment" placeholder="例如：这里可能仅适用于旧规则时期的常规任务……">${escapeHTML(state.draft)}</textarea><label class="field-label" for="evidence">来源线索（可选）</label><input id="evidence" class="field" value="${escapeHTML(state.evidence)}" placeholder="例如：某份资料的标题或定位，勿填敏感内容"><p class="muted tiny">只示范位置、版本及文字快照；真实系统还需稳定锚点与变更后的重新定位机制。</p><div class="actions">${btn('发布团队评论（模拟）','submit-comment','',state.selected?'':'disabled title="需要先选择文段"')}</div></aside></div>`:acl);
+    return header('WORKBENCH / 内容讨论','看到差异就留下来，不必先有“专家”身份','所有能访问该团队资产的成员都可评论、补背景、给来源、讨论或发起修订；评论不是结论的批准。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><div class="between"><h2>围绕 K-01 的讨论</h2>${badge(`${state.annotations.length} 条评论`)}</div>${annotationCards()}<div class="actions">${link('去宿主答案选中内容','task')}${knowledgeLink('去知识正文选中内容')}${state.annotations.length?link('把讨论整理成修订','proposal'):''}</div></section><aside class="card span-5"><h2>对选中内容评论</h2>${anchorHint()}<label class="field-label" for="comment">问题、差异或背景</label><textarea class="field" id="comment" placeholder="例如：这里可能仅适用于旧规则时期的常规任务……">${escapeHTML(state.draft)}</textarea><label class="field-label" for="evidence">来源线索（可选）</label><input id="evidence" class="field" value="${escapeHTML(state.evidence)}" placeholder="例如：某份资料的标题或定位，勿填敏感内容"><p class="muted tiny">只示范位置、版本及文字快照；真实系统还需稳定锚点与变更后的重新定位机制。</p><div class="actions">${btn('发布团队评论（模拟）','submit-comment','',state.selected?'':'disabled title="需要先选择文段"')}</div></aside></div>`:acl);
   }
   function proposal() {
     const p=state.proposal;
@@ -257,7 +523,16 @@
     return header('WORKBENCH / 针对修订核对','一起看证据；确认是一项单独的责任','团队成员可以参与核对、指出问题和补证；“正式确认指定修订”是受控动作，需要实际有权的确认人。')+scope+(state.authorized?`<div class="grid"><section class="card span-8"><div class="between"><h2>R-02 · ${state.proposal?'已有候选':'尚无提议'}</h2>${badge(published()?'演示 v2 已读回':state.publication==='外部状态未知 · 待对账'?'外部结果未知 · 待对账':state.publication==='待模拟读回'?'演示审核完成 · 待读回':state.decision,state.decision==='已模拟针对修订确认'||published()?'good':'warn')}</div><div class="quote">原资料 A：过去某类任务使用 A。原资料 B：出现新模板，但时间与任务范围未知。Agent 的比较仅作待核对线索。</div><div class="fact"><span>成员评论</span><span>${state.annotations.length} 条 · 可继续补背景/证据</span></div><div class="fact"><span>草稿修订</span><span>${state.proposal?escapeHTML(state.proposal.text):'未创建，不能确认'}</span></div><div class="fact"><span>正式判断</span><span>${state.decision}</span></div><div class="notice warn">${published()?'R-02 已模拟读回；本页保留核对记录，新的问题需另建事项。':state.publication==='外部状态未知 · 待对账'?'R-02 的外部结果未知；先在知识创作会话对账，不在本页重新判定。':state.publication==='待模拟读回'?'R-02 已模拟审核，尚未目标读回；后续在知识创作会话处理。':'本页的「模拟具备确认权限的审核」按钮仅演示有权人员对指定修订的判断；没有真实身份、授权、批准或发布。'}</div><div class="actions">${link('参与讨论／补证','discussion')}${state.proposal&&state.review==='待确认'&&state.publication==='无新版本'?btn('要求补证','request-evidence','secondary'):''}${state.proposal&&state.review==='待确认'&&state.publication==='无新版本'?btn('拒绝本修订','reject','danger'):''}${state.proposal?btn('模拟具备确认权限的审核','simulate-confirm','ghost',state.review==='待确认'&&state.publication==='无新版本'?'':'disabled title="当前修订已处理；请先重新提出修订"'):''}</div></section><aside class="card span-4"><h2>没有人能够确认时</h2><p class="muted small">显示待指派并返回当前业务处理，不假装“已转给专家”；负责人决定投入时间、缩小范围或保留逐次人工判断。</p>${link('查看团队资产中的版本','assets')}</aside></div>`:acl);
   }
   function skill() {
-    return header('WORKBENCH / Skill 创作会话','描述性方法不必都变成 Skill','从可核证经验中的稳定步骤出发；宿主任务里的推荐、复盘里觉得值得复用，都不证明旧 Skill 曾实际运行。')+scope+(state.authorized?`<div class="grid"><div class="span-8"><section class="card"><div class="between"><h2>清单差异核对 · 工作流草稿（演示）</h2>${badge('整理中 · 非发布版','warn')}</div><div class="fact"><span>引用与关联</span><span>团队经验 K-01 v1（演示版） · 项目 A / 产品线 P；引用同一版本，不复制正文</span></div><div class="fact"><span>当前需核对</span><span>输入资料是否有权访问、旧/新规则适用条件、人的判断点、异常和停止条件</span></div><ol class="steps"><li>核对复盘候选是否涉及稳定步骤，排除仅当次处理；描述性方法可留在知识。</li><li>描述触发、输入、人工判断、例外和停止条件，明确外部 Tool 依赖。</li><li>用脱敏样例测试正常、边界和异常情形并记录差异。</li><li>内容版本经审核发布后，目标工作区分发/安装、加载、任务执行与业务成效分别核证。</li></ol><div class="notice warn">本地用户创作的 knowledge-compounding 仅是 DSH 工作区实例；其 deposits/status 文件未接入本原型，accepted/merged 也不是正式发布或 Skill 安装。这里不执行 Skill 或真实 Tool。</div></section><div style="margin-top:16px">${candidateBox('skill')}</div></div><aside class="card span-4"><h2>Skill 与知识的区别</h2><p class="muted small">经验说明“什么条件下怎样判断”；Skill 封装“输入、稳定步骤、判断点与停止条件”。模拟草稿仅整理中，既不等于宿主已安装/加载，也没有运行记录。</p><div class="actions">${link('查看经验 K-01','knowledge')}${link('查看团队资产','assets')}${link('返回宿主任务示意','task')}</div></aside></div>`:acl);
+    if(!state.authorized) return header('WORKBENCH / Skill 创作会话','先判断是否需要 Skill','没有稳定步骤与可核证样例，不生成可用 Skill。')+acl;
+    const steps=creationSteps('skill',[
+      ['fit','1 · 看来源与适用','外部候选／已有版本'],['workflow','2 · 核对已有步骤','拟改草稿 · 未保存'],['cases','3 · 比较差异','仅合成对照 · 非试跑'],['handoff','4 · 受控共享','缺测试与读回']
+    ],state.skillStep);
+    const fit=`<section class="card"><h2>把外部形成或已有的 Skill 带来核对</h2><p class="small muted">示例 SK-01 v1“周报整理”是虚构已有版本：在外部任务中逐步调试形成，工作台不要求重做任务；材料第四步的合成比较提示它可能混淆预计到货与实际完成。</p><div class="fact"><span>来源</span><span>外部调试结论只可携带获准的最小描述；不导入完整会话、Prompt 或 Tool trace。本例无真实包或运行记录。</span></div><div class="fact"><span>适用任务</span><span>仅有来源和时间均可核的采购周报辅助整理；团队责任与评价标准仍待约定。</span></div><div class="fact"><span>先判断</span><span>修订已有版本、补知识／Tool 证据、标为不适用；只有稳定且重复的新流程才提出新 Skill。</span></div><div class="actions">${btn('核对已有步骤','skill-step-workflow','')}${link('返回材料第四步','knowledge')}${knowledgeLink('查看已有知识 K-01')}</div><div class="notice warn">来源或适用边界不明时暂停共享；建议不是实际运行或发布。</div></section><div style="margin-top:16px">${candidateBox('skill')}</div>`;
+    const workflow=`<section class="card"><h2>针对已有版本，核对要改的步骤</h2><p class="small muted">SK-01 v1 的结构与下面改进提议均为本地虚构；真实产品要先读取准确 Skill 包和任务输入，绝不凭页面示例覆盖原版。</p><div class="fact"><span>当前步骤</span><span>核来源 → 摘录采购进展 → 汇总交付状态。示例中“交付状态”未明确区分实际、预计和风险。</span></div><div class="fact"><span>拟补步骤</span><span>逐条标注形成时间、实际／预计／计划；缺订单或签收证据时停在待核，不输出“已经到货”。</span></div><div class="fact"><span>依赖与边界</span><span>引用 K-01 v1 仅作旧规则条件依据；数字需要另核 Tool 身份、字段、期间与口径，目录可见不授予调用权。</span></div><div class="fact"><span>新建条件</span><span>仅当没有适用的 Skill、步骤跨多次任务稳定、正常／边界／异常样例可复测且有人维护，才建议新建。</span></div><div class="actions">${btn('看合成对照与反例','skill-step-cases','')}${btn('返回适用范围','skill-step-fit','ghost')}</div><div class="notice warn">只有本地改进方向；未保存新 Skill 草稿，未创建版本或实际执行。</div></section>`;
+    const sample=skillCases[state.skillCase];
+    const cases=`<section class="card"><h2>看差异，先排查原因</h2><p class="small muted">合成对照：假设 SK-01 v1 写“交货完成”，假设人工稿写“预计到货”。两者不是实际 subagent 或人工执行记录；人工稿也不是标准答案。资料形成时间未知，真实比较须先对齐任务输入、来源时点和适用条件，不能拿事后信息评判过去。</p><div class="actions">${Object.entries(skillCases).map(([id,item])=>btn(item.title,`skill-case-${id}`,state.skillCase===id?'secondary':'ghost',`aria-pressed="${state.skillCase===id}"`)).join('')}</div><div class="divider"></div><h3>${sample.title}</h3><div class="fact"><span>给定</span><span>${sample.input}</span></div><div class="fact"><span>应核对</span><span>${sample.expected}</span></div><div class="fact"><span>缺口</span><span>${sample.gap}</span></div><div class="notice ${state.skillCaseReviews[state.skillCase]?'warn':''}">当前评审：${state.skillCaseReviews[state.skillCase]?'已标记设计待补（仅本地）；不能提交为测试通过。':'尚未标记设计意见；也不代表样例已通过测试。'}</div><div class="actions">${btn(state.skillCaseReviews[state.skillCase]?'撤销本地待补标记':'标记设计评审待补','skill-review-toggle','ghost')}${btn('查看治理门槛','skill-step-handoff','')}${btn('返回拟补步骤','skill-step-workflow','ghost')}</div></section>`;
+    const handoff=`<section class="card"><h2>提交前缺什么，发布后还要核什么？</h2><div class="fact"><span>草稿与测试</span><span>输入/输出契约、可复核的来源版本、正常/边界/异常的真实脱敏试验及断言均未产生；本地标记也不是测试证据。</span></div><div class="fact"><span>受控审核</span><span>实际会话与草稿修订、团队权限、Git/CI、人审及 SkillHub 版本/digest 读回均未接入。</span></div><div class="fact"><span>宿主运行</span><span>分发/安装、加载、任务执行、业务结果由各权威系统分别核证；发布不等于安装或运行。</span></div><div class="notice warn">当前无法在本原型提交或发布 Skill。缺证据就补证，不能以知识被引用、目录可见或复盘“值得复用”冒充测试成功。</div><div class="actions">${btn('回去核对样例','skill-step-cases','secondary')}${link('查看团队只读资产','assets')}${link('返回原任务','task')}</div></section>`;
+    return header('WORKBENCH / Skill 改进','让外部积累的步骤可检查、可纠错、再共享','只有明确要处理已有版本的问题，才进入这条深层核对路径；新材料在原四步中完成阅读和对照。')+scope+`<div class="card creation-intro"><strong>已有版本 SK-01 v1 · 虚构周报整理 Skill</strong><p class="small muted">以下只是对现有版本的本地质量核对；未获取真实包、模型结果或任务会话。</p><div class="actions">${link('回到材料四步','knowledge')}</div></div>`+steps+`<div class="grid"><div class="span-8">${{fit,workflow,cases,handoff}[state.skillStep]}</div><aside class="card span-4 creation-summary"><h2>此刻的产物与状态</h2><div class="fact"><span>知识</span><span>K-01 v1 · 有条件参考，不复制正文</span></div><div class="fact"><span>工作流</span><span>对 SK-01 v1 的预置改进意见 · 未保存、未生成包</span></div><div class="fact"><span>Skill</span><span>未真实测试、未发布、未安装、未加载、未执行</span></div><div class="fact"><span>下一步</span><span>${state.skillStep==='fit'?'核来源、精确版本和适用范围':state.skillStep==='workflow'?'核时态步骤与停止条件':state.skillStep==='cases'?'做获准样例的真实对照并归因':'有权者受控审核与目标读回'}</span></div><div class="notice warn">本地 accepted/merged 不是正式发布或安装；数字员工使用与任务效果另需真实验证。</div>${knowledgeLink('查看知识依据')}</aside></div>`;
   }
   function publishFlow() {
     const unknown=state.publication==='外部状态未知 · 待对账';
@@ -337,7 +612,7 @@
     const filters=toolDomains.map(domain=>btn(domain==='all'?'全部领域':domain,`tool-domain-${domain}`,state.toolDomain===domain?'secondary':'ghost',`aria-pressed="${state.toolDomain===domain}"`)).join('');
     const list=found.length?found.map(tool=>`<div class="item ${tool.id===selected.id?'current':''}"><div><strong>${escapeHTML(tool.name)}</strong><p class="tiny muted">${escapeHTML(tool.method)} · ${escapeHTML(tool.provider)}</p><div class="row">${tool.tags.map(tag=>badge(escapeHTML(tag))).join('')}${badge(tool.risk,'warn')}</div>${available?'<p class="tiny muted" style="margin:7px 0 0">本团队实际调用次数：暂无法统计 · 无宿主成功调用回执</p>':''}</div>${btn('详情',`tool-detail-${tool.id}`,'ghost',`aria-label="查看${escapeHTML(tool.name)}详情"`)}</div>`).join(''):'<div class="notice">当前筛选下没有可见示例条目；不代表目录中没有 Tool。右侧无可显示的详情。</div>';
     const detail=selected?`<div class="between"><h2>${escapeHTML(selected.name)} · 详情</h2>${badge(available?'组织开放 · 团队可发现':'目录可见 · 未开通','warn')}</div><p class="small muted">${escapeHTML(selected.method)} · 目录 ID ${escapeHTML(selected.id)}（虚构） · 来源：外部目录模拟数据</p><div class="row">${selected.tags.map(tag=>badge(escapeHTML(tag))).join('')}</div><div class="fact"><span>提供方 / 数据责任方</span><span>${escapeHTML(selected.provider)} / ${escapeHTML(selected.owner)}</span></div><div class="fact"><span>用途与风险</span><span>${escapeHTML(selected.purpose)} · ${escapeHTML(selected.risk)}</span></div><div class="fact"><span>输入参数</span><span>${escapeHTML(selected.input)}；必填字符串，具体约束依提供方 schema 核对</span></div><div class="fact"><span>返回摘要</span><span>${escapeHTML(selected.output)}；仅展示目录允许公开的结构</span></div><div class="fact"><span>接入与授权</span><span>${available?'组织开放且团队可发现；'+(selected.id==='inventory'?'库存试参当前演示前提：'+escapeHTML(toolStates[state.toolTestStatus][0])+'；不代表真实授权或接入':'此接口的身份授权、团队接入和运行健康均未核实'):'尚未向本团队开通；审批、宿主接入与身份授权均未核实'}</span></div><div class="fact"><span>相关 Skill</span><span>仅示意依赖关系；推荐、安装和实际执行均未验证</span></div>${available&&selected.id==='inventory'?`<div class="divider"></div><h3>试参示意 · 固定脱敏值</h3><p class="small muted">正式产品只允许经提供方批准的低风险只读测试通道；此处仅本地演示，不访问 ERP、不证明当前身份有权调用。</p><label class="field-label" for="tool-test-input">product_id · 必填 · 演示 ID</label><input id="tool-test-input" class="field" value="${escapeHTML(state.toolTestInput)}" placeholder="仅填 DEMO-001，勿输入真实 ID"><div class="actions">${btn('模拟参数测试','tool-test','secondary',state.toolTestStatus==='ready'?'':'disabled title="本地试参条件未就绪"')}</div><details class="optional" data-tool-test-options ${state.toolTestOptionsOpen?'open':''}><summary>本地试参情景（仅此库存示例）</summary><p class="small muted">以下按钮只是让这一个库存示例演示“条件就绪或不就绪时能否试参”，不是团队的真实接入、身份授权或接口健康状态；也不影响列表及其他 Tool。真实试参要走经批准的测试通道。</p><div class="actions">${btn('演示条件就绪','tool-test-ready','ghost')}${btn('演示待授权','tool-test-needs-access','ghost')}${btn('演示未接入','tool-test-disconnected','ghost')}${btn('演示状态未知','tool-test-unknown','ghost')}</div></details>${state.toolTestResult?'<div class="notice good">本地模拟响应：商品 DEMO-001 · 可用库存 24 件（固定虚构值）；不是 ERP 或沙箱读回。演示点击时间：'+escapeHTML(state.toolTestResult)+'（本地时钟）。不计入团队真实调用次数。</div>':''}`:available?'<div class="notice warn">此条没有核验过的低风险测试通道；这里只展示参数结构。请回宿主任务按实际授权流程查询。</div>':`<div class="notice warn">广场条目不可试参；先核实提供方的审批、接入及测试资格。${selected.id==='price'?state.priceRequest==='未申请'?'下方按钮仅记录本地申请意向。':'已记录本地申请意向，未提交或获批。':'没有经验证的申请链接，请向数据责任方核对去向。'}</div>${selected.id==='price'?`<div class="actions">${btn(state.priceRequest==='未申请'?'模拟记录申请意向':'申请意向已记录（模拟）','tool-apply','ghost',state.priceRequest==='未申请'?'':'disabled')}</div>`:''}`}<div class="actions">${link('回宿主任务示意','task')}</div>`:'<div class="notice">从列表选择一个接口，查看参数结构、业务范围及使用前提。</div>';
-    return (state.authorized?toolTabs()+`<div class="grid" style="margin-top:16px"><section class="card span-5"><div class="between"><h2>${available?'团队可发现的接口':'待申请的接口'}</h2>${badge('虚构目录 · 非接口读回','warn')}</div><p class="tiny muted">ERP / MES / 采购是演示提供方标签，真实分类随目录返回；无标签应显示未分类。搜索在此只过滤预置条目，真实产品须在授权范围内由服务端分页检索。</p><label class="field-label" for="tool-search">搜索名称、接口 ID 或用途（输入后点搜索）</label><div class="tool-search"><input id="tool-search" class="field" value="${escapeHTML(state.toolSearchDraft)}" placeholder="如 ERP、工单、价格"><button class="btn secondary" data-action="tool-search-submit">搜索</button><button class="btn ghost" data-action="tool-search-clear">清空</button></div><div class="tool-filters" aria-label="业务域标签">${filters}</div><p class="tiny muted">匹配 ${found.length} 条虚构条目 · 目录时间：固定示例（非实时）</p><div class="tool-list">${list}</div></section><section class="card span-7">${detail}</section></div>`:acl);
+    return header('WORKBENCH / 业务接口目录','可发现不等于可调用','数字核对还须按具体场景验证接入、身份、用途、字段、期间及统计口径；本页不提供真实结果。')+scope+(state.authorized?toolTabs()+`<div class="grid" style="margin-top:16px"><section class="card span-5"><div class="between"><h2>${available?'团队可发现的接口':'待申请的接口'}</h2>${badge('虚构目录 · 非接口读回','warn')}</div><p class="tiny muted">ERP / MES / 采购是演示提供方标签，真实分类随目录返回；无标签应显示未分类。搜索在此只过滤预置条目，真实产品须在授权范围内由服务端分页检索。</p><label class="field-label" for="tool-search">搜索名称、接口 ID 或用途（输入后点搜索）</label><div class="tool-search"><input id="tool-search" class="field" value="${escapeHTML(state.toolSearchDraft)}" placeholder="如 ERP、工单、价格"><button class="btn secondary" data-action="tool-search-submit">搜索</button><button class="btn ghost" data-action="tool-search-clear">清空</button></div><div class="tool-filters" aria-label="业务域标签">${filters}</div><p class="tiny muted">匹配 ${found.length} 条虚构条目 · 目录时间：固定示例（非实时）</p><div class="tool-list">${list}</div></section><section class="card span-7">${detail}</section></div>`:acl);
   }
   const mapPoints=[['清单适用判断','只有资料 / 待确认','warn','来源冲突；任务与时间范围未核对。'],['例外是否升级','依赖人','warn','维持人的判断和解释。'],['任务实时状态','业务系统/外部 Tool 负责','warn','需通过获授权的业务接口查询；本演示未取得实时状态。'],['临时特殊审批','逐次人工决定','warn','不属于应填补的文档缺口。']];
   function map() {
@@ -346,7 +621,7 @@
     return header('WORKBENCH / 候选能力地图','哪些判断能复用，哪些仍要人处理','仅一类虚构任务的桌面梳理；不以知识或 Skill 数量、个人工作量冒充组织能力。')+scope+(state.authorized?`<div class="grid"><section class="card span-7"><h2>示例任务：核对交接资料</h2><p class="muted small">限定分母：1 类任务、4 个示意判断点。点击查看问题与行动。</p>${points.map(point=>`<div class="item between"><div><strong>${point[0]}</strong><br><span class="small muted">${point[3]}</span></div><div class="row">${badge(point[1],point[2])}<button class="btn text" data-point="${point[0]}">查看 →</button></div></div>`).join('')}</section><aside class="card span-5"><h2>${selected[0]}</h2>${badge(selected[1],selected[2])}<p class="small muted" style="margin-top:14px">${selected[3]}</p><div class="fact"><span>真实结果</span><span>未知 · 待任务中验证</span></div><div class="fact"><span>可做什么</span><span>${selected[0]==='清单适用判断'?'补证并核对确认范围':selected[0]==='任务实时状态'?'核对接口接入与授权；回原系统确认':'约定人的判断责任'}</span></div>${selected[0]==='任务实时状态'?link('查看业务接口目录','tools'):link('回到团队协作','discussion')}</aside><section class="card span-12"><h3>不要推算整个组织的覆盖率</h3><p class="muted small">分别看任务是否完成、依据是否可靠、能否复用、能否更新、投入是否值得；这里没有用户访谈、真实使用效果或个人绩效榜。</p></section></div>`:acl);
   }
   const views={home,task,object:objectView,record:recordView,knowledge,discussion,proposal,review,skill,assets,tools,map};
-  const names={home:'Team Knowledge Workbench',task:'对话与任务',object:'团队内容 / 业务对象',record:'团队内容 / 工作记录',knowledge:'知识创作会话',discussion:'知识创作会话 / 内容讨论',proposal:'知识创作会话 / 修订提议',review:'知识创作会话 / 修订核对',skill:'Skill 创作会话',assets:'团队资产',tools:'业务接口目录',map:'团队资产 / 候选能力地图'};
+  const names={home:'Team Knowledge Workbench',task:'对话与任务',object:'团队内容 / 业务对象',record:'团队内容 / 工作记录',knowledge:'导入材料 / 四步梳理',discussion:'团队内容 / 内容讨论',proposal:'团队内容 / 修订提议',review:'团队内容 / 修订核对',skill:'团队资产 / Skill 改进',assets:'团队资产',tools:'业务接口目录',map:'团队资产 / 候选能力地图'};
   function render() {
     document.getElementById('breadcrumb').textContent=names[state.route];
     document.getElementById('space-label').textContent=state.authorized?'演示团队 · team-asset':'模拟未绑定';
@@ -355,8 +630,31 @@
   }
   function setAnchor(container,text) {
     state.selected={asset:container.dataset.asset,version:container.dataset.version,paragraph:container.dataset.anchor,text:text.trim().slice(0,180)};
-    state.route='discussion'; render(); root.focus();
+    state.knowledgeStep='review'; state.route='discussion'; render(); root.focus();
   }
+  function knowledgeSelectDraft(event) {
+    const container=event.target.closest?.('[data-draft-target]');
+    if(!container||state.route!=='knowledge'||!state.authorized||!knowledgeIsSample()) return;
+    const [type,id]=container.dataset.draftTarget.split(':');
+    if(state.knowledgeStep!==(type==='fact'?'facts':'experience')) return;
+    const point=knowledgeFactPoints.find(item=>item.id===id), issue=knowledgeIssues.find(item=>item.id===id);
+    if((type==='fact'&&!point)||(type==='experience'&&(!issue||state.knowledgeIssue!==id))) return;
+    const draft=type==='fact'?knowledgeFactDraft(point):knowledgeReview(issue);
+    if(draft.pending||state.knowledgeEditIssue===id||container.textContent!==draft.body) return;
+    const selection=window.getSelection();
+    if(!selection||selection.isCollapsed||selection.rangeCount!==1||!container.contains(selection.anchorNode)||!container.contains(selection.focusNode)) return;
+    const range=selection.getRangeAt(0), text=range.toString();
+    if(!text.trim()||text.length>180) { note('请选择当前草稿中的一小段文字（不超过 180 字）。'); return; }
+    const prefix=range.cloneRange(); prefix.selectNodeContents(container); prefix.setEnd(range.startContainer,range.startOffset);
+    const start=prefix.toString().length, end=start+text.length;
+    if(draft.body.slice(start,end)!==text) return;
+    state.knowledgeCommentTarget=container.dataset.draftTarget;
+    state.knowledgeCommentSelection={text,start,end,body:draft.body,version:draft.versions.length+1};
+    state.knowledgeCommentDraft=''; render(); root.querySelector('#knowledge-comment-text')?.focus();
+  }
+  document.addEventListener('mouseup',knowledgeSelectDraft);
+  document.addEventListener('keyup',knowledgeSelectDraft);
+  document.addEventListener('touchend',knowledgeSelectDraft);
   document.addEventListener('mouseup',event=>{
     const container=event.target.closest('.selectable'); if(!container || !state.authorized) return;
     const selection=window.getSelection(); if(!selection || selection.isCollapsed || !selection.toString().trim()) return;
@@ -369,27 +667,183 @@
     if(event.target.id==='comment') state.draft=event.target.value;
     if(event.target.id==='evidence') state.evidence=event.target.value;
     if(event.target.id==='recap-correction') state.recapCorrection=event.target.value;
-    if(event.target.id==='candidate-draft') { const kind=candidateKind(); state.candidateDrafts[kind]=event.target.value; state.candidateSubmitted[kind]=false; }
+    if(event.target.id==='candidate-draft') {
+      const kind=candidateKind();
+      if(kind==='knowledge' && state.route==='knowledge'&&state.knowledgeStep==='import') {
+        knowledgeResetMaterial(event.target.value,'paste'); state.knowledgeImportError='';
+        const feedback=root.querySelector('.knowledge-import-feedback');
+        if(feedback) feedback.textContent=event.target.value.trim()?'已录入文字；仅固定示例有本地预置结果，材料未归档。':'尚无材料。可载入合成示例。';
+      } else { state.candidateDrafts[kind]=event.target.value; state.candidateSubmitted[kind]=false; }
+    }
+    if(state.route==='knowledge' && event.target.id==='knowledge-comment-text') state.knowledgeCommentDraft=event.target.value;
+    if(state.route==='knowledge' && event.target.id==='knowledge-method-body') state.knowledgeEditDraft=event.target.value;
     if(event.target.id==='tool-search' && state.route==='tools' && state.authorized) state.toolSearchDraft=event.target.value;
     if(event.target.id==='tool-test-input' && state.route==='tools' && state.authorized) { state.toolTestInput=event.target.value; state.toolTestResult=null; }
   });
+  document.addEventListener('change',async event=>{
+    if(!state.authorized||state.route!=='knowledge') return;
+    if(event.target.id!=='knowledge-file'||state.knowledgeStep!=='import') return;
+    const file=event.target.files?.[0]; if(!file) return;
+    const currentName=file.name;
+    knowledgeResetMaterial('','file',currentName,false);
+    const revision=state.knowledgeImportRevision;
+    if(!/\.(txt|md|csv)$/i.test(currentName)||file.size>200*1024) { state.knowledgeImportError='当前只能本地读取 200 KB 内的 TXT / MD / CSV 文本。'; render(); return; }
+    state.knowledgeImportError='正在本地读取并比对演示样本；没有上传文件。'; render();
+    try {
+      const bytes=await file.arrayBuffer();
+      if(revision!==state.knowledgeImportRevision||!state.authorized||state.route!=='knowledge'||state.knowledgeStep!=='import') return;
+      const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+      if(text.includes('\0')) throw Error('不可读取的纯文本');
+      const digest=globalThis.crypto?.subtle?Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256',bytes)),byte=>byte.toString(16).padStart(2,'0')).join(''):'';
+      if(revision!==state.knowledgeImportRevision||!state.authorized||state.route!=='knowledge'||state.knowledgeStep!=='import') return;
+      knowledgeResetMaterial(text,'file',currentName,digest===knowledgeFileDigest); state.knowledgeImportError=digest?'':'此浏览器环境无法计算本地指纹；不能识别演示周报。'; render();
+    } catch(error) { if(revision===state.knowledgeImportRevision&&state.authorized&&state.route==='knowledge'&&state.knowledgeStep==='import') { knowledgeResetMaterial('','file',currentName,false); state.knowledgeImportError='文件读取失败或编码不符，请改用 TXT / MD / CSV 的 UTF-8 文本。'; render(); } }
+  });
   document.addEventListener('toggle',event=>{
+    if(event.target.matches?.('details[data-knowledge-evidence]')) state.knowledgeEvidenceOpen=event.target.open;
+    if(event.target.matches?.('details[data-legacy-knowledge]')) state.legacyOpen=event.target.open;
     if(event.target.matches?.('details[data-tool-test-options]')) state.toolTestOptionsOpen=event.target.open;
   },true);
   document.addEventListener('click',event=>{
     const el=event.target.closest('[data-route],[data-action],[data-point]'); if(!el || el.disabled) return;
     if(!state.authorized && !['home','task'].includes(el.dataset.route) && el.dataset.route) { note('演示空间未绑定，不能访问项目、来源或内容详情。'); return; }
-    if(el.dataset.route) { state.route=el.dataset.route; if(state.route==='assets') state.assetDetail=null; if(state.route==='tools') { state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; } render(); root.focus(); return; }
+    if(el.dataset.route) { const from=state.route; if(from==='knowledge'&&el.dataset.route!=='knowledge') knowledgeLeave(); state.route=el.dataset.route; if(state.route==='assets') state.assetDetail=null; if(state.route==='knowledge'&&el.dataset.knowledgeTarget==='legacy') { state.knowledgeStep='import'; state.knowledgeIssue=null; state.legacyOpen=true; } else if(state.route==='knowledge'&&['discussion','proposal','review'].includes(from)) { state.knowledgeStep='intake'; } if(state.route==='tools') { state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; } render(); root.focus(); if(state.route==='knowledge'&&el.dataset.knowledgeTarget==='legacy') root.querySelector('[data-legacy-knowledge] summary')?.focus(); return; }
     if(el.dataset.point) { state.mapPoint=el.dataset.point; render(); root.focus(); return; }
     const action=el.dataset.action;
     if(action==='recap-reset') { if(!state.authorized) { note('演示资产空间未绑定，不能访问团队复盘内容。'); return; } state.recapStage='idle'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; render(); root.focus(); return; }
     if(!state.authorized && !['toggle-access','open-task'].includes(action) && !action.startsWith('result-')) { note('演示资产空间未绑定，不能访问团队资产或提交内容。'); return; }
+    if(action.startsWith('knowledge-fact-focus-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='facts'||!knowledgeIsSample()) return;
+      const id=action.slice('knowledge-fact-focus-'.length);
+      if(!knowledgeFactPoints.some(point=>point.id===id)) return;
+      state.knowledgeFactFocus=id; render(); root.querySelector(`[data-action="${action}"]`)?.focus(); return;
+    }
+    if(action.startsWith('knowledge-skill-case-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='intake'||!knowledgeIsSample()) return;
+      const id=action.slice('knowledge-skill-case-'.length);
+      if(!skillCases[id]) return;
+      state.skillCase=id; render(); root.querySelector(`[data-action="${action}"]`)?.focus(); return;
+    }
+    if(action.startsWith('knowledge-step-')) {
+      const step=action.slice(15);
+      if(state.route!=='knowledge'||!['import','facts','experience','intake'].includes(step)) return;
+      if(step!=='import'&&!state.candidateDrafts.knowledge.trim()) { note('请先粘贴获准分享的材料、选择可读文件或载入脱敏周报示例。'); return; }
+      if(step!=='import'&&state.knowledgeImportError==='正在本地读取并比对演示样本；没有上传文件。') { note('文件仍在本地读取，请等待读取完成。'); return; }
+      if(step!==state.knowledgeStep) { state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; state.knowledgeGenerationRevision++; for(const draft of Object.values(state.knowledgeReviews)) { if(draft.pending) draft.comments.filter(comment=>comment.result==='pending').forEach(comment=>{comment.result='cancelled';}); draft.pending=false; } for(const [id,draft] of Object.entries(state.knowledgeFactDrafts)) { if(draft.pending) (state.knowledgeFactComments[id]||[]).filter(comment=>comment.result==='pending').forEach(comment=>{comment.result='cancelled';}); draft.pending=false; } }
+      if(step==='experience'&&knowledgeIsSample()&&!state.knowledgeIssue) state.knowledgeIssue=knowledgeIssues[0].id;
+      state.knowledgeStep=step; render(); root.focus(); return;
+    }
+    if(action==='knowledge-demo') { if(state.route!=='knowledge') return; knowledgeResetMaterial(knowledgeSample,'sample'); state.knowledgeImportError=''; render(); root.focus(); return; }
+    if(action.startsWith('knowledge-issue-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='experience'||!knowledgeIsSample()) return;
+      const issue=knowledgeIssues.find(candidate=>candidate.id===action.slice(16));
+      if(!issue) return;
+      if(state.knowledgeIssue!==issue.id) { state.knowledgeGenerationRevision++; for(const draft of Object.values(state.knowledgeReviews)) { if(draft.pending) draft.comments.filter(comment=>comment.result==='pending').forEach(comment=>{comment.result='cancelled';}); draft.pending=false; } }
+      state.knowledgeIssue=issue.id; state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; state.knowledgeEditIssue=null; render(); root.querySelector(`[data-action="${action}"]`)?.focus(); return;
+    }
+    if(action.startsWith('knowledge-cell-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='facts'||!knowledgeIsSample()||!state.knowledgeEvidenceOpen) return;
+      const cell=action.slice(15), items=knowledgeCandidates.filter(item=>`${item.object}-${item.kind}`===cell);
+      if(!items.length) return;
+      state.knowledgeCell=`${items[0].object}:${items[0].kind}`;
+      state.knowledgeFocus=items[0].id;
+      render(); root.querySelector(`[data-action="${action}"]`)?.focus(); return;
+    }
+    if(action.startsWith('knowledge-focus-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='facts'||!knowledgeIsSample()) return;
+      const item=knowledgeCandidates.find(candidate=>candidate.id===action.slice(16));
+      if(!item||!state.knowledgeEvidenceOpen||state.knowledgeCell!==`${item.object}:${item.kind}`) return;
+      state.knowledgeFocus=item.id;
+      render(); root.querySelector(`[data-action="${action}"]`)?.focus(); return;
+    }
+    if(action.startsWith('knowledge-fact-comment-')||action.startsWith('knowledge-method-comment-')) {
+      const isFact=action.startsWith('knowledge-fact-comment-'), id=action.slice(isFact?23:25);
+      if(state.route!=='knowledge'||state.knowledgeStep!==(isFact?'facts':'experience')||!knowledgeIsSample()) return;
+      if(isFact&&!knowledgeFactPoints.some(point=>point.id===id)) return;
+      if(!isFact&&(!knowledgeIssues.some(issue=>issue.id===id)||state.knowledgeIssue!==id)) return;
+      state.knowledgeCommentTarget=`${isFact?'fact':'experience'}:${id}`;
+      state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; render(); root.querySelector('#knowledge-comment-text')?.focus(); return;
+    }
+    if(action==='knowledge-comment-cancel') { if(state.route!=='knowledge') return; state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; render(); root.focus(); return; }
+    if(action.startsWith('knowledge-comment-again-')||action.startsWith('knowledge-history-')) {
+      if(state.route!=='knowledge'||!knowledgeIsSample()) return;
+      const again=action.startsWith('knowledge-comment-again-'), match=/^knowledge-(?:comment-again|history)-(fact|experience)-([\w-]+)$/.exec(action);
+      if(!match) return;
+      const [,type,id]=match, point=knowledgeFactPoints.find(item=>item.id===id), issue=knowledgeIssues.find(item=>item.id===id);
+      if((type==='fact'&&(state.knowledgeStep!=='facts'||!point))||(type==='experience'&&(state.knowledgeStep!=='experience'||!issue||state.knowledgeIssue!==id))) return;
+      if(again) { const draft=type==='fact'?knowledgeFactDraft(point):knowledgeReview(issue); if(draft.pending) return; state.knowledgeCommentTarget=`${type}:${id}`; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; render(); root.querySelector('#knowledge-comment-text')?.focus(); }
+      else { const history=root.querySelector(`[data-draft-history="${type}-${id}"]`); if(history) { history.open=true; history.querySelector('summary')?.focus(); } }
+      return;
+    }
+    if(action.startsWith('knowledge-draft-restore-')) {
+      if(state.route!=='knowledge'||!knowledgeIsSample()) return;
+      const match=/^knowledge-draft-restore-(fact|experience)-([\w-]+)-(\d+)$/.exec(action);
+      if(!match) return;
+      const [,type,id,index]=match, point=knowledgeFactPoints.find(item=>item.id===id), issue=knowledgeIssues.find(item=>item.id===id);
+      if((type==='fact'&&(state.knowledgeStep!=='facts'||!point))||(type==='experience'&&(state.knowledgeStep!=='experience'||!issue||state.knowledgeIssue!==id))) return;
+      const draft=type==='fact'?knowledgeFactDraft(point):knowledgeReview(issue), old=draft.versions[Number(index)];
+      if(!old||draft.pending||state.knowledgeEditIssue===id) return;
+      if(draft.body===old.body) return;
+      knowledgeReplaceDraft(draft,old.body,null,'从旧稿回退'); state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; if(type==='experience') draft.status='pending';
+      state.knowledgePublishIntent=''; render(); return;
+    }
+    if(action==='knowledge-comment-save') {
+      if(state.route!=='knowledge'||!knowledgeIsSample()||!state.knowledgeCommentTarget) return;
+      const [type,id]=state.knowledgeCommentTarget.split(':');
+      if((type==='fact'&&(state.knowledgeStep!=='facts'||!knowledgeFactPoints.some(point=>point.id===id)))||(type==='experience'&&(state.knowledgeStep!=='experience'||state.knowledgeIssue!==id))||!['fact','experience'].includes(type)) return;
+      if(!state.knowledgeCommentDraft.trim()) { note('先写一条评论；不会直接覆盖来源。'); return; }
+      const comment={text:state.knowledgeCommentDraft.trim(),selection:state.knowledgeCommentSelection,result:'pending'};
+      const issue=type==='experience'?knowledgeIssues.find(candidate=>candidate.id===id):null;
+      if(type==='experience'&&!issue) return;
+      const draft=type==='fact'?knowledgeFactDraft(knowledgeFactPoints.find(point=>point.id===id)):knowledgeReview(issue);
+      if(!draft||draft.pending||state.knowledgeEditIssue===id) { note('当前草稿正在修改，请完成后再评论。'); return; }
+      if(comment.selection&&(comment.selection.version!==draft.versions.length+1||comment.selection.body!==draft.body||draft.body.slice(comment.selection.start,comment.selection.end)!==comment.selection.text)) { note('选区已不属于当前草稿，请重新画线。'); return; }
+      const comments=type==='fact'?(state.knowledgeFactComments[id]||(state.knowledgeFactComments[id]=[])):draft.comments;
+      comments.push(comment); draft.pending=true; draft.error='';
+      const revision=state.knowledgeGenerationRevision, base=draft.versions.length, body=draft.body;
+      state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; state.knowledgePublishIntent=''; render();
+      setTimeout(()=>{
+        if(revision!==state.knowledgeGenerationRevision||!state.authorized||!knowledgeIsSample()||state.route!=='knowledge'||state.knowledgeStep!==(type==='fact'?'facts':'experience')||draft.versions.length!==base||draft.body!==body||!draft.pending) return;
+        try { knowledgeReplaceDraft(draft,knowledgeDemoResponse(type,type==='fact'?knowledgeFactPoints.find(point=>point.id===id):issue,comment),comment); }
+        catch(error) { comment.result='failed'; draft.error='本地演示未覆盖这条评论或生成失败'; }
+        draft.pending=false; if(type==='experience') draft.status='pending';
+        state.knowledgePublishIntent=''; if(state.route==='knowledge') { if(comment.result==='failed') { state.knowledgeCommentTarget=`${type}:${id}`; state.knowledgeCommentSelection=comment.selection; state.knowledgeCommentDraft=comment.text; } render(); if(comment.result==='failed') root.querySelector('#knowledge-comment-text')?.focus(); else root.querySelector(`[data-revision-feedback="${type}-${id}"]`)?.focus(); }
+      },300);
+      return;
+    }
+    if(action.startsWith('knowledge-method-edit-')) {
+      const id=action.slice(22), issue=knowledgeIssues.find(candidate=>candidate.id===id);
+      if(state.route!=='knowledge'||state.knowledgeStep!=='experience'||!knowledgeIsSample()||!issue||state.knowledgeIssue!==id||knowledgeReview(issue).pending) return;
+      state.knowledgeEditIssue=state.knowledgeEditIssue===id?null:id;
+      state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft='';
+      state.knowledgeEditDraft=state.knowledgeEditIssue?knowledgeReview(issue).body:''; render(); root.querySelector('#knowledge-method-body')?.focus(); return;
+    }
+    if(action==='knowledge-method-cancel') { if(state.route!=='knowledge') return; state.knowledgeEditIssue=null; state.knowledgeEditDraft=''; render(); root.focus(); return; }
+    if(action.startsWith('knowledge-method-save-')) {
+      const id=action.slice(22), issue=knowledgeIssues.find(candidate=>candidate.id===id);
+      if(state.route!=='knowledge'||state.knowledgeStep!=='experience'||!knowledgeIsSample()||!issue||state.knowledgeEditIssue!==id||state.knowledgeIssue!==id||knowledgeReview(issue).pending) return;
+      if(!state.knowledgeEditDraft.trim()) { note('不能把方法经验改为空白；如不沉淀，请选择“本次暂不沉淀”。'); return; }
+      const review=knowledgeReview(issue); if(state.knowledgeEditDraft.trim()===review.body) { state.knowledgeEditIssue=null; state.knowledgeEditDraft=''; render(); return; } knowledgeReplaceDraft(review,state.knowledgeEditDraft.trim(),null,'人工改写前的版本'); review.status='pending';
+      state.knowledgeEditIssue=null; state.knowledgeEditDraft=''; state.knowledgePublishIntent=''; render(); root.focus(); return;
+    }
+    if(action.startsWith('knowledge-review-')||action.startsWith('knowledge-question-')||action.startsWith('knowledge-exclude-')) {
+      if(state.route!=='knowledge'||state.knowledgeStep!=='experience'||!knowledgeIsSample()) return;
+      const status=action.startsWith('knowledge-question-')?'needs-evidence':action.startsWith('knowledge-exclude-')?'excluded':'reviewed';
+      const id=action.slice(status==='needs-evidence'?19:status==='excluded'?18:17), issue=knowledgeIssues.find(candidate=>candidate.id===id);
+      if(!issue||state.knowledgeIssue!==id) return;
+      const review=knowledgeReview(issue);
+      if(status==='reviewed'&&!review.body.trim()) { note('请先核对方法的判断、适用情形与停止条件。'); return; }
+      review.status=status; state.knowledgePublishIntent=''; render(); root.querySelector(`[data-action="knowledge-issue-${id}"]`)?.focus(); return;
+    }
+    if(action.startsWith('skill-step-')) { const step=action.slice(11); if(state.route!=='skill'||!['fit','workflow','cases','handoff'].includes(step)) return; state.skillStep=step; render(); root.focus(); return; }
+    if(action.startsWith('skill-case-')) { const sample=action.slice(11); if(state.route!=='skill'||state.skillStep!=='cases'||!Object.hasOwn(skillCases,sample)) return; state.skillCase=sample; render(); root.focus(); return; }
+    if(action==='skill-review-toggle') { if(state.route!=='skill'||state.skillStep!=='cases') return; state.skillCaseReviews[state.skillCase]=!state.skillCaseReviews[state.skillCase]; render(); root.focus(); return; }
     if(action==='asset-back') { if(state.route!=='assets'||!state.assetDetail) return; state.assetDetail=null; render(); root.focus(); return; }
     if(action.startsWith('diagnosis-disposition-')) { const match=/^diagnosis-disposition-(diagnosis-(?:conflict|stale|flow))-(needs-evidence|not-applicable)$/.exec(action); if(state.route!=='assets'||state.assetTab!=='diagnosis'||!match||state.assetDetail!==match[1]) return; state.diagnosticDisposition[match[1]]=match[2]; render(); root.focus(); return; }
     if(action.startsWith('asset-focus-')) { const focus=action.slice(12); if(state.route!=='assets'||state.assetTab!=='overview'||state.assetDetail||!['all',...businessLines.map(line=>line.id),...businessProjects.map(project=>project.id)].includes(focus)) return; state.assetOverviewFocus=focus; render(); root.focus(); return; }
     if(action.startsWith('asset-tab-')) { const tab=action.slice(10); if(state.route!=='assets'||!Object.hasOwn(assetTabs,tab)) return; state.assetTab=tab; state.assetDetail=null; render(); root.focus(); return; }
     if(action.startsWith('asset-open-')) { const id=action.slice(11); if(state.route!=='assets'||state.assetDetail||!Object.hasOwn(assetDetails,id)) return; state.assetDetail=id; render(); root.focus(); return; }
-    if(action.startsWith('asset-create-')) { if(state.route!=='assets'||!state.assetDetail) return; const target=action.slice(13); if(target!==assetDetails[state.assetDetail].create) return; if(target==='product'||target==='project') { state.objectFocus=target; state.route='object'; } else state.route=target; state.assetDetail=null; render(); root.focus(); note('仅定位创作或核证示意页；未创建待办、转交来源或授予权限。'); return; }
+    if(action.startsWith('asset-create-')) { if(state.route!=='assets'||!state.assetDetail) return; const target=action.slice(13); if(target!==assetDetails[state.assetDetail].create) return; if(target==='product'||target==='project') { state.objectFocus=target; state.route='object'; } else { state.route=target; if(target==='knowledge') { state.knowledgeStep='import'; } if(target==='skill') state.skillStep='fit'; } state.assetDetail=null; render(); root.focus(); note('仅定位创作或核证示意页；未创建待办、转交来源或授予权限。'); return; }
     if(action==='focus-project'||action==='focus-product') { state.objectFocus=action==='focus-product'?'product':'project'; state.route='object'; render(); root.focus(); return; }
     if(action==='recap-start') { state.recapStage='review'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; }
     if(action==='recap-discuss') { state.recapReviewed=true; state.recapStage='decide'; }
@@ -405,10 +859,12 @@
     if(action==='recap-revise') { state.recapStage='decide'; state.handoff=''; }
     if(action==='submit-candidate') {
       const kind=candidateKind();
+      if(kind==='knowledge') return;
       if(!state.candidateDrafts[kind]?.trim()) { note('请先自行粘贴可分享的脱敏候选；仅打开页面不会创建事项。'); return; }
-      state.candidateSubmitted[kind]=true; note('仅在本地演示中收到候选；未验证来源、运行记录或正式权限。');
+      state.candidateSubmitted[kind]=true;
+      note('仅在本地演示中收到候选；未验证来源、运行记录或正式权限。');
     }
-    if(action==='toggle-access') { state.authorized=!state.authorized; if(!state.authorized) { state.selected=null; state.draft=''; state.evidence=''; state.toolResult=false; state.toolQueriedAt=null; state.toolTestStatus='ready'; state.toolTestOptionsOpen=false; state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; state.priceRequest='未申请'; state.recapStage='idle'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; state.candidateDrafts={knowledge:'',skill:'',source:'',fact:''}; state.candidateSubmitted={knowledge:false,skill:false,source:false,fact:false}; state.objectFocus='project'; state.assetOverviewFocus='all'; state.assetDetail=null; state.diagnosticDisposition={}; if(!['home','task'].includes(state.route)) state.route='home'; } render(); note('仅切换演示状态，真实权限仍需服务端验证。'); return; }
+    if(action==='toggle-access') { state.authorized=!state.authorized; if(!state.authorized) { state.selected=null; state.draft=''; state.evidence=''; state.annotations=[]; state.discussion='尚未开始'; state.proposal=null; state.decision='未确认'; state.review='未提交'; state.publication='无新版本'; state.toolResult=false; state.toolQueriedAt=null; state.toolTestStatus='ready'; state.toolTestOptionsOpen=false; state.toolTab='available'; state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; state.priceRequest='未申请'; state.recapStage='idle'; state.recapReviewed=false; state.recapReuse='pending'; state.recapAction='pending'; state.recapArtifact='pending'; state.recapCorrection=''; state.handoff=''; state.candidateDrafts={knowledge:'',skill:'',source:'',fact:''}; state.candidateSubmitted={knowledge:false,skill:false,source:false,fact:false}; state.knowledgeStep='import'; state.knowledgeOrigin=''; state.knowledgeFileName=''; state.knowledgeImportError=''; state.knowledgeImportRevision++; state.knowledgeMatched=false; state.knowledgeIssue=null; state.knowledgeFactFocus='a-test'; state.knowledgeEvidenceOpen=false; state.knowledgeCell=null; state.knowledgeFocus=null; state.knowledgeReviews={}; state.knowledgeFactComments={}; state.knowledgeFactDrafts={}; state.knowledgeGenerationRevision++; state.knowledgeCommentTarget=null; state.knowledgeCommentSelection=null; state.knowledgeCommentDraft=''; state.knowledgeEditIssue=null; state.knowledgeEditDraft=''; state.knowledgePublishIntent=''; state.legacyOpen=false; state.skillStep='fit'; state.skillCase='normal'; state.skillCaseReviews={}; state.objectFocus='project'; state.assetOverviewFocus='all'; state.assetDetail=null; state.diagnosticDisposition={}; if(!['home','task'].includes(state.route)) state.route='home'; } render(); note('仅切换演示状态，真实权限仍需服务端验证。'); return; }
     if(action==='tool-tab-available'||action==='tool-tab-plaza') { if(state.route!=='tools') return; state.toolTab=action.slice(9); state.selectedTool=null; state.toolDomain='all'; state.toolSearch=''; state.toolSearchDraft=''; state.toolTestInput=''; state.toolTestResult=null; render(); root.focus(); return; }
     if(action.startsWith('tool-domain-')) { const domain=action.slice(12); if(state.route!=='tools'||!toolDomains.includes(domain)) return; state.toolDomain=domain; if(!toolCatalog.some(tool=>tool.id===state.selectedTool&&visibleTool(tool))) state.selectedTool=null; state.toolTestInput=''; state.toolTestResult=null; render(); root.focus(); return; }
     if(action==='tool-search-submit'||action==='tool-search-clear') { if(state.route!=='tools') return; state.toolSearch=action==='tool-search-clear'?'':state.toolSearchDraft; state.toolSearchDraft=state.toolSearch; if(!toolCatalog.some(tool=>tool.id===state.selectedTool&&visibleTool(tool))) state.selectedTool=null; state.toolTestInput=''; state.toolTestResult=null; render(); document.getElementById('tool-search').focus(); return; }
@@ -423,7 +879,7 @@
     if(action==='toggle-sources') state.sourceExpanded=!state.sourceExpanded;
     if(action==='anchor-answer'||action==='anchor-knowledge') {
       const anchor=action==='anchor-answer'?'answer-a':'knowledge-p1';
-      const container=document.querySelector(`[data-anchor="${anchor}"]`);
+      const container=document.querySelector(`[data-anchor="${anchor}"]`); if(!container) { note('请先打开依据步骤中的 K-01 v1 正文，再选中段落评论。'); return; }
       const current=window.getSelection();
       const selected=current&&!current.isCollapsed&&container.contains(current.anchorNode)&&container.contains(current.focusNode)?current.toString().trim():'';
       const remembered=state.selected?.paragraph===anchor?state.selected.text:'';
@@ -436,6 +892,7 @@
       state.draft=''; state.evidence=''; state.selected=null; state.discussion='已有人补充'; note('团队评论已留在旧版对应位置；未修改正式正文。');
     }
     if(action==='create-proposal') {
+      if(state.route!=='proposal') return;
       if(state.proposal) { note('当前修订已存在；不能覆盖已有修订。'); return; }
       if(!state.annotations.length) { note('请先留下与原文绑定的评论。'); return; }
       const text=document.getElementById('proposed-text').value.trim(), reason=document.getElementById('reason').value.trim();
@@ -450,9 +907,9 @@
       if(action==='reject') { state.decision='拒绝修订'; state.review='已拒绝'; }
       if(action==='simulate-confirm') { state.decision='已模拟针对修订确认'; state.review='待正式审核'; note('仅演示具备授权的责任人确认指定修订，不代表当前访问者拥有该权限。'); }
     }
-    if(action==='audit') { if(state.route!=='knowledge'||!state.proposal||state.decision!=='已模拟针对修订确认'||state.publication!=='无新版本') { note('请回知识创作会话，对已确认的指定修订模拟审核。'); return; } state.publication='待模拟读回'; note('仅演示人审和 CI 完成，未真实访问 Git。'); }
-    if(action==='readback') { if(state.route!=='knowledge'||state.publication!=='待模拟读回') { note('请在知识创作会话核对待读回的指定修订。'); return; } state.publication='可引用（模拟）'; note('仅演示版本读回成功。正式使用仍需核对任务条件。'); }
-    if(action==='external-unknown') { if(state.route!=='knowledge'||state.publication!=='待模拟读回') { note('只有知识创作会话中待读回的修订才能进入外部状态未知。'); return; } state.publication='外部状态未知 · 待对账'; note('未知不等于失败或成功，需要对账。'); }
+    if(action==='audit') { if(state.route!=='knowledge'||!state.legacyOpen||!state.proposal||state.decision!=='已模拟针对修订确认'||state.publication!=='无新版本') { note('请在 K-01 的修订记录中，对已确认的 R-02 模拟审核。'); return; } state.publication='待模拟读回'; note('仅演示人审和 CI 完成，未真实访问 Git。'); }
+    if(action==='readback') { if(state.route!=='knowledge'||!state.legacyOpen||!state.proposal||state.decision!=='已模拟针对修订确认'||state.publication!=='待模拟读回') { note('请在 K-01 的修订记录中核对待读回的 R-02。'); return; } state.publication='可引用（模拟）'; note('仅演示版本读回成功。正式使用仍需核对任务条件。'); }
+    if(action==='external-unknown') { if(state.route!=='knowledge'||!state.legacyOpen||!state.proposal||state.decision!=='已模拟针对修订确认'||state.publication!=='待模拟读回') { note('只有 K-01 的待读回修订才能进入外部状态未知。'); return; } state.publication='外部状态未知 · 待对账'; note('未知不等于失败或成功，需要对账。'); }
     render(); root.focus();
   });
   render();
