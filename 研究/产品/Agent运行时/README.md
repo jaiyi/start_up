@@ -57,6 +57,8 @@
 | `praisonai.md` | PraisonAI（MervinPraison，MIT） | 五层 Agent 栈 + Managed Agents 执行位置语义的多 agent 框架全家桶 | tools_run_on / run_on 双语义、completion_reason 枚举退出、doom-loop 检测等循环纪律 |
 | `rea.md` | REA（morluto/rea） | **邻接对象：证据型 MCP 工具运行时** | Evidence contract、provider binding、progress/cancel/cleanup 与模型侧 schema 投影 |
 | [`magpie.md`](./magpie.md) | Magpie（yetone/magpie） | 编程 Agent 的本地多协议模型网关与客户端接入管理 | 多模型/账号路由、客户端配置恢复和 Library 资产分发如何与宿主授权、知识库及团队治理分工 |
+| [`loongsuite-dsh-plugin.md`](./loongsuite-dsh-plugin.md) | LoongSuite dsh-plugin | DSH 运行时 OTel GenAI Trace/Metric 插件 | 遥测采集、内容默认关闭与 Skill 级归因/资产发布回执如何分工 |
+| [`tencent-octop.md`](./tencent-octop.md) | TencentCloud/Octop | 多用户、多 Agent 自托管助手与应用工作台 | 多入口/工作区/连接器/技能共享和 DSH 宿主、团队资产权威如何分界 |
 
 TeamAI、Paperclip 和 SkillHub 等偏团队资产、组织和发布治理的产品，统一见 [`../Agent资产与团队治理/`](../Agent资产与团队治理/)。
 

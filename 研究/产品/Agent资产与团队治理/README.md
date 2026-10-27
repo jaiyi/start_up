@@ -21,6 +21,7 @@
 | `teamai-cli.md` | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发与持续改进控制面 | Skills、Rules、MCP、Models 如何随代码仓和团队约定发布，并通过 friction learning 持续改进 |
 | `paperclip.md` | Paperclip | Agent 公司级组织、任务、Heartbeat、预算和审批控制面 | Agent 如何被组织成可分工、可追踪、受预算和审批约束的团队 |
 | `skillhub-vs-skills-manager-and-a2a-skill-design.md` | SkillHub / Skills Manager 对比 | Skill 注册中心、个人 Skill 库房与 A2A Skill 资产治理设计 | Skill 契约、证据、协商和版本如何支撑跨团队发现、审核与调度 |
+| [`himarket.md`](./himarket.md) | HiMarket | 企业 AI 能力市场、Skill 包发现与分发 | HiMarket 的管理/开发者门户、包上传/审核与团队 Git 权威、固定 digest、目标装载如何分工 |
 
 ## 与相邻类别的边界
 
