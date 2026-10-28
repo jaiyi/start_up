@@ -7,6 +7,7 @@
 ### 工业 AI 产品专题
 
 - [Lattice](./lattice/)：外部工业 AI 产品和公开能力研究。
+- [Chronos Forecasting](./chronos-forecasting.md)：Amazon 时序预测模型家族与 SageMaker AI Chronos-Bolt 部署案例；区分预测能力与 SPC 判异。
 - [连山产品研究](./lianshan/)：连山内部产品、代码仓和当前产品能力分析；这是研究与诊断专题，不是项目实现正文。
 
 ### 研究边界
