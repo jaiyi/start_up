@@ -22,9 +22,11 @@ DSH Desktop / Workbench Market
 
 Workbench 的市场安装、版本和重启状态不等于团队资产发布。每个团队必须独立绑定 `team_id`、`asset_space_id`、资产 Git 仓库、WeKnora space、steward、review policy 和下游分发目标。DSH Desktop 的本地 state、Session ownership 和 market install record 不是共享团队控制面，也不是正式知识/Skill 的权威来源。
 
-P0 需要在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。部署对象包括 Team Knowledge Backend、worker、PostgreSQL、对象存储和现有 WeKnora 的独立测试空间；DSH/Harness、SkillHub 和 TeamLab 若目标版本具备可部署制品则纳入部署验证，否则明确保留管理员/fake provider fallback，不把“可访问”写成“已集成”。Workbench 当前复用 DSH Desktop 的认证上下文，不以公司统一身份系统接入作为 P0 前提；后端仍必须验证身份、团队/asset-space ACL 和服务身份。Git、WeKnora、SkillHub、TeamLab 可以复用内部组件接入配置，但不能共享团队资产、可变草稿或授权。
+当前推荐的 SkillHub 固定包 release + 可选 TeamAI 分发是待验证拓扑；这两者是否互补、是否选其一，由[工程评估门](./方案/11-开发工程设计与集成基线.md#7-skillhub-与-teamai-的角色评估及选择门)决定，DSH 和 WeKnora 必接。P0 计划在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。部署对象包括 Team Knowledge Backend、worker、PostgreSQL、对象存储和现有 WeKnora 的独立测试空间；DSH/Harness、SkillHub 和 TeamLab 若目标版本具备可部署制品则纳入部署验证，否则明确保留管理员/fake provider fallback，不把“可访问”写成“已集成”。Workbench 拟利用经验证的 DSH Desktop 身份上下文，不以公司统一身份系统接入作为 P0 前提；后端仍必须验证身份、团队/asset-space ACL 和服务身份。Git、WeKnora、SkillHub、TeamLab 可以复用内部组件接入配置，但不能共享团队资产、可变草稿或授权。
 
 身份与执行责任：当前用户通过 DSH Desktop 认证上下文进入 Workbench，后端映射 `principal_id`、团队成员和角色并重新校验 asset-space ACL。真实用户承担确认、审核和发布责任；Workbench Git bot、WeKnora adapter、SkillHub/TeamLab publisher 和 Worker 负责技术执行，分别记录 `approved_by`、`released_by`、`executed_by` 和 service identity。Git、WeKnora、SkillHub、TeamLab 可复用受控内部接入，但不共用用户 Token、团队资产授权或审计上下文。
+
+下面展示已存在的 SkillHub→可选 TeamAI **候选拓扑**，具体是否启用或替代须[工程设计第 7 节](./方案/11-开发工程设计与集成基线.md#7-skillhub-与-teamai-的角色评估及选择门)和目标环境验证；DSH 和 WeKnora 均为必接。没有通过的 SkillHub release/TeamAI install 不得写成真实成功。
 
 ```text
 资料入口：会议纪要/资料 → 梳理讨论 → 知识草稿 → Git/MR/CI → protected main merge
@@ -37,11 +39,11 @@ P0 需要在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。�
 
 `merge` 只是触发事实，不等于知识已 `published` 或 Skill 已 `released`。WeKnora 的索引读回、SkillHub 的 release/digest 读回、TeamAI 的安装读回和 DSH 的 loaded/profile 读回分别证明不同阶段；任何一个环节状态未知，都必须进入对账或人工 fallback，不能显示为最终成功。
 
-工作台使用 PostgreSQL outbox 和持久 worker 编排上述异步操作，负责事件去重、租约、重试、读回、补偿和审计，但不成为知识或 Skill 的 canonical source。TeamAI 只消费 SkillHub 已确认的固定 `package_digest`，管理员流程只是 provider 不可用时的 fallback。
+工作台使用 PostgreSQL outbox 和持久 worker 编排上述异步操作，负责事件去重、租约、重试、读回、补偿和审计，但不成为知识或 Skill 的 canonical source。若选用 TeamAI 分发，它只消费已确认的固定 `package_digest`，管理员流程是自动 provider 不可用时的有期限、可审计 fallback。
 
-## 两种核心体验
+## 五入口与两类创作会话
 
-首页只有两个创作入口，点击后会创建独立的 Creation Session；用户在会话内完成梳理、确认、测试、提交和发布，而不是在多个系统状态页面之间跳转。
+现行 Workbench 左侧入口为「我的使用与改进」「提炼知识&经验」「打磨可复用的技能」「连接业务数据源」「团队业务资产大盘」，默认先看本人有权的使用和反馈。DSH 原生对话属于宿主；查看来源、资产或报告问题不强制生成新会话。确需正式创作/修订时，从材料或 Skill 候选、指定版本、已分流反馈进入独立的 Knowledge/Skill Creation Session，在会话内完成核对、测试、审核和发布回访。[工程设计](./方案/11-开发工程设计与集成基线.md)给出从入口到 API/权限/跨平台读回的映射；下面两节是两条资产生产链，而非首页仅有两个按钮。
 
 ### 1. 资料变知识
 
@@ -65,7 +67,7 @@ P0 需要在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。�
   → 生成 Skill 草稿、脚本/资源、契约和测试集
   → 用脱敏样例试跑、比较和修改
   → 用户确认并提交 Git
-  → 审核通过后发布到 SkillHub
+  → 审核通过后形成固定包/digest，走经验证的 release 或标明管理员 fallback
   → 交给 DeepSeek Harness 的 Skill Provider 消费
 ```
 
@@ -116,7 +118,7 @@ Harness session / 业务系统
 5. 描述一个相关的重复工作流；
 6. 生成 Skill 草稿、资源和 3–5 个测试例；
 7. 用样例试跑、比较并修改；
-8. 确认后提交 Git、发布 SkillHub；
+8. 确认后提交 Git、构建固定包，按已通过的选型门发布或记录管理员 fallback；
 9. 生成交接记录，供目标 DeepSeek Harness 环境验证发现和加载。
 
 首期不做本项目自己的任务执行入口、通用 Runtime、完整 Session/Run 控制面、运行时工具调用追踪、独立业务 Plugin Marketplace 或通用 SaaS 多租户控制面；但 P0 必须完成非生产部署验证，P1 必须验证至少两个团队/asset space 安装同一 Workbench 后的隔离。Workbench 多团队安装不等于建设一个共享可变资产的 SaaS 控制面。
@@ -137,7 +139,8 @@ Harness session / 业务系统
 10. [MVP 实施、验证与验收](./方案/08-MVP实施、验证与验收.md)
 11. [工作台信息架构与核心对象](./方案/09-工作台信息架构与核心对象.md)
 12. [Workflow 到 Skill 的生成、测试与发布](./方案/10-Workflow到Skill的生成、测试与发布.md)
-13. [DeepSeek Harness 能力验证](./验证/03-DeepSeek%20Harness能力验证.md)
+13. [开发工程设计与集成基线（含五入口、权限、回传和 Skill 组件选型门）](./方案/11-开发工程设计与集成基线.md)
+14. [DeepSeek Harness 能力验证](./验证/03-DeepSeek%20Harness能力验证.md)
 
 验证材料只回答“外部能力实际证明了什么”，不能把未验证的发布、索引、装载或运行显示为成功。
 
@@ -145,7 +148,7 @@ Harness session / 业务系统
 
 - 模型不能直接发布知识或 Skill，也不能推送 protected `main`；
 - Git/MR/CI/人工审核是正式发布门禁；
-- WeKnora 只接收批准后的知识；SkillHub 不替代质量评测和审核；
+- WeKnora 只接收批准后的知识；SkillHub 若通过选型门，仍不替代质量评测和审核；
 - Skill 只能声明能力需求，不能自行扩大工具权限或数据范围；
 - 不把聊天 Memory、运行日志或业务原文直接当正式资产；
 - `approved`、`published`、`loaded`、`running` 和 `succeeded` 属于不同系统状态；

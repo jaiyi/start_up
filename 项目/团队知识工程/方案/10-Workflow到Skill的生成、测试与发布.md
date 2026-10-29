@@ -10,7 +10,7 @@
 
 ## 2. 从用户描述到 Workflow Draft
 
-用户从工作台点击“从工作流创建 Skill”，平台先创建一个独立的 `Skill Creation Session`、`Workflow Draft` 和 `draft_revision_id`，并绑定当前团队的 `team_id`、`asset_space_id`、Git repository 和知识依赖范围。用户可以直接描述工作流、粘贴 SOP/模板、上传历史产物，或从 Feedback Candidate fork 出新的修订会话。Agent 按阶段追问目标和触发、输入、步骤和判断、例外和风险、输出和成功标准。每个候选答案都要标明来源、假设和待确认状态。
+用户在「打磨可复用的技能」核对指定候选/版本并确认需要正式创作或修订，或从材料第五步确定有稳定可测的 Skill 缺口后，平台才创建独立的 `Skill Creation Session`、`Workflow Draft` 和 `draft_revision_id`，并绑定当前团队的 `team_id`、`asset_space_id`、Git repository 和知识依赖范围。仅浏览、核证候选或决定沿用旧版不建立会话。进入创作后，用户可以描述工作流、提供获准的 SOP/模板与历史产物，或从已分流 Feedback Candidate fork 修订会话。Agent 按阶段追问目标和触发、输入、步骤和判断、例外和风险、输出和成功标准。每个候选答案都要标明来源、假设和待确认状态。
 
 ```yaml
 id: <workflow-id>
@@ -88,7 +88,7 @@ skills/<domain>/<name>/
 
 ## 4. 交互式生成体验
 
-工作台采用“对话 + 结构化工作区”双栏模式：
+本节双栏与底部动作是**进入正式 Skill Creation Session 后**的交互示意，不能取代现行「引入 Skill → 自动校验 → 具体修改与复测 → 审核提交」页内流程，也不表示每个页内步骤均已由目标 DSH 实现。会话内可采用“对话 + 结构化工作区”双栏模式：
 
 ```text
 左侧：Agent 追问、解释、发现冲突和提出修改
@@ -120,7 +120,9 @@ Skill Draft
 
 平台展示变更摘要、文件差异、测试和门禁、审核意见、commit/MR 链接以及失败原因。默认由 Workbench Git service identity 创建分支、commit 和 MR；`created_by`/`submitted_by`/`approved_by` 仍记录真实 DSH 用户及责任角色。模型不能直接 push protected `main`，也不能用 Hook 绕过审核。
 
-## 7. 发布到 SkillHub 与下游交接
+## 7. 从固定 Git 版本打包、候选 SkillHub 发布与下游交接
+
+本节给出既有推荐拓扑的**条件性路径**，不是目标环境已经具备 SkillHub/TeamAI API 的结论。最终是否采用 SkillHub 注册与 TeamAI 分发，或等价实现/限期管理员固定包 fallback，须先通过[工程设计选型门](11-开发工程设计与集成基线.md#7-skillhub-与-teamai-的角色评估及选择门)并记录 ADR；无论何种路径，DSH loader/真实装载与业务结果均独立读回。
 
 Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_id`、`asset_space_id`、`asset_repository_id`、`repository_identity`、`repo_path`、source repository、approved Git revision、package digest、`skill_owner`、`approved_by`、`released_by`、`executed_by` 和 release read-back。Workbench Plugin 是否已经安装在 DSH Desktop，不改变 Skill 的发布状态：
 
@@ -128,16 +130,18 @@ Skill package 属于当前团队的 `team-knowledge-asset`，必须记录 `team_
 approved Git revision
   → package root: skills/<domain>/<name>/
   → package
-  → SkillHub release request
-  → SkillHub release/version/digest read-back
+  → SkillHub release request（若通过选型；否则等价 Registry 或管理员固定包 fallback）
+  → release/version/digest read-back（真实 Registry 路径）或 fallback 操作证据（非 release）
   → pinned digest
-  → TeamAI distribution/read-back（如启用）
+  → TeamAI distribution/read-back（仅启用时）
   → DSH handoff/discovery/load 验证
 ```
 
-工作台负责确认 package、version、digest、知识依赖、兼容目标和发布状态；SkillHub 负责注册、版本、release read-back 和 pinned digest；TeamAI（如启用）只负责消费 pinned digest 并完成目标安装读回；DeepSeek Harness 负责实际 handoff、discovery/load、session 消费、工具策略、运行时人工批准和运行结果。工作台不把目标 profile“可用”、Skill“loaded”或任务“succeeded”写成自己的发布成功状态。
+工作台负责确认 package、version、digest、知识依赖、兼容目标和发布状态；若选 SkillHub，它负责真实注册、版本、release read-back 和 pinned digest；TeamAI（如启用）只负责消费 pinned digest 并完成目标安装读回；DeepSeek Harness 负责实际 handoff、discovery/load、session 消费、工具策略、运行时人工批准和运行结果。未选用相应 Provider 时不写其 release/install 事实；工作台不把目标 profile“可用”、Skill“loaded”或任务“succeeded”写成自己的发布成功状态。
 
-如果 SkillHub 暂时不可用，允许管理员 fallback，但必须保持 Git、审核、digest、目标和回滚语义，并标记实际路径。
+**TeamAI 下发补充**：上游文档描述的贡献路径是 `teamai push→PR/MR→审核 merge`，成员首次在目标机/工作区 `teamai init` 后，受支持客户端的 SessionStart Hook 才会在**下一次会话**执行 `pull`；既有会话、未初始化或离线目标不会因仓库 merge 即时收到更新。Workbench 提交只进入 canonical Git 的受审链；如 TeamAI 使用另一个团队仓库，固定包的复制还须在镜像仓经审查合并，不允许绕过首个受审版本。必须分别展示“源包已审核/Registry 已读回（或 fallback）→ TeamAI 仓库版本可拉取→指定目标已 pull/安装且 digest 读回→DSH profile 已 loaded”，不把前一步冒称后一步。目标配置、成员引导、同仓/受审镜像和设备撤回条件见[工程设计 3.2、5.4](11-开发工程设计与集成基线.md#32-teamai-配置与成员设备引导仅选用时拟议)；这些是目标版本待测集成契约，不是 TeamAI 已在 DSH Desktop 无感运行的证据。
+
+如果选定的 Registry 暂时不可用，允许有期限的管理员固定包 fallback，但必须保持 Git、审核、digest、目标、操作人和回滚语义，并将实际路径标为 `release_mode=admin,fallback_only`；不能把它写为 SkillHub release。
 
 ## 8. 版本和晋升
 
@@ -149,8 +153,8 @@ draft → tested → review → approved → released → deprecated/rollback
 - `tested`：契约和测试有证据；
 - `review`：等待 owner/steward/reviewer；
 - `approved`：Git/CI/人工审核通过；
-- `released`：SkillHub release/version/digest 或明确标记的管理员 fallback 发布有真实读回；
-- `distributed/installed`：TeamAI 已按 pinned digest 到达目标并完成安装读回；
+- `released`：选定的真实 Registry 对 release/version/digest 作最终读回；管理员路径另记 `fallback_only`，不标记为真实 released；
+- `distributed/installed`：所选目标按 pinned digest 安装并读回；只有选用 TeamAI 且目标读回通过时才记 TeamAI installed；
 - `loaded`：DSH profile 实际装载并读回相同 digest；
 - `deprecated`：不再推荐新会话消费；
 - `rollback`：固定回到已知可用 digest。
@@ -183,7 +187,7 @@ Skill 的 `success_criteria` 应至少定义技术完成、契约成功和业务
 - 说明、schema、少量脚本/资源；
 - 3–5 个测试例和样例试跑；
 - Git 提交和审核证据；
-- 一个已验证或人工 fallback 的 SkillHub 发布路径；
+- 一个已验证的真实候选 Registry release，或标明 `fallback_only` 的管理员固定包路径；
 - package/version/digest/依赖的 DSH 交接记录；
 - 结构化反馈引用和回归候选。
 

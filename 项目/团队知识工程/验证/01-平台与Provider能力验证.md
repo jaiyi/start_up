@@ -36,7 +36,7 @@ fake/admin 结果不得报告为真实 Provider 的 `released`、`distributed`�
 | Workbench outbox/worker | B | 事件落库后确认、operation 幂等、lease/retry/crash recovery、provider 半成功和 read-back 对账 |
 | WeKnora 查询/摄取/检索 | A/B | ACL、来源/版本、重复、document/read-back、检索验证、索引失败和旧版本 |
 | Skill package/digest/SkillHub release | B/C | 固定 merge commit 构建、immutable digest、release API、审批、release/digest read-back、撤回和回滚 |
-| TeamAI pinned digest distribution | B/C | 只消费 SkillHub digest、target workspace、init/push/pull、installed revision/file list/digest read-back、删除清理和回滚 |
+| TeamAI 已审固定包目标同步 | B/C（可选候选） | 只同步与已审 Git/CI 固定包 digest 对应的仓库版本（若采用 SkillHub，还需 release 读回）；验证源 commit→包 digest→团队仓库 commit→目标文件摘要映射，以及 target workspace、init/push/pull、安装读回、删除清理和回滚；不预设 TeamAI 本身支持按 digest 锁定 |
 | DSH handoff/load | B | pinned digest、profile、handoff id、loaded digest/read-back、权限过滤和回滚 |
 | DSH Desktop Workbench package/market | B | `team-knowledge-workbench` 的 package layout、canonical repository identity、catalog/install/restart、enabled/UI read-back、卸载/回滚和市场准入；市场安装不等于资产发布 |
 | 多团队 Workbench 安装 | B | 两个团队安装同一 Workbench 后的 team/asset-space binding、Git/WeKnora/session/ACL/审计隔离和 cross-team deny |
@@ -91,15 +91,15 @@ fake/admin 结果不得报告为真实 Provider 的 `released`、`distributed`�
 
 ### V-04：Skill package → SkillHub release/read-back
 
-固定一个已合并的 Skill commit，执行 `package → digest → SkillHub release → release/digest read-back`，验证 metadata、审批、immutable digest、重复 release、撤回、断网恢复、回滚和审计。SkillHub read-back 缺失或 digest 不一致时，不得进入 TeamAI。
+固定一个已合并的 Skill commit，若选择 SkillHub，则执行 `package → digest → SkillHub release → release/digest read-back`，验证 metadata、审批、immutable digest、重复 release、撤回、断网恢复、回滚和审计；SkillHub read-back 缺失或 digest 不一致时，**该 release 路径**不得进入 TeamAI。若未选择 SkillHub，必须另以已审 Git/CI 固定包及明确标记的管理员 fallback（或有独立 ADR 的等价 Registry）建立固定 digest 与批准来源映射，不能把 fallback 记作 SkillHub release。
 
 **通过条件：**未审核内容不能自动生效；SkillHub 返回的 release/version/digest 与本地 package 一致；重复操作不产生重复 release；release unknown 可对账；旧 digest 可回滚。该结果只有在目标版本、真实 Provider、目标环境和最终状态 read-back 均有证据时，才能标记 `integration_status: real_verified`；fake/admin 只能标记 `fallback_only` 或 `contract_verified`，不能作为真实 SkillHub 接通证据。
 
-### V-04A：SkillHub pinned digest → TeamAI → DSH
+### V-04A：已审固定包 → 可选 TeamAI → DSH
 
-固定已读回的 SkillHub `pinned_digest`，测试 TeamAI distribution request、目标 workspace、`init`、变更分支 `push`、`pull`、Hook 生命周期、格式兼容、安装/删除清理、installed revision/file list/digest read-back，再测试 DSH handoff、profile 和 loaded digest read-back。
+固定受审 Git commit 构建 package/digest，并读回所选 Registry release（若用 SkillHub）或记录管理员固定包 fallback。若选 TeamAI，测试同一 canonical Git 仓库或独立仓库的**受审镜像 MR** 如何映射固定包/团队仓库 commit；在有权成员的隔离 workspace/profile 先 `init`，测试 SessionStart 是否真在**目标 DSH** 的下一次会话触发 `pull`，并对照显式 `pull`。先核上游 CLI 版本、目标系统、实际下发路径/命名空间和 DSH 对该路径的发现/加载优先级；用户分享的 `.agents/skills`、`.dsh/skills` 等路径和 rank 不能直接当作目标版本的实验结论。分别测试首次 Git 只读授权、离线、撤权/残留、本地修改冲突、文件清单/digest 与 DSH loaded revision/profile 的目标端读回；`teamai push` 只能用于受审贡献流程，不是工作台草稿直接发布。
 
-**通过条件：**TeamAI 不接受 `latest` 或未审核版本；TeamAI 实际 digest 与 SkillHub pinned digest 一致；DSH loaded digest/profile 与 handoff 一致；digest 漂移、安装半成功和 loaded unknown 均阻断运行并进入对账；TeamAI/DSH 不可用时管理员 fallback 可按同一个 digest 运行。真实 Provider 路径必须记录 `provider_mode: real`、目标版本、目标环境和最终 read-back；管理员/fake 路径只能标记 `fallback_only` 或 `contract_verified`，不得报告为真实分发或加载成功。
+**通过条件：**明确团队仓库 commit 与源 package digest 的可验证映射，未经审核的变更或未初始化成员不能宣称自动分发；TeamAI 已装文件摘要与固定包相符，DSH loaded digest/profile 与批准目标一致，禁止以 `latest`、Hook 存在、`pull` 退出码或一次问答声称全员装载。目标 DSH 若无兼容 Hook/loader，记 `blocked/fallback_only` 并按固定包受控安装；漂移、离线/半成功、旧副本清理未知进入对账。真实 Provider 路径必须记录 `provider_mode: real`、目标版本、环境和最终读回；管理员/fake 路径只能标 `fallback_only/contract_verified`。
 
 ### V-05：Skill contract and regression
 
@@ -109,7 +109,7 @@ fake/admin 结果不得报告为真实 Provider 的 `released`、`distributed`�
 
 ### V-06：MCP security contract
 
-测试合法/非法/超大参数、无 token、跨 workspace、过期 token、无 approval、幂等、超时、断连和 cancellation；确认高风险工具默认不出现在普通 Agent 的列表中。
+先判定原生 DSH 会话接入 WeKnora 采用目标版本官方 Plugin/MCP，还是受控 Workbench 查询工具；若使用 MCP，分别核 WeKnora 只读端点/工具与版本引用、DSH 客户端/profile 配置和加载读回、目标授权主体与 asset-space 映射。团队配置模板不可携带 Token 或自动覆盖 `cordis.patch.yml` 等 profile 文件；分享内容中的配置路径和插件名称须以目标版本源码及隔离 profile 测试为准。测试合法/非法/超大参数、无 token、跨 workspace、过期 token、无 approval、撤权后旧文档直连检索、幂等、超时、断连和 cancellation；确认高风险工具默认不出现在普通 Agent 的列表中。
 
 **通过条件：**拒绝有稳定错误码和审计；工具结果与真实 provider 状态一致；日志和 trace 无 token、Cookie 和敏感正文。
 
