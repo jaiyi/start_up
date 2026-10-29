@@ -43,7 +43,7 @@ Workbench 的市场安装、版本和重启状态不等于团队资产发布。�
 
 ## 五入口与两类创作会话
 
-现行 Workbench 左侧入口为「我的使用与改进」「提炼知识&经验」「打磨可复用的技能」「连接业务数据源」「团队业务资产大盘」，默认先看本人有权的使用和反馈。DSH 原生对话属于宿主；查看来源、资产或报告问题不强制生成新会话。确需正式创作/修订时，从材料或 Skill 候选、指定版本、已分流反馈进入独立的 Knowledge/Skill Creation Session，在会话内完成核对、测试、审核和发布回访。[工程设计](./方案/11-开发工程设计与集成基线.md)给出从入口到 API/权限/跨平台读回的映射；下面两节是两条资产生产链，而非首页仅有两个按钮。
+现行 Workbench 左侧入口为「我的工作台」「提炼知识&经验」「打磨可复用的技能」「连接业务数据源」「团队业务资产大盘」，默认先看本人有权的使用和反馈；个人 Inbox 在首项内暂存获准来源定位/少量笔记（PG 私有条目、必要时另存获准加密对象），保存或打开知识页不自动生成 Session、Git/WeKnora 资产或 DSH 任务；另行授权的最小候选提交只返回独立 `submission_id`/受理回执。只有随后明确正式知识创作/修订并重新核来源、目标空间与动作权限，才新建会话；未来 IM 来源须另行获准。DSH 原生对话属于宿主；查看来源、资产或报告问题不强制生成新会话。确需正式创作/修订时，从材料或 Skill 候选、指定版本、已分流反馈进入独立的 Knowledge/Skill Creation Session，在会话内完成核对、测试、审核和发布回访。[工程设计](./方案/11-开发工程设计与集成基线.md)给出从入口到 API/权限/跨平台读回的映射；下面两节是两条资产生产链，而非首页仅有两个按钮。
 
 ### 1. 资料变知识
 
@@ -95,7 +95,9 @@ Workspace
    ├─ Draft Revision / Test / Evaluation
    └─ Asset Revision → Release → Handoff
 
-Feedback Candidate → 新的 Creation Session
+Feedback Candidate → 仅正式修订决定并获授权后关联新的 Creation Session
+
+InboxItem（PG 个人私有；仅显式知识 intake 且重鉴权后关联新会话）
 
 Harness session / 业务系统
   └─ 消费已发布版本并返回 feedback reference
@@ -140,7 +142,8 @@ Harness session / 业务系统
 11. [工作台信息架构与核心对象](./方案/09-工作台信息架构与核心对象.md)
 12. [Workflow 到 Skill 的生成、测试与发布](./方案/10-Workflow到Skill的生成、测试与发布.md)
 13. [开发工程设计与集成基线（含五入口、权限、回传和 Skill 组件选型门）](./方案/11-开发工程设计与集成基线.md)
-14. [DeepSeek Harness 能力验证](./验证/03-DeepSeek%20Harness能力验证.md)
+14. [未决工程风险与决策记录（含旧文矛盾、目标 Spike 与个人 Inbox）](./方案/12-未决工程风险与决策记录.md)
+15. [DeepSeek Harness 能力验证](./验证/03-DeepSeek%20Harness能力验证.md)
 
 验证材料只回答“外部能力实际证明了什么”，不能把未验证的发布、索引、装载或运行显示为成功。
 

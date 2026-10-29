@@ -2,6 +2,8 @@
 
 > 本文是唯一的实施路线和验收入口。首期交付知识与 Skill 创作发布闭环；DeepSeek Harness 的会话执行由下游能力验证和交接验证覆盖，不作为本工作台 Runtime 建设。[开发工程设计与集成基线](11-开发工程设计与集成基线.md)负责把现行五入口映射为拟议 API、授权与跨平台读回，以及 SkillHub/TeamAI 的待证选型门；它不取代本文件阶段、节点或成熟度门禁。
 
+**风险登记表及决策占位**见[12-未决工程风险与决策记录](12-未决工程风险与决策记录.md)：其中两项是已确认的旧文矛盾，七项需目标环境取证；个人 Inbox 风险另列。登记不构成通过、豁免或对旧文的静默修订；各项按下述阶段门给出 Spike 证据后再决策。
+
 ## 1. 交付方式
 
 采用：**一个知识域、一个高频低风险工作流、一个 Git provider、一个 worker、一个知识 steward、一个 Skill owner、一个发布目标、一个下游 Harness 验证环境和一个腾讯云非生产部署环境**。
@@ -192,7 +194,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 - `team-knowledge-workbench` 的 package skeleton、server/client contract、构建产物和一次内部安装/重启/read-back 验证；同时冻结可信 Backend 地址/环境的安装分发契约，确认客户端不持 Git/WeKnora/PostgreSQL/TeamAI **共享服务凭据**；TeamAI 若选用时成员授权的目标端 Git 只读身份与首次 `init` 另列；
 - 首位 platform owner 的受控初始化、团队资产空间/连接配置数据模型、仅管理员可见子页与服务端绑定/验证/激活契约；目标版本读回和凭据轮换作为待实测门禁，而非原型已有功能；
 - 知识规范目录、taxonomy、domain/topic/path preview、Git↔WeKnora mapping 和迁移/退役 contract；
-- 五入口 Workbench 默认首页、本人与反馈优先，以及按需创建 Knowledge/Skill Creation Session 的原型；标准 Tool/MCP 契约与隔离合成 Demo 方案，以及入口②→Git/WeKnora→入口⑤大盘的真实非生产链路测试卡（见 V-32–V-34）；
+- 五入口 Workbench 默认首页、个人 Inbox 暂存与本人使用反馈并列，以及按需创建 Knowledge/Skill Creation Session 的原型；标准 Tool/MCP 契约与隔离合成 Demo 方案，以及入口②→Git/WeKnora→入口⑤大盘的真实非生产链路测试卡（见 V-32–V-34）；
 - principal/team membership/role binding、service identity、Git 提交人和 Skill 发布责任链模型；
 - session、draft、asset revision、release、handoff、审批、operation/job/outbox/reconciliation 和反馈引用模型；
 - Git merge event fixture、签名/重放/乱序/旧 SHA contract；
@@ -304,7 +306,7 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 
 | 编号 | 主题 | 验收证据与失败条件 |
 |---|---|---|
-| V-01 | 工作台与会话入口 | 五个一级入口一致、默认先看本人有权的使用与反馈；材料/Skill 候选仅在进入正式创作或修订时创建正确的 Creation Session；首次使用能说明本次任务可获得什么、需要谁确认，回访可一键回到未完成动作；首页不得把发布数当业务价值 |
+| V-01 | 工作台与会话入口 | 五个一级入口一致（首项「我的工作台」）、默认先看个人 Inbox 主动暂存，再看本人有权的使用与反馈；材料/Skill 候选仅在进入正式创作或修订时创建正确的 Creation Session；首次使用能说明本次任务可获得什么、需要谁确认，回访可一键回到未完成动作；首页不得把发布数当业务价值 |
 | V-02 | Workbench Plugin 安装 | package、canonical repository、digest、安装、重启、enabled/UI read-back 可验证；安装不被报告为资产发布 |
 | V-03 | 多团队资产隔离与集中配置 | 两台以上 Desktop 安装同一 Workbench，受信 Backend 地址/环境分发和身份交换可验；普通用户仅见本人有权空间、不逐机填 Provider 共享凭据；team/asset-space/Git/WeKnora/ACL/session/审计互相隔离；管理员子页可按权限做配置草案→连接检查→激活/停用，版本并发、密钥轮换/不回显、旧操作对账和失败回滚可验证；如选 TeamAI，卡片仅允许绑定获批仓库/target、pull 模式及逐设备 init/授权状态，不把配置通过或测试 HTTP 200 当真实发布、安装 |
 | V-04 | 知识目录与索引映射 | domain/topic/path preview、空间内唯一 canonical key、稳定 asset ID、Git↔WeKnora 多版本/旧 document ID 映射可验证；新增/修订冲突、显式 tombstone 退役、移动/重命名旧路径残留及旧索引不可见性分别有正负向证据，不把 Git path 删除当已下架 |
@@ -340,6 +342,7 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-34 | 大盘诊断来源与成熟度（阶段 6 起） | 真实扫描才显示授权范围、批次、时间窗、来源、覆盖/未知、待核候选；人工预置线索标 fixture，不冒称 AI 巡检；所有卡片和计数区分演示数据、非生产真实集成、生产真实能力，权限过滤与小样本抑制先于聚合 |
 | V-35 | 分层成功率与知识引用统计（阶段 6，Pilot 复验） | 同空间/环境/准确资产版本/窗口固定独立开始或查询底账；Skill distinct `invocation_id` 与重试尝试分开，技术/契约/业务三层分别列已判定通过率、含 unknown 的保守下界、覆盖率与截止时间；Knowledge 含零结果查询、真实检索与答案引用分开，多文档/重复查询去重，适用性由授权复核；丢事件、无 digest/版本、无引用真值、无业务回执时不能推断总体成功或把 unknown 算明确失败，缺底账显示“不可计算” |
 | V-36 | 目标 DSH 原生观测与可选 OTel（阶段 2 Spike、阶段 8 真实补验） | 固定 Desktop/Harness commit、profile、Host Plugin 授权、环境/主体和合成任务，验证事件订阅或有权 Session Query 的实际可用性、调用/重试/知识引用版本/digest 归因、开始底账、跨空间与撤权拒绝、漏投/迟到/幂等/读回；字段白名单阻止 Prompt/回答/Tool 敏感原文/密钥和完整 trace 外传，只有最小事件进入指标；OTel/OTLP 如采用须证明模式、采样、脱敏、传输/留存和故障处理，不能以 span `OK`、反馈日志或采样 span 代替领域消费事件及业务结果；目标未通过时仅有契约 fixture、手动待核反馈和“不可计算”，不宣称 DSH 已接通 |
+| V-37 | 个人 Inbox 暂存与明确知识 intake（阶段 3–5；真实敏感输入另设准入） | `InboxItem` 是 PG 私有对象，与反馈/Session/正式资产分开；本人跨设备恢复、第二主体及跨空间拒绝、撤权/过期链接、对象加密/最短留存/删除与备份例外按批准策略验证；保存或仅打开知识页不触发会话、DSH、Git 或 WeKnora，选择具体内容/目标空间/分享范围并获授权的单独提交只返回 `submission_id`/受理回执、不建 Session；其后另行明确正式知识创作/修订时重新核来源/用途/目标空间/基线及动作权限并建唯一 Knowledge Session/Draft，过期或无权不建；IM connector 默认关闭，未来另测消息同意/群聊 ACL/撤回。缺数据 owner 留存策略不得开放真实敏感内容。 |
 
 详细平台实验见[验证材料](../验证/README.md)。产品体验以[用户价值与指标](01-问题、用户与产品范围.md#2-用户与责任)、[日常反馈闭环](02-端到端知识工作流.md#51-日常反馈--周期复核--下次使用)、[Workbench 如何解决专家判断与维护负担](../产品/03-Workbench如何解决.md)和[工作台逐屏设计](09-工作台信息架构与核心对象.md)为设计输入；V-01、V-05、V-14、V-16、V-22、V-28–V-31 应分别附首次使用、回访、审核退回、反馈纠错、Provider `unknown`、小样本无结论、专家拒绝/补证、无人认领/转交、归因更正及反推隐私的脱敏录屏或逐步操作记录。阶段 0 先用纸面原型/脱敏 fixture 评估这些交互是否可理解，**不能将原型通过记为功能已实现**；阶段 5 实现 V-29 的 Knowledge 授权判断/修订门禁，阶段 7 扩展到 Skill；阶段 6 实现 V-30 的队列/归因更正及 V-31 的最小授权聚合与负向权限测试，低风险真实试点再观察受益者、贡献者、审核人的任务结果与负担。fixture 与产品设想均不代替真实价值验收。
 
