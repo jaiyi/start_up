@@ -2,7 +2,7 @@
 
 > 本文是唯一的实施路线和验收入口。首期交付知识与 Skill 创作发布闭环；DeepSeek Harness 的会话执行由下游能力验证和交接验证覆盖，不作为本工作台 Runtime 建设。[开发工程设计与集成基线](11-开发工程设计与集成基线.md)负责把现行五入口映射为拟议 API、授权与跨平台读回，以及 SkillHub/TeamAI 的待证选型门；它不取代本文件阶段、节点或成熟度门禁。
 
-**风险登记表及决策占位**见[12-未决工程风险与决策记录](12-未决工程风险与决策记录.md)：其中两项是已确认的旧文矛盾，七项需目标环境取证；个人 Inbox 风险另列。登记不构成通过、豁免或对旧文的静默修订；各项按下述阶段门给出 Spike 证据后再决策。
+**风险登记表及决策占位**见[12-未决工程风险与决策记录](12-未决工程风险与决策记录.md)：R-01–R-09 的产品边界已裁决并在产品/方案对齐，其中 R-02 的 Skill 仅在经审合入 canonical Git protected main 后为 `已发布`，合并前为 `审核中`，管理员固定包 fallback 不使其已发布；R-09 区分个人 Inbox 留链接与知识入口在明确选择、授权且受限获取能力验证后抓取解析。除 R-07 专项模型治理不在产品范围，其余服务端或目标集成证据均待验证；个人 Inbox 的 I-01–I-04 工程风险另列。规则或文档对齐不构成工程验证通过、豁免或 Provider 能力证明；各项按下述阶段门给出 Spike 证据后再决策。
 
 ## 1. 交付方式
 
@@ -42,7 +42,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 `fake` 或 `admin` 可以满足契约和受控技术验证，但不能单独满足真实 Provider、Pilot Beta 或 Stable 的证据要求；fallback 必须有有效期、操作人、原因、固定 package/digest、回滚路径和到期复审日期。**合成内容与接入真实度是两条轴**：原型预置=`演示数据/fake`，合成数据经真实非生产 Provider 调用/读回=`非生产真实集成`，正式业务数据与生产授权/质量/价值=`生产真实能力`，后者不能由前两者推出。未选择 SkillHub 时记录 `not_selected` 仅为选型结果，不扩充 `integration_status` 枚举，也不构成缺失的 Provider 通过证据。
 
-首期不是“先做完 Knowledge、以后再做 Skill”，而是 **Knowledge-first、Skill 同期进入 MVP**：Knowledge 作为首条业务闭环和 Skill 的固定知识依赖先行验证；Skill 在同一个 MVP 周期内完成创建、契约、测试、打包、安装/发布 fallback 和最小消费验证。SkillHub、TeamAI、DSH 的真实 Provider 能力可以分阶段验证，但不得因为 Provider 尚未 `real_verified` 而省略 Skill 本身的 MVP 交付。
+首期不是“先做完 Knowledge、以后再做 Skill”，而是 **Knowledge-first、Skill 同期进入 MVP**：Knowledge 作为首条业务闭环先行验证，Skill 可在确有查询需求时引用已获授权的固定知识版本；Skill 在同一个 MVP 周期内完成创建、契约、测试、打包、安装/发布 fallback 和最小消费验证。SkillHub、TeamAI、DSH 的真实 Provider 能力可以分阶段验证，但不得因为 Provider 尚未 `real_verified` 而省略 Skill 本身的 MVP 交付。
 
 实施路线采用“主链路顺序 + 节点性双资产验收”：先完成能支撑 Skill 固定依赖的 Knowledge 基础能力，但每个重要功能完成后，都必须同步验证 Workbench Plugin 的构建、打包、安装、重启和最小 read-back；涉及 Skill 的节点还必须验证 Skill package、digest、安装或 fallback release。这样既保持 Knowledge-first 的业务优先级，又避免 Skill 和安装契约拖到 MVP 末尾才暴露问题。
 
@@ -51,12 +51,12 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 | N0 工程骨架 | Backend、Worker、Workbench client、配置和健康检查可启动 | 健康检查、身份上下文和 fake provider smoke | 最小 Plugin manifest/tool contract | `build → package → digest → fresh-profile install → restart → boot/load report` |
 | N1 控制面与隔离 | session、ACL、job、outbox、审计和双 asset-space 隔离可用 | 两个 asset-space 的 session/job/ACL 隔离 smoke | 同一 package 在两个 profile 安装，确认 enabled/UI/read-back，不能共享可变资产 | 固定 package digest、双 profile 安装、重启、隔离 smoke、disable/uninstall |
 | N2 Knowledge 发布链与大盘合成验证 | Creation Session、Git merge、WeKnora read-back 和 retrieval smoke 可用；合成知识经入口②真实非生产链进入入口⑤ | 新增/修改基线冲突、受审退役/移动、紧急撤权与三方对账；合成材料/旧版经审核、worker、测试 space 索引/ACL 检索；大盘 ID/版本去重、项目×产品线及有权具体文档深链和旧索引/撤权负向读回均有证据 | Skill fixture、Knowledge dependency 声明和 contract fixture 可随同测试 | 增量 package 安装、fixture contract/read-back、失败回滚 |
-| N3 Skill MVP | Workflow、Skill contract、测试、package builder 和 fallback release 可用 | Skill 依赖的 Knowledge ID/version/source commit 可读回 | `Workflow → Skill → golden/regression/security → Git 指定审核人/protected merge → package/digest → 安装或 fallback + 受控 load/read-back（标明 fake/admin/real）` | fresh-profile 安装、restart、load/read-back、digest 对账、rollback |
+| N3 Skill MVP | Workflow、Skill contract、测试、受审 Git 发布、package builder 和明确标记的 fallback 路径可用 | Skill 依赖的 Knowledge ID/version/source commit 可读回 | `Workflow → Skill → golden/regression/security → Git MR/CI/指定审核人 → canonical protected main merge（此前审核中，此后已发布）→ package/digest → 安装或 fallback + 受控 load/read-back（标明 fake/admin/real，各自独立）` | fresh-profile 安装、restart、load/read-back、digest 对账、rollback |
 | N4 消费与反馈、Tool Demo | Knowledge/Skill 消费事件、独立反馈引用和三层指标最小闭环；标准 Tool 契约及非生产合成只读 Demo 验收 | Knowledge 引用、修订任务和反馈分流可对账；大盘仅真实扫描才显示范围/批次/来源，预置诊断标 fixture | Skill version/digest、technical/contract/business status 和反馈引用可对账；Demo Tool 经目录/权限/环境→受控调用→来源/审计/失败回执，权限拒绝可复验 | 消费版本对账；失败后 disable/uninstall 或回退上一版本 |
 | N5 Provider 交接 | 外部 Provider 适配器和 read-back contract 可用 | 不改变 Git/WeKnora canonical source 和检索权威 | 按选型门逐层验证 SkillHub release（若选择）→ TeamAI distribution（如启用）→ DSH pinned digest/read-back；管理员 fallback 单独标记 | 每个真实 Provider 节点重复 `build/package/digest/install/restart/load/read-back/rollback` |
 | N6 MVP 发布候选 | 双资产版本、ACL、旧版、指标和回滚证据齐全 | Knowledge 发布、消费和反馈闭环验收 | Skill package、digest、fallback/真实 release 和最小消费验收 | 发布候选 fresh-profile 安装、端到端 smoke、disable/uninstall/rollback |
 
-每个节点必须记录目标版本、环境、package/artifact digest、fixture digest、实际命令和退出码、read-back、失败路径、回滚结果、执行人、复核人和证据自身 digest。未完成节点性打包和安装测试的功能，不得进入下一个 MVP 节点；节点测试失败时可以保留已通过的旧版本，但不得把失败功能标记为已发布或已安装。N0–N6 是能力验收节点，不与下述实施阶段编号一一对应：阶段 6 先验证 N4 中的 Knowledge 反馈和通用事件契约，阶段 7 产出 N3 Skill 制品后补验 N4 中的 Skill 最小消费；N4 双资产验收须在 N3 完成之后才能整体通过。
+每个节点必须记录目标版本、环境、package/artifact digest、fixture digest、实际命令和退出码、read-back、失败路径、回滚结果、执行人、复核人和证据自身 digest。未完成节点性打包和安装测试的功能，不得进入下一个 MVP 节点；节点测试失败时可以保留已通过的旧版本，但只能阻断该失败步骤的成功/安装声明，不撤销已核实的 Skill canonical Git `已发布`，也不得将未核实 Git merge 的 Skill 或未读回 WeKnora 的知识标记已发布。N0–N6 是能力验收节点，不与下述实施阶段编号一一对应：阶段 6 先验证 N4 中的 Knowledge 反馈和通用事件契约，阶段 7 产出 N3 Skill 制品后补验 N4 中的 Skill 最小消费；N4 双资产验收须在 N3 完成之后才能整体通过。
 
 
 ### 阶段 0：方案冻结与实施输入
@@ -74,7 +74,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 - **目标**：在业务代码前冻结控制面数据模型、状态迁移、外部契约和错误语义。
 - **输入**：阶段 0 基线、既有对象关系、Provider contract。
-- **主要设计/开发项**：定义 `team`、`asset_space`、`asset_repository`、`connection_binding`、`connection_config_revision`、`credential_binding`、`creation_session`、`draft`、`draft_revision`、`asset_revision`、`knowledge`、`skill`、`release`、`handoff`、`outbox_operation`、`worker_attempt`、`reconciliation_record`、`feedback`、`consumption_event`、`metric_aggregate`、`audit_event`；绘制 Creation Session、Draft、Release、Handoff、Outbox、Provider Operation 与配置草案/验证/激活/停用状态机；设计 API schema、错误码、幂等键、`operation_id`、`correlation_id` 和 `expected_state_version`；设计 migration、唯一约束、乐观锁、索引、审计、soft delete、备份恢复和数据保留；定义 merge、read-back、package、release、handoff、consumption、feedback event。**Tool/MCP 另需冻结**版本化标准接入契约、目录/详情/schema、主体与字段权限/环境、真实申请回执或未知、只读合成试参、来源/审计和失败映射，禁止不同 Provider 不支持的语义被默认为批准。**大盘另需冻结**资产 ID+版本去重、项目×产品线正交关联、来源/权限/窗口与具体文档深链的重鉴权，以及扫描批次与人工 fixture 的来源标记。**Knowledge 另需冻结**新增/修改/退役 tombstone/移动重命名的稳定 ID、base revision、旧 document ID、逐入口可见性；紧急撤权先阻断 epoch 后审计 Git、更正的权限及外部直连负向读回；定期 Git/PG/WeKnora 扫描游标、频率/范围、责任人与不可完成条件；目标 WeKnora 下架/旧索引能力未经实测保持待验证。**TeamAI 若选用**需冻结团队仓库与 canonical repo 的同仓/受审镜像关系、固定包/commit 映射、`teamai_session_pull|managed_target` 下发方式、目标机首次 init/授权、Hook 适配、逐目标摘要与离线撤回，不把仓库可拉取当目标已装载。专家判断、待办转交及贡献更正先作为与现有候选/草稿修订、身份和审计关联的操作契约设计，不另立一套资产批准或消费主体画像状态机。
+- **主要设计/开发项**：定义 `team`、`asset_space`、`asset_repository`、`connection_binding`、`connection_config_revision`、`credential_binding`、`creation_session`、`draft`、`draft_revision`、`asset_revision`、`knowledge`、`skill`、`release`、`handoff`、`outbox_operation`、`worker_attempt`、`reconciliation_record`、`feedback`、`consumption_event`、`metric_aggregate`、`audit_event`；另冻结 Workbench 评论独立持久化的 `comment_id`、条目/草稿修订锚点、状态与有权读回，以及仅在目标 DSH 回合契约实测后启用的 `turn_id/reply_id/终态` 关联和新稿 CAS/人工改写退路；绘制 Creation Session、Draft、Release、Handoff、Outbox、Provider Operation 与配置草案/验证/激活/停用状态机；设计 API schema、错误码、幂等键、`operation_id`、`correlation_id` 和 `expected_state_version`；设计 migration、唯一约束、乐观锁、索引、审计、soft delete、备份恢复和数据保留；定义 merge、read-back、package、release、handoff、consumption、feedback event。**Tool/MCP 另需冻结**版本化标准接入契约、目录/详情/schema、主体与字段权限/环境、真实申请回执或未知、只读合成试参、来源/审计和失败映射，禁止不同 Provider 不支持的语义被默认为批准。**大盘另需冻结**资产 ID+版本去重、项目×产品线正交关联、来源/权限/窗口与具体文档深链的重鉴权，以及扫描批次与人工 fixture 的来源标记。**Knowledge 另需冻结**新增/修改/退役 tombstone/移动重命名的稳定 ID、base revision、旧 document ID、逐入口可见性；紧急撤权先阻断 epoch 后审计 Git、更正的权限及外部直连负向读回；定期 Git/PG/WeKnora 扫描游标、频率/范围、责任人与不可完成条件；目标 WeKnora 下架/旧索引能力未经实测保持待验证。**TeamAI 若选用**需冻结团队仓库与 canonical repo 的同仓/受审镜像关系、固定包/commit 映射、`teamai_session_pull|managed_target` 下发方式、目标机首次 init/授权、Hook 适配、逐目标摘要与离线撤回，不把仓库可拉取当目标已装载。专家判断、待办转交及贡献更正先作为与现有候选/草稿修订、身份和审计关联的操作契约设计，不另立一套资产批准或消费主体画像状态机。
 - **输出**：领域模型图、状态机、OpenAPI/JSON Schema、ERD/migration、事件契约、错误码表、权限矩阵和 API examples。
 - **设计冻结门**：必须同时冻结数据字典、合法/非法状态迁移、API request/response、错误模型、幂等和唯一约束、事务边界、并发策略、Provider callback/read-back、审批/发布/回滚授权、迁移兼容策略、审计事件、evidence manifest schema 及其正向/负向/故障测试矩阵；未形成这些设计物只能进入设计评审，不能进入控制面实现或真实 Provider 接入。
 - **测试**：先写状态迁移和 schema contract tests；覆盖非法迁移、重复幂等、旧版本更新、跨团队访问和错误响应；数据库约束使用 integration test。
@@ -87,7 +87,7 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 - **目标**：先证明身份、隔离和最短发布链可行，再决定真实 Provider 接入顺序。
 - **输入**：阶段 1 契约、目标 DSH/Git/WeKnora 版本、TeamAI 分发候选版本、SkillHub（仅独立 Registry 需求获批时）的目标版本，以及获准的隔离非生产测试身份/凭据和合成 Tool Demo Provider；不得输入生产凭据。
 - **主要设计/开发项**：完成 DSH auth context 到 `principal_id`、`team_id`、`asset_space_id` 的可验证交换设计与后端重新授权；验证 Workbench 安装时 Backend 地址/环境的受信分发与拒绝错误目标；完成 Git webhook/merge event 的签名、重放、乱序、旧 SHA 和幂等 Spike；完成 Git → fake WeKnora → read-back 的 ID、路径、版本、source commit、ACL 和检索映射，再对真实 WeKnora 测试 space 验证；**实测**目标版本按 document ID/版本下架、ACL 收紧、旧 path/旧索引的负向检索与直连访问阻断（不能只测有权正向命中），记录不支持时的隔离限制与 blocked 状态；完成 Git MR/CI/指定审核人/protected merge→固定 Skill package/digest、DSH 目标校验/loader 的 Spike，优先验证 TeamAI 分发与逐目标读回；独立 Registry 契约有需求时才验证 SkillHub release，否则记录管理员固定包 fallback；以标准 Tool/MCP 契约在隔离非生产环境调用只读合成 Demo Tool，验证发现、详情、主体/字段权限/环境、受控试参、来源与审计/失败回执；验证管理员配置草案、连接检查的权限范围/非生产 fixture/真实读回、密钥引用轮换与旧配置在途操作的对账；为各 Provider 记录 `provider_mode`、`integration_status`、版本、环境、owner、阻塞原因和 fallback；注入 timeout、重复提交、响应丢失、read-back 不一致和迟到回调。
-- **Spike 记录格式**：每个 Spike 单独登记 `hypothesis`、`timebox`、`fixture`、`expected_result`、`actual_result`、`decision`、`owner`、`evidence_digest` 和对后续阶段的影响；至少拆分为控制面/跨团队拒绝、Git → outbox → worker → WeKnora、Skill package/digest/fallback、Workbench Plugin 安装，以及 **DSH 原生会话最小消费/知识引用观测**五类实验。最后一类须固定 Desktop/Harness commit、profile、插件身份和数据 owner 授权，用合成非生产会话分别检查宿主事件订阅/有权 Session Query、真实 Skill 调用与尝试、加载包 digest 映射、知识查询/零结果/检索/答案实际引用、漏投底账、权限撤销和字段白名单；先定是否能接入，再决定是否用 OTel/OTLP 作为技术观测传输，不能预设其能提供未采样分母或业务结果。失败时只能选择调整设计、保留 fallback 或阻断后续阶段，不得以“接口可访问”代替成功。
+- **Spike 记录格式**：每个 Spike 单独登记 `hypothesis`、`timebox`、`fixture`、`expected_result`、`actual_result`、`decision`、`owner`、`evidence_digest` 和对后续阶段的影响；至少拆分为控制面/跨团队拒绝、Git → outbox → worker → WeKnora、Skill package/digest/fallback、Workbench Plugin 安装，以及 **DSH 原生会话最小消费/知识引用观测**五类实验。最后一类须固定 Desktop/Harness commit、profile、插件身份和数据 owner 授权，用合成非生产会话分别检查宿主事件订阅/有权 Session Query、真实 Skill 调用与尝试、加载包 digest 映射、知识查询/零结果/检索/答案实际引用、漏投底账、权限撤销和字段白名单；先定是否能接入，再决定是否用 OTel/OTLP 作为技术观测传输，不能预设其能提供未采样分母或业务结果。**R-05 评论回合另建 Spike**：用有权合成评论验证真实投递、唯一 turn/comment、持久 reply、成功/失败/取消/超时终态、刷新读回及最小化权限边界，不拿上述消费观测或 OTel span 代替回复完成；缺契约只保留 Workbench 评论和人工改写。**R-09 来源链接另建 Spike**：个人 Inbox/导航只存定位且零抓取；知识入口用户明确选用、来源/用途/空间授权后，以隔离非生产脱敏链接验证限定来源、每跳重定向/DNS/实际地址、文件内容和解析器安全，失败只留最小待核定位；未通过则该链接抓取能力不开放，不能以管理员连接检查通过替代。失败时只能选择调整设计、保留 fallback 或阻断后续阶段，不得以“接口可访问”代替成功。
 - **输出**：Provider capability matrix、Spike fixture、fake provider、真实 Provider blocker 清单、evidence manifest 模板和 read-back 字段映射。
 - **测试**：contract、sandbox integration、签名/重放、故障注入和凭据扫描；真实 Provider 仅在非生产执行。
 - **证据**：目标版本/环境、fixture digest、命令及退出码、provider read-back、失败/回滚结果、复核人及证据 digest。
@@ -121,11 +121,11 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 
 - **目标**：交付第一个可独立验收的 Knowledge 创作到发布闭环，并以明确标合成的材料通过真实非生产 Git/WeKnora 测试链验证入口⑤大盘；业务场景和角色使用阶段 0 的待填配置，合成样本不代替试点。
 - **输入**：已确认的 `<pilot_scenario>` 或脱敏 fixture、Creation Session 设计、Git/WeKnora contract、阶段 4 权限能力。
-- **主要设计/开发项**：实现资料上传/脱敏、来源定位、候选卡片、冲突和待确认项；实现草稿、修订、确认、暂停/恢复、分叉/只读和并发 base revision；生成规范 knowledge path、metadata、sources、CHANGELOG 和变更包；通过 Git provider 创建分支/MR，执行格式、敏感信息、taxonomy、owner、链接和权限门禁；只接受 protected main merge event；由 outbox/Worker 调用 WeKnora ingest，读回 document/version/source/repo_path/ACL 并执行 retrieval smoke；只有 read-back 和检索通过才标记固定版本 `published`，失败保留旧版证据，旧版如无权或已失效须先阻断访问。按[工程设计的增改退役/对账契约](11-开发工程设计与集成基线.md#52-knowledge-增改退役与权限变更契约拟议)实现新建/修订的版本冲突、显式退役 tombstone、稳定 ID 移动/重命名、紧急访问阻断与旧索引逐项撤回/负向读回，持久游标核 Git/PG/WeKnora；无法证明外部不可检索时留 `withdrawal_unknown/revocation_unknown/manual_required` 并暂停相应访问，不伪称退役完成。
+- **主要设计/开发项**：由材料/知识 owner 先冻结首期格式×大小×语言/版式、关键内容与覆盖判定、形成/生效/截止及复核规则；仅对经目标解析实测支持的获准资料实现上传/脱敏、固定原件版本/hash、逐页/段/工作表或单元格定位与覆盖/未读范围、失败原因及时间证据。扫描件与复杂表格仅在实测通过后纳入；不支持、漏页漏表、关键锚点缺失或时效不明仅留有权最小待人工核对线索，服务端阻断可送审正式知识候选，补证后按固定原件重验。实现候选卡片、冲突和待确认项；实现草稿、修订、确认、暂停/恢复、分叉/只读和并发 base revision；评论按当前条目/草稿修订独立持久保存、刷新可查，目标 DSH 未实测可核回合/回复终态前只允许人工改写，不自动以回复替换待核稿；生成规范 knowledge path、metadata、sources、CHANGELOG 和变更包；通过 Git provider 创建分支/MR，执行格式、敏感信息、taxonomy、owner、链接和权限门禁；只接受 protected main merge event；由 outbox/Worker 调用 WeKnora ingest，读回 document/version/source/repo_path/ACL 并执行 retrieval smoke；只有 read-back 和检索通过才标记固定版本 `published`，失败保留旧版证据，旧版如无权或已失效须先阻断访问。按[工程设计的增改退役/对账契约](11-开发工程设计与集成基线.md#52-knowledge-增改退役与权限变更契约拟议)实现新建/修订的版本冲突、显式退役 tombstone、稳定 ID 移动/重命名、紧急访问阻断与旧索引逐项撤回/负向读回，持久游标核 Git/PG/WeKnora；无法证明外部不可检索时留 `withdrawal_unknown/revocation_unknown/manual_required` 并暂停相应访问，不伪称退役完成。
 - **输出**：Knowledge-first E2E、页面/API、Git change package、merge event、WeKnora published/read-back、人工接管和回滚。
-- **测试**：Creation Session、Git webhook、`创建 → 确认 → MR → merge → ingest → read-back → 检索` E2E；以明确标识的合成材料/已有知识版本从入口②真实走草稿、指定审核人、protected merge、worker、WeKnora 测试索引/ACL/有权检索，再由入口⑤大盘按资产 ID/版本去重展示来源、进展、项目×产品线与有权具体文档深链；两版并发修改、旧 base revision 冲突与人工合并，新增同键重复，审核后退役/负向检索、移动/重命名旧 path 残留；紧急撤权先阻断受控入口、再查外部直连/旧版/缓存，旧 callback 不得复活；Webhook 漏投、重复/乱序或旧 SHA、合规站外 Git merge、未经审核 Git diff 隔离、PG 与 WeKnora 漂移、索引半成功/不可读回及扫描游标恢复的三方对账 fixture；大盘对索引失败、撤权、旧版残留展示 unknown/阻断而非假成功，未运行真实扫描的诊断只标预置 fixture。另覆盖敏感资料和 ACL 测试；让第一用户从真实或脱敏材料起步，在不操作 Git 的前提下看到来源、待确认点、草稿变更和下一步，暂停后返回原位置；让有权 steward 对过期资料[拒绝/限定范围/要求补证]，验证决定绑定候选及修订、阻断该候选而不误改已发布版本，补证形成新修订并重新确认；让受益者从可用的消费入口找到可核对来源的答案。阶段 5 仅验证“报告错/旧/缺内容”的入口原型或授权人工登记，并保留资产版本与来源；反馈候选处理、事件归因和回访闭环在阶段 6 验收。无法接入既有入口时明示为试点临时入口，不暗示已嵌入日常工作。
-- **证据**：fixture digest、MR/merge commit、outbox/attempt、WeKnora read-back、检索结果、审计、失败和回滚记录。
-- **退出条件**：第一用户无需直接操作 Git 完成确认和提交；新增/修订知识在实际检索后才发布；隔离非生产合成知识从入口②通过真实受审 Git/Worker/WeKnora 测试空间读回进入入口⑤，有权具体文档链接、去重与双维关联可验证，修订/索引失败/撤权/旧版残留不冒称成功；退役和紧急撤权的声明范围有旧索引/外部入口负向读回或明确 blocked+安全升级（后者**不等于**退役/撤权成功）；持久对账能发现漏 event 和索引漂移且旧 callback 不复活已撤内容；消费入口可查到已读回版本，反馈入口原型或授权人工登记可记录问题、来源和资产版本；正式反馈处理和消费归因留给阶段 6。
+- **测试**：Creation Session、Git webhook、`创建 → 确认 → MR → merge → ingest → read-back → 检索` E2E；按 owner 冻结的支持矩阵，用授权脱敏原件与输出逐区块对照 hash/版本、页/段/表格锚点、已读/未读/排除范围和形成/生效/截止时间，覆盖正常长文本、跨页、复杂表格/扫描件（不支持则拒绝）、损坏/截断文件、缺页漏表/附件、旧版/过期或时效不明；缺关键锚点、权限、覆盖或时效时拒绝可送审正式候选与 MR，补证按固定原件重验，解析成功也不代替业务事实确认。以明确标识的合成材料/已有知识版本从入口②真实走草稿、指定审核人、protected merge、worker、WeKnora 测试索引/ACL/有权检索，再由入口⑤大盘按资产 ID/版本去重展示来源、进展、项目×产品线与有权具体文档深链；两版并发修改、旧 base revision 冲突与人工合并，新增同键重复，审核后退役/负向检索、移动/重命名旧 path 残留；紧急撤权先阻断受控入口、再查外部直连/旧版/缓存，旧 callback 不得复活；Webhook 漏投、重复/乱序或旧 SHA、合规站外 Git merge、未经审核 Git diff 隔离、PG 与 WeKnora 漂移、索引半成功/不可读回及扫描游标恢复的三方对账 fixture；大盘对索引失败、撤权、旧版残留展示 unknown/阻断而非假成功，未运行真实扫描的诊断只标预置 fixture。另覆盖敏感资料和 ACL 测试；让第一用户从真实或脱敏材料起步，在不操作 Git 的前提下看到来源、待确认点、草稿变更和下一步，暂停后返回原位置；让有权 steward 对过期资料[拒绝/限定范围/要求补证]，验证决定绑定候选及修订、阻断该候选而不误改已发布版本，补证形成新修订并重新确认；让受益者从可用的消费入口找到可核对来源的答案。阶段 5 仅验证“报告错/旧/缺内容”的入口原型或授权人工登记，并保留资产版本与来源；反馈候选处理、事件归因和回访闭环在阶段 6 验收。无法接入既有入口时明示为试点临时入口，不暗示已嵌入日常工作。
+- **证据**：owner 批准的支持矩阵与时效规则、脱敏原件/解析结果逐区块比对、正负例与送审阻断回执；fixture digest、MR/merge commit、outbox/attempt、WeKnora read-back、检索结果、审计、失败和回滚记录。
+- **退出条件**：首期范围经材料/知识 owner 冻结且以脱敏原件验证解析覆盖/定位/时效正负例；不支持或关键缺失不生成可送审正式候选，人工补证重验后才可继续。第一用户无需直接操作 Git 完成确认和提交；新增/修订知识在实际检索后才发布；隔离非生产合成知识从入口②通过真实受审 Git/Worker/WeKnora 测试空间读回进入入口⑤，有权具体文档链接、去重与双维关联可验证，修订/索引失败/撤权/旧版残留不冒称成功；退役和紧急撤权的声明范围有旧索引/外部入口负向读回或明确 blocked+安全升级（后者**不等于**退役/撤权成功）；持久对账能发现漏 event 和索引漂移且旧 callback 不复活已撤内容；消费入口可查到已读回版本，反馈入口原型或授权人工登记可记录问题、来源和资产版本；正式反馈处理和消费归因留给阶段 6。
 - **阻塞条件**：草稿未经确认进入 WeKnora；merge event 可伪造或重复副作用；索引未读回却显示 published；合成知识未沿入口②真实审核/worker/WeKnora 测试空间走通却将大盘预置卡标非生产真实集成，或具体文档深链越权；无法保留仍获授权的旧版或对失效旧版即时阻断；退役仍能从受控/声明范围外部入口检索却显示已撤回；扫描漏 commit/残留索引后错误推进游标；无法人工补偿；数据无法脱敏。
 
 ### 阶段 6：消费、反馈与三层指标
@@ -143,14 +143,14 @@ Provider 不得只用一句“如启用”描述。阶段 0 需要建立并持�
 ### 阶段 7：Skill 契约、测试与打包
 
 - **目标**：在 Knowledge-first 的最小发布和消费链路通过后，仍在同一 MVP 内交付完整的 Skill 资产生产线；Skill 不是 P1 之外的后续功能，而是以 Knowledge-first 为前置顺序的第二条 MVP 资产路径。
-- **节点依赖**：阶段 7 复用阶段 6 的消费事件与反馈契约，不要求阶段 8 的真实 SkillHub、TeamAI 或 DSH Provider 已 `real_verified`；N3 的 package、digest、安装/read-back、fallback release 和最小消费测试是本阶段的交付/退出门禁，不是进入阶段 7 的前置条件。
+- **节点依赖**：阶段 7 复用阶段 6 的消费事件与反馈契约，不要求阶段 8 的真实 SkillHub、TeamAI 或 DSH Provider 已 `real_verified`；N3 的 Git 受审合并、package、digest、安装/read-back、明确标记的管理员固定包 fallback 和最小消费测试是本阶段的交付/退出门禁，不是进入阶段 7 的前置条件。
 - **输入**：工作流候选、Knowledge 依赖、目标 DSH Skill package/layout 校验结果、固定包/管理员 fallback 契约；SkillHub 契约只在独立 Registry 选型后补入，另需指标配置。
-- **主要设计/开发项**：实现 Workflow Draft 和 Skill Creation Session；生成 `skills/<domain>/<name>/`、`contract/` 和测试目录；固定 `knowledge_dependencies` 的 ID/version，声明 effects、网络/数据范围、能力需求、风险等级和 profile；建立 golden/boundary/regression/security fixture；从 approved merge commit 构建 package，计算 `package_digest`，禁止 `latest` 和未提交工作区；先用 fake/admin 验证 release、撤回、旧版本 pin 和 digest read-back。
+- **主要设计/开发项**：实现 Workflow Draft 和 Skill Creation Session；生成 `skills/<domain>/<name>/`、`contract/` 和测试目录；确需知识查询时才声明固定 `knowledge_dependencies` 的 ID/version、查询用途及零结果/无权/失效的用户核实与停止判断策略，声明 effects、网络/数据范围、能力需求、风险等级和 profile；建立 golden/boundary/regression/security fixture；静态校验与未经批准 Draft 的可执行试跑分离：Runner 隔离及负向证据未通过前只允许不执行候选代码/Tool 的静态检查，浏览器规则演练不得充作真实测试或送审证据；真实试跑须在经准入的隔离非生产 Runner 中用获准脱敏 fixture，限制权限、网络/文件/进程、跨空间与资源/成本，失败时阻断送审；核实经审核合入 canonical protected main 的 commit 后标记 Skill `已发布`，再从该 commit 构建 package，计算 `package_digest`，禁止 `latest` 和未提交工作区；先用 fake/admin 验证 Registry 契约或管理员固定包路径的独立操作/撤回、旧版本 pin 和 digest read-back，不把 fake/admin 回执视为真实 Registry release。
 - **输出**：Skill contract、测试集、package builder、digest、release metadata、回滚包和质量门禁。
 - **测试**：contract/golden/regression/security；恶意输入、越权 effects、依赖漂移、不可复现构建、digest mismatch、资源限制和失败回滚。
 - **证据**：merge commit、manifest、package/digest、测试报告、SBOM、release/read-back 或 fallback 记录。
-- **退出条件**：固定 commit 可重复构建；Git 指定审核人/CI/protected merge、目标 DSH 格式校验与包测试分别留证，不以校验代替审批；契约、依赖、测试证据完整；**选用 Registry 时**其 release/read-back 与 digest 一致，未选用则有期限的管理员固定包 fallback 有审计/目标/回滚证据，不伪称 Registry release；至少完成一条与 Knowledge 固定版本依赖关联的 Skill MVP 路径，包括 Skill package、安装或管理员/fake fallback、load/read-back、最小消费和回滚，并按阶段 6 契约补验 Skill 版本/digest 归因、去重、三层结果和反馈分流；Provider 状态如实记录。
-- **阻塞条件**：Skill 只有 Prompt；依赖 `latest`；构建不可复现；digest 不一致；能力声明绕过权限或人工确认。
+- **退出条件**：固定 commit 可重复构建；Git 指定审核人/CI/canonical protected main merge 的审核与 Skill `已发布` 证据、目标 DSH 格式校验与包测试分别留证，合并前（含已批准未合并）仍为 `审核中`；契约、依赖、测试证据完整，未经批准 Draft 的可执行试跑须已通过隔离 Runner 安全准入和负向测试，不能由静态扫描、虚构演练或有权限的普通 Tool 调用代替；**选用 Registry 时**其独立 release/read-back 与 digest 一致，未选用则有期限的管理员固定包 fallback 有审计/目标/回滚证据，不伪称 Registry release，且 fallback 不使未合并 Skill 已发布；至少完成一条与 Knowledge 固定版本依赖关联的 Skill MVP 路径，包括 Skill package、安装或管理员/fake fallback、load/read-back、最小消费和回滚，并按阶段 6 契约补验 Skill 版本/digest 归因、去重、三层结果和反馈分流；Provider 状态如实记录。
+- **阻塞条件**：Skill 只有 Prompt；依赖 `latest`；无法核实 canonical Git 经审 merge 却标 Skill 已发布；构建不可复现；digest 不一致；能力声明绕过权限或人工确认。
 
 ### 阶段 8：候选 Skill Registry、可选 TeamAI 与 DSH Provider 集成
 
@@ -223,13 +223,13 @@ Host-only Bundle Spike 不得以“已写计划”作为完成条件：必须记
 
 ### Skill 交付
 
-从「打磨可复用的技能」核到有权候选/指定版本，或从材料第五步的稳定缺口，按需创建独立 Skill Creation Session；会话内包含 Skill 需求卡、Workflow Draft、模板化创建、input/output schema、知识依赖、effects/能力需求声明、golden/regression/security、Git/CI 审核、从 merge commit 打包、immutable digest、候选 SkillHub release/read-back 或明确标记的管理员固定包 fallback、pinned digest、TeamAI distribution/read-back（如启用）和 DSH handoff metadata。仅查看候选、引用已适用旧版不必创建新资产。P1 的 Skill 交付允许使用 fake/admin provider 或管理员 fallback，但必须完成 package、digest、固定版本依赖、安装/read-back 和最小消费验证；SkillHub、TeamAI、DSH 的真实 Provider 晋级属于 P3，不是 P1 双资产 MVP 的前置条件。
+从「打磨可复用的技能」核到有权候选/指定版本，或从材料第五步的稳定缺口，按需创建独立 Skill Creation Session；会话内包含 Skill 需求卡、Workflow Draft、模板化创建、input/output schema、按需知识查询说明与固定引用、effects/能力需求声明、golden/regression/security、Git/CI 审核、从 merge commit 打包、immutable digest、候选 SkillHub release/read-back 或明确标记的管理员固定包 fallback、pinned digest、TeamAI distribution/read-back（如启用）和 DSH handoff metadata。仅查看候选、引用已适用旧版不必创建新资产。P1 的 Skill 交付允许使用 fake/admin provider 或管理员 fallback，但必须完成 package、digest、实际声明的固定版本引用（无知识查询需求可为空）、安装/read-back 和最小消费验证；SkillHub、TeamAI、DSH 的真实 Provider 晋级属于 P3，不是 P1 双资产 MVP 的前置条件。
 
 - SkillHub/DSH Provider/TeamAI 未验证时使用管理员发布或 fake adapter，但必须保持 package、digest、approval、target、profile、installed revision 和回滚状态可追踪；fallback 不能使用漂移版本。
 
 ### 数据源与大盘纵向验证交付
 
-入口④的虚构 Tool 广场只保留为明确标注的产品演示；首期另交付[标准 Tool/MCP adapter 契约及非生产可真实调用的合成 Demo Tool](11-开发工程设计与集成基线.md#55-数据中台-toolmcp-标准接入契约与真实-demo拟议)，涵盖目录、详情/schema、权限及环境检查、受控只读试参、带来源结果、审计和故障回执。没有真实数据中台 Provider 时仅对合成 Demo 的目标环境声明非生产真实集成；生产目录、申请审批、字段权限和调用统计仍依提供方/数据责任方/DSH 宿主各自授权与读回逐项验收。入口⑤以[合成知识的真实 Git/WeKnora 纵向链](11-开发工程设计与集成基线.md#56-合成知识经真实链路进入资产大盘拟议)验证最新进展、全局概览和授权深链；合成输入、非生产真集成、生产真能力分别标记，不用合成样本冒充业务成果或 AI 自动诊断。
+入口④的虚构 Tool 广场只保留为明确标注的产品演示；首期另交付[标准 Tool/MCP adapter 契约及非生产可真实调用的合成 Demo Tool](11-开发工程设计与集成基线.md#55-数据中台-toolmcp-标准接入契约与真实-demo拟议)，涵盖目录、详情/schema、权限及环境检查、受控只读试参、带来源结果、审计和故障回执。没有真实数据中台 Provider 时仅对合成 Demo 的目标环境声明非生产真实集成；生产目录、申请审批、字段权限和调用统计仍依提供方/数据责任方/DSH 宿主各自授权与读回逐项验收。入口⑤以[合成知识的真实 Git/WeKnora 纵向链](11-开发工程设计与集成基线.md#56-合成知识经真实链路进入资产大盘拟议)验证最新进展、全局概览和授权深链；只有经过来源/目标授权并实测的 WeKnora 指定来源文档 ID/版本、逐文档权限与安全深链才给原文外跳；正式知识的 WeKnora 索引/读回不能代替原件托管证据，映射缺失改用有权原系统定位/人工核对，不建 Workbench 持久原文阅读或来源全文索引。合成输入、非生产真集成、生产真能力分别标记，不用合成样本冒充业务成果或 AI 自动诊断。
 
 ### P1 退出
 
@@ -313,11 +313,11 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-05 | 会话隔离与生命周期 | 多会话可并行；暂停、恢复、归档、分叉、只读可用且上下文不串线；暂停后由首页/待办返回原阶段、草稿和证据，归档/只读展示原因和恢复或新建路径 |
 | V-06 | 草稿与并发 | session/draft/revision 可追踪；同 base revision 并发提交触发冲突和人工合并 |
 | V-07 | 双资产 schema/状态 | 合法/非法/重复/并发迁移有测试 |
-| V-08 | Skill 创建 | 模板、metadata、契约和知识依赖可生成并审核 |
-| V-09 | Skill 门禁 | schema、effects、能力需求、依赖、golden/regression/security 有效 |
+| V-08 | Skill 创建 | 模板、metadata、契约及确需查询时的固定知识引用与失败核实说明可生成并审核；无知识需求不强制绑定 |
+| V-09 | Skill 门禁与未批准 Draft 的测试隔离 | schema、effects、能力需求、依赖及 golden/regression/security 各有证据；静态检查不得执行候选代码、脚本或真实 Tool，不产生真实试跑通过回执。真实试跑仅在安全/平台批准且用无害/恶意脚本与 Tool fixture 完成负向验证的隔离非生产 Runner 中使用获准脱敏输入，核最小权限/无生产凭据、网络/文件/进程/跨空间拒绝、CPU/内存/时间/并发/成本上限、超时终止、清理与最小审计；Runner 未就绪、撤权、超额或隔离失败时执行与送审保持阻断，不能以静态扫描、原型规则演练、DSH/CI/通用 Tool 替代真实测试 |
 | V-10 | Git merge event 与异步发布 | merge event 验签、经审核 protected commit 验证、逐资产稳定 ID/change kind 幂等、旧 SHA/乱序处理、outbox 落库、worker lease/retry/crash recovery；漏 webhook 与合规站外 merge 可从持久游标补 receipt，未经审核/意外路径不自动索引，游标扫不全不推进 |
 | V-11 | WeKnora ingest/read-back | 指定版本来源/ACL/document/path 与有权检索读回后才 published；部分索引失败仅在旧版仍安全获授权时继续服务；退役/迁移/紧急撤权核旧版、旧 path、指定主体及直连入口的负向读回，无法证实保持 unknown/blocked 并升级，不以服务端过滤冒充外部撤权 |
-| V-12 | Skill package/条件性 Registry release | Git MR/CI、指定审核人及 protected merge 构成正式审核；固定 merge commit 构建 package digest、目标 DSH Skill 格式校验与业务测试各自留证且不互相代替；若独立 Registry 选型通过则 release id/状态/digest 实际读回，否则按有期限管理员固定包 fallback 核对操作者、目标、摘要和回滚，状态不可混同 |
+| V-12 | Skill Git 已发布/package/条件性 Registry release | 指定版本在 canonical Git protected main 上经 MR/CI/指定审核人批准且 merge commit 可核实后才标 `已发布`；MR 提交、CI 或批准但未合并仍 `审核中`，漏 event/未知 merge 先对账且不得凭 webhook、PG、打包或 fallback 晋级；固定 merge commit 构建 package digest、目标 DSH Skill 格式校验与业务测试各自留证且不互相代替；独立 Registry 选型通过才核其 release id/状态/digest 真实读回（未知/失败不得显示 Registry 成功但不撤销已证实 Git 发布），否则有期限管理员固定包 fallback 核操作者、目标、摘要和回滚；fallback 自身不发布 Skill |
 | V-13 | 固定 digest → 可选 TeamAI → DSH | 选用 TeamAI 时验证 `init` 前/后、有权/无权 Git 身份、同仓或受审镜像仓 source→commit→文件摘要、下一次 SessionStart 自动 pull 与显式主动 pull、运行中/离线/Hook 缺失、本地编辑冲突、停用/撤回与旧副本；逐 target installed revision/file list/digest 与批准 pinned digest 映射一致才写 installed，DSH handoff/load/profile 独立读回；不启用 TeamAI 则记录受控目标安装及其读回，不伪称 TeamAI 自动下发 |
 | V-14 | 非程序员体验 | 不操作 Git 可创建、确认、审核和发布；第一用户在预览中辨认来源/推断及版本差异，审核退回后能按意见在原会话修订；发布排队、失败或 unknown 时知道责任人、已验证到哪一步及下一步，不会误以为已生效 |
 | V-15 | 交接协议 | 下游 target、version、digest 和依赖可追踪 |
@@ -326,7 +326,7 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-18 | PostgreSQL 控制面 | migration、事务/乐观锁、幂等、备份恢复、Worker 重启和数据库故障的 unknown/degraded 状态可验证 |
 | V-19 | 安全审计 | 无 secret 泄露、越权和不可追踪写入 |
 | V-20 | 故障恢复 | provider 半成功、超时、丢 event、重复/乱序、迟到旧 callback、索引孤儿/旧版残留、撤权竞态均能用 Git/PG/WeKnora 持久对账发现；原目标先读回再补偿，权限收紧即时阻断受控入口，外部不可阻断则安全升级而非报告成功；人工接管、告警和恢复游标有证据 |
-| V-21 | 稳定发布 | released/rollback 有批准、证据、digest 和旧版本 pin |
+| V-21 | 稳定发布 | Skill 的 Git `已发布` 以经审核的 canonical protected main merge 取证，Knowledge `published` 以 WeKnora 授权读回/检索取证；选用时 Registry released、安装、加载与 rollback 各自另核批准、digest、读回及旧版本 pin，管理员 fallback 不充任任一资产的发布证据 |
 | V-22 | 运营价值 | 至少一个由业务结果 Owner 确认的真实低风险场景，记录人工基线、观察窗口和结果证据，验证找答案/重复解释/返工等实际任务是否改善；同时核算贡献与审核负担，覆盖不足或仅有上传/发布/安装计数时标记 unknown，不报告改善 |
 | V-23 | Plugin 预留契约 | P0 有 manifest/tool contract、权限边界；不要求真实业务 Plugin runtime |
 | V-24 | Harness 能力验证（P3） | Provider/discovery/load 和反馈引用有可重复证据 |
@@ -342,7 +342,15 @@ P4 的 Plugin 不再采用“最后一次性集成”方式。详细的适用能
 | V-34 | 大盘诊断来源与成熟度（阶段 6 起） | 真实扫描才显示授权范围、批次、时间窗、来源、覆盖/未知、待核候选；人工预置线索标 fixture，不冒称 AI 巡检；所有卡片和计数区分演示数据、非生产真实集成、生产真实能力，权限过滤与小样本抑制先于聚合 |
 | V-35 | 分层成功率与知识引用统计（阶段 6，Pilot 复验） | 同空间/环境/准确资产版本/窗口固定独立开始或查询底账；Skill distinct `invocation_id` 与重试尝试分开，技术/契约/业务三层分别列已判定通过率、含 unknown 的保守下界、覆盖率与截止时间；Knowledge 含零结果查询、真实检索与答案引用分开，多文档/重复查询去重，适用性由授权复核；丢事件、无 digest/版本、无引用真值、无业务回执时不能推断总体成功或把 unknown 算明确失败，缺底账显示“不可计算” |
 | V-36 | 目标 DSH 原生观测与可选 OTel（阶段 2 Spike、阶段 8 真实补验） | 固定 Desktop/Harness commit、profile、Host Plugin 授权、环境/主体和合成任务，验证事件订阅或有权 Session Query 的实际可用性、调用/重试/知识引用版本/digest 归因、开始底账、跨空间与撤权拒绝、漏投/迟到/幂等/读回；字段白名单阻止 Prompt/回答/Tool 敏感原文/密钥和完整 trace 外传，只有最小事件进入指标；OTel/OTLP 如采用须证明模式、采样、脱敏、传输/留存和故障处理，不能以 span `OK`、反馈日志或采样 span 代替领域消费事件及业务结果；目标未通过时仅有契约 fixture、手动待核反馈和“不可计算”，不宣称 DSH 已接通 |
-| V-37 | 个人 Inbox 暂存与明确知识 intake（阶段 3–5；真实敏感输入另设准入） | `InboxItem` 是 PG 私有对象，与反馈/Session/正式资产分开；本人跨设备恢复、第二主体及跨空间拒绝、撤权/过期链接、对象加密/最短留存/删除与备份例外按批准策略验证；保存或仅打开知识页不触发会话、DSH、Git 或 WeKnora，选择具体内容/目标空间/分享范围并获授权的单独提交只返回 `submission_id`/受理回执、不建 Session；其后另行明确正式知识创作/修订时重新核来源/用途/目标空间/基线及动作权限并建唯一 Knowledge Session/Draft，过期或无权不建；IM connector 默认关闭，未来另测消息同意/群聊 ACL/撤回。缺数据 owner 留存策略不得开放真实敏感内容。 |
+| V-37 | 个人 Inbox 暂存与明确知识 intake（阶段 3–5；真实敏感输入另设准入） | `InboxItem` 是 PG 私有对象，与反馈/Session/正式资产分开；本人跨设备恢复、第二主体及跨空间拒绝、撤权/过期链接、对象加密/最短留存/删除与备份例外按批准策略验证；保存、回访或仅打开知识页不抓取/解析外部链接，也不触发会话、DSH、Git 或 WeKnora，选择具体内容/目标空间/分享范围并获授权的单独提交只返回 `submission_id`/受理回执、不建 Session；其后另行明确正式知识创作/修订时重新核来源/用途/目标空间/基线及动作权限并建唯一 Knowledge Session/Draft，过期或无权不建；IM connector 默认关闭，未来另测消息同意/群聊 ACL/撤回。缺数据 owner 留存策略不得开放真实敏感内容。 |
+| V-38 | 材料解析范围、完整性与时效门（阶段 5；R-04） | 材料/知识 owner 批准格式×大小×语言/版式支持矩阵、关键内容与覆盖阈值、形成/生效/截止/复核规则；逐脱敏原件固定版本/hash 对照页/段/工作表/单元格、附件、已读/部分/未读/排除范围及原因。正常与跨页正例、扫描/复杂表格在纳入前的实测，以及损坏、截断、漏页漏表/附件、旧版、无权/过期或时效不明负例均留目标解析证据。缺关键锚点、覆盖不足、越界或时效不明仅留有权最小「待人工核对」线索，服务端拒绝生成/送审正式知识候选及 MR；补证按固定版本重验，模型置信度、上传成功和业务人工确认都不能替代解析证据。合成 fixture/原型不证明真实格式支持、业务事实核证或 WeKnora published。 |
+| V-39 | Workbench 持久评论与 DSH 回合关联（阶段 2 Spike、阶段 5 回归；R-05） | Workbench 对有权评论独立持久化 `comment_id`/固定条目及草稿修订、刷新后查询/审计，重复点击同键不生成多条，跨团队/撤权拒绝且不复制未经授权正文。目标 Desktop/Harness 固定版本/身份/非生产 fixture 下，分别验证投递、唯一 `turn_id`/持久 `reply_id`/成功终态与评论对应、成功后按当前版本 CAS 只生成一个新待核稿；双击/重试/响应丢失/刷新/并发人工改稿/旧回复迟到、失败/超时/取消/未知归属不覆盖较新稿、不自动重发。若宿主不能提供可靠关联及完成回执，仍可评论与人工改写，自动原生回复标未接通；原型预置回复、`accepted` 或 OTel span 不能充当真实完成证据。 |
+
+| V-40 | Skill 可选知识查询与缺失核实（阶段 7–8；R-06） | 无知识查询的 Skill 可不声明 `knowledge_dependencies`；确需查询的 Skill 固定声明对象/版本/用途，在 `SKILL.md` 写明零结果、无权、指定版不可用/过期或时效不明时告知用户并请求核实，停止依赖该知识的结论而不绕权检索、不把未知说成知识不存在。获准脱敏 fixture 分别核可用正例及零结果/撤权/跨空间/失效负例；运行时知识 ACL 与失权拒绝由检索链路单独验证。Skill 的 Git 发布、目标安装/加载不因知识侧状态自动重写；首期不以反向索引、逐目标连锁停用作为验收门。目标 DSH/WeKnora 查询未实测时只保留说明与契约测试，不声称真实运行通过。 |
+
+| V-41 | 历史原文外部阅读（阶段 2 Spike、阶段 5/6 回归；R-08） | Workbench 只管理有权来源的最小定位、固定版本、核证锚点与处理状态，不提供持久全文/默认原件归档或独立来源全文索引。分别以获准脱敏来源和正式知识版验证：仅 WeKnora 确有独立来源 document ID/version、目标文档级 ACL 与真实深链时显示外部「在 WeKnora 阅读」，跳转后目标重新鉴权；知识版链接不冒充来源原件。无来源文档、映射失效、旧版、撤权、跨空间与无权负例不渲染虚假入口，转有权原系统定位或人工核对。目标缺安全深链时标 `pending`，不宣称原文已接入；创作时授权临时核对与材料解析门仍按 V-38 验收。 |
+
+| V-42 | Inbox 留链接与知识入口受限抓取（阶段 2 Spike、阶段 5 按声明范围验收；R-09） | 用脱敏非生产链接验证 Inbox 保存、回访、导航和最小候选受理零抓取/解析；知识入口用户明确选用链接、当前主体/来源/用途/目标空间获准且来源连接器与解析能力通过目标验证时才临时抓取固定版本，返回覆盖/未读/拒绝的可核回执，不自动受理团队候选、建 Session/Draft、长期保存原件或索引。以无权/撤权、跨空间、越界来源、重定向每跳、DNS 重绑定、私网/元数据目的地、文件超限、伪装类型、恶意/损坏解析内容及超时为负例，核授权/allowlist/实际连接地址、字节与类型限制、扫描/隔离、最小拒绝审计与无外传；失败只保留有权定位，正式候选仍过 V-38 的固定版本/覆盖门。未获目标正负向证据时仅链接定位及获准其他材料路径可继续，不声称链接抓取能力上线，也不拿管理员连接测试或静态 HTML 替代。 |
 
 详细平台实验见[验证材料](../验证/README.md)。产品体验以[用户价值与指标](01-问题、用户与产品范围.md#2-用户与责任)、[日常反馈闭环](02-端到端知识工作流.md#51-日常反馈--周期复核--下次使用)、[Workbench 如何解决专家判断与维护负担](../产品/03-Workbench如何解决.md)和[工作台逐屏设计](09-工作台信息架构与核心对象.md)为设计输入；V-01、V-05、V-14、V-16、V-22、V-28–V-31 应分别附首次使用、回访、审核退回、反馈纠错、Provider `unknown`、小样本无结论、专家拒绝/补证、无人认领/转交、归因更正及反推隐私的脱敏录屏或逐步操作记录。阶段 0 先用纸面原型/脱敏 fixture 评估这些交互是否可理解，**不能将原型通过记为功能已实现**；阶段 5 实现 V-29 的 Knowledge 授权判断/修订门禁，阶段 7 扩展到 Skill；阶段 6 实现 V-30 的队列/归因更正及 V-31 的最小授权聚合与负向权限测试，低风险真实试点再观察受益者、贡献者、审核人的任务结果与负担。fixture 与产品设想均不代替真实价值验收。
 

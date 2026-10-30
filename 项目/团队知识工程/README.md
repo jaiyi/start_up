@@ -22,7 +22,7 @@ DSH Desktop / Workbench Market
 
 Workbench 的市场安装、版本和重启状态不等于团队资产发布。每个团队必须独立绑定 `team_id`、`asset_space_id`、资产 Git 仓库、WeKnora space、steward、review policy 和下游分发目标。DSH Desktop 的本地 state、Session ownership 和 market install record 不是共享团队控制面，也不是正式知识/Skill 的权威来源。
 
-当前推荐的 SkillHub 固定包 release + 可选 TeamAI 分发是待验证拓扑；这两者是否互补、是否选其一，由[工程评估门](./方案/11-开发工程设计与集成基线.md#7-skillhub-与-teamai-的角色评估及选择门)决定，DSH 和 WeKnora 必接。P0 计划在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。部署对象包括 Team Knowledge Backend、worker、PostgreSQL、对象存储和现有 WeKnora 的独立测试空间；DSH/Harness、SkillHub 和 TeamLab 若目标版本具备可部署制品则纳入部署验证，否则明确保留管理员/fake provider fallback，不把“可访问”写成“已集成”。Workbench 拟利用经验证的 DSH Desktop 身份上下文，不以公司统一身份系统接入作为 P0 前提；后端仍必须验证身份、团队/asset-space ACL 和服务身份。Git、WeKnora、SkillHub、TeamLab 可以复用内部组件接入配置，但不能共享团队资产、可变草稿或授权。
+当前拟优先验证 TeamAI 分发；独立 SkillHub Registry 仅在确有需要且经目标版本验证后选用，未选用时可对已审且已合入受保护 canonical 主分支的固定包采用有期限的管理员交接。两种后续交接都不改变 Skill 的 Git 发布门禁，其是否接通及是否互补由[工程评估门](./方案/11-开发工程设计与集成基线.md#7-skillhub-与-teamai-的角色评估及选择门)决定，DSH 和 WeKnora 必接。P0 计划在腾讯云建立脱敏、非生产的 Team Knowledge 验证环境。部署对象包括 Team Knowledge Backend、worker、PostgreSQL、对象存储和现有 WeKnora 的独立测试空间；DSH/Harness、SkillHub 和 TeamLab 若目标版本具备可部署制品则纳入部署验证，否则明确保留管理员/fake provider fallback，不把“可访问”写成“已集成”。Workbench 拟利用经验证的 DSH Desktop 身份上下文，不以公司统一身份系统接入作为 P0 前提；后端仍必须验证身份、团队/asset-space ACL 和服务身份。Git、WeKnora、SkillHub、TeamLab 可以复用内部组件接入配置，但不能共享团队资产、可变草稿或授权。
 
 身份与执行责任：当前用户通过 DSH Desktop 认证上下文进入 Workbench，后端映射 `principal_id`、团队成员和角色并重新校验 asset-space ACL。真实用户承担确认、审核和发布责任；Workbench Git bot、WeKnora adapter、SkillHub/TeamLab publisher 和 Worker 负责技术执行，分别记录 `approved_by`、`released_by`、`executed_by` 和 service identity。Git、WeKnora、SkillHub、TeamLab 可复用受控内部接入，但不共用用户 Token、团队资产授权或审计上下文。
 
@@ -31,13 +31,13 @@ Workbench 的市场安装、版本和重启状态不等于团队资产发布。�
 ```text
 资料入口：会议纪要/资料 → 梳理讨论 → 知识草稿 → Git/MR/CI → protected main merge
   → Git merge event → Workbench outbox/worker → WeKnora ingest/read-back → published knowledge
-能力入口：工作流描述 → 追问建模 → Skill + 测试 → Git/MR/CI → protected main merge
-  → package/digest → SkillHub release/read-back → pinned digest
-发布交接：SkillHub pinned digest → TeamAI distribution/read-back → DSH discovery/load/read-back
+能力入口：工作流描述 → 追问建模 → Skill + 测试 → Git/MR/CI → 受保护 canonical main 合并并核验 → published Skill
+  → 固定 commit 的 package/digest → 可选 SkillHub Registry release/read-back 或管理员固定包交接
+发布交接：已核准的固定包/digest → 可选 TeamAI distribution/read-back → DSH discovery/load/read-back
 反馈回流：Harness/业务反馈 → 知识复核或 Skill 回归 → 新的变更与发布
 ```
 
-`merge` 只是触发事实，不等于知识已 `published` 或 Skill 已 `released`。WeKnora 的索引读回、SkillHub 的 release/digest 读回、TeamAI 的安装读回和 DSH 的 loaded/profile 读回分别证明不同阶段；任何一个环节状态未知，都必须进入对账或人工 fallback，不能显示为最终成功。
+未经核验的 `merge` 事件只是线索：知识须 WeKnora 索引与授权检索读回才 `published`；Skill 须确认指定审核通过并合入团队 canonical Git 受保护主分支，才算该固定版本 `已发布`（`skill.released`）。SkillHub（仅选用时）的 Registry release/digest、管理员固定包交接、TeamAI（仅选用时）的目标安装和 DSH 的 loaded/profile 读回各证明后续独立阶段；任何阶段未知只对该阶段进行对账，不抹掉已核验的 Git 发布，也不声称目标可用或业务成功。
 
 工作台使用 PostgreSQL outbox 和持久 worker 编排上述异步操作，负责事件去重、租约、重试、读回、补偿和审计，但不成为知识或 Skill 的 canonical source。若选用 TeamAI 分发，它只消费已确认的固定 `package_digest`，管理员流程是自动 provider 不可用时的有期限、可审计 fallback。
 
