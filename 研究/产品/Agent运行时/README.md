@@ -59,6 +59,8 @@
 | [`magpie.md`](./magpie.md) | Magpie（yetone/magpie） | 编程 Agent 的本地多协议模型网关与客户端接入管理 | 多模型/账号路由、客户端配置恢复和 Library 资产分发如何与宿主授权、知识库及团队治理分工 |
 | [`loongsuite-dsh-plugin.md`](./loongsuite-dsh-plugin.md) | LoongSuite dsh-plugin | DSH 运行时 OTel GenAI Trace/Metric 插件 | 遥测采集、内容默认关闭与 Skill 级归因/资产发布回执如何分工 |
 | [`tencent-octop.md`](./tencent-octop.md) | TencentCloud/Octop | 多用户、多 Agent 自托管助手与应用工作台 | 多入口/工作区/连接器/技能共享和 DSH 宿主、团队资产权威如何分界 |
+| [`harness2.md`](./harness2.md) | Harness²（google-research/harness2） | 实验型递归 Harness 优化框架 | 候选 Harness 的提出、探测、合成和跨任务经验保留如何与隔离评测及 Git 审核分开 |
+| [`kestra.md`](./kestra.md) | Kestra | 邻接对象：事件驱动工作流/任务编排平台 | 后台异步任务的重试、状态与回执如何与 DSH、PG、Git 和 WeKnora 权威事实分工 |
 
 TeamAI、Paperclip 和 SkillHub 等偏团队资产、组织和发布治理的产品，统一见 [`../Agent资产与团队治理/`](../Agent资产与团队治理/)。
 

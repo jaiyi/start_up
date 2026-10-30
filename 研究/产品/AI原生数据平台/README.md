@@ -36,6 +36,7 @@ AI 原生数据平台可以理解为：
 | `open-ontologies-production-ontology-change-management.md` | Open Ontologies（fabio-rovai，MIT 开源） | 生产本体变更管理工具（"Terraform for ontology"） | 本体进入生产后的 blast radius 推演、Lean 4 证明证书与变更门禁，语义层治理的缺失一环 |
 | `palantir-ontology.md` | Palantir Foundry Ontology | 组织数字孪生层：语义元素（objects/links）+ 动能元素（actions/functions/dynamic security）+ interfaces 多态 | action types 全生命周期写路径清单、函数版本区间依赖、staged writes 与全类型统一分支治理 |
 | `helix-foundry.md` | Helix Foundry（HelixDB/helix-foundry） | 本地优先的数据工作空间：多源快照 + HelixDB ontology + 隔离 DuckDB + AI 辅助分析 | Ontology proposal 审阅、snapshot citations、generation 发布/回滚与本地安全边界 |
+| [`openbkn.md`](./openbkn.md) | OpenBKN / BKN Foundry | 本体驱动的业务知识网络与数据/执行治理底座 | BKN 语义、来源与动作如何映射到现有知识、权限和正式资产权威；按文件多许可证如何核对 |
 
 后续可继续补充：
 
