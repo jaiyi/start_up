@@ -84,7 +84,45 @@ skills/<domain>/<name>/
 
 以上路径相对于当前 `asset_repository` 的 repository root；`skills/<domain>/<name>/` 是 Git canonical source path，`contract/` 是源码中的规范契约目录。若 SkillHub 或 DSH loader 使用不同的外部布局，由 package builder 映射，并在 manifest 中记录 `asset_repository_id`、source repository、source path 和 approved merge commit，不在 Git 中并行维护 `schemas/` 和 `contract/` 两套 canonical 目录。
 
-`SKILL.md` 说明使用边界、输入输出、推荐步骤、确需时的知识查询对象/条件/用途、能力需求和失败处理；查不到、无权、版本不可用或时效不明时应说明未核实并向用户请求核实，停止依赖该知识的结论，不能绕权或编造事实。`skill.yaml` 记录 id、version、owner、风险等级、schema、可选的固定知识引用、effects/能力声明、兼容目标、测试集和发布策略。确定性处理优先放入脚本；脚本和资源必须经过依赖、secret、权限和安全检查。
+`SKILL.md` 说明使用边界、输入输出、推荐步骤、确需时的知识查询对象/条件/用途、能力需求和失败处理；查不到、无权、版本不可用或时效不明时应说明未核实并向用户请求核实，停止依赖该知识的结论，不能绕权或编造事实。`skill.yaml` 声明 id、version、owner、风险等级、schema 路径、可选固定知识引用、effects/能力需求、兼容目标与测试/发布**策略**；实际测试结果和发布状态由独立证据记录维护，不写成源码事实。确定性处理优先放入脚本；脚本和资源必须经过依赖、secret、权限和安全检查。
+
+### 源码层：人读说明、机器契约与权限声明分开
+
+下列是**项目建议的首期源码契约**，不是 DSH、SkillHub 或 TeamAI 的既有协议；目标 loader 的目录、frontmatter 字段、schema dialect、脚本运行能力和校验行为须先按所选版本 Spike 验证。不兼容时由 package builder 生成目标布局，不能悄悄删掉核心安全语义。
+
+- **`SKILL.md`（给人/Agent 读）**：建议文件首部至少使用 `name` 与 `description` 的 YAML frontmatter 作发现提示，正文写清触发/不适用任务、允许输入、分步判断与引用、未知/无权/过期时的停止点、输出模板、禁止动作与人工接管。仅有 frontmatter 或“请谨慎”的自然语言不等于已取得业务权限。`name` 的字符/长度、描述是否被宿主读取，均以 loader 实测为准。
+- **`skill.yaml`（规范源元数据）**：声明稳定 `id`、源码 `version`、`owner`/备份人、`purpose`、`risk_level`、`input_schema`/`output_schema`/`effects` 相对路径、`compatible_profiles`、可选 `knowledge_dependencies` 和 `success_criteria`。每个相对路径只能指向当前源码目录内实际文件；CI 核 id/版本、owner、路径及约定枚举。状态 `draft/reviewing/released/loaded` 与 `package_digest` **不写进要打包的源码 YAML**：前者是带证据的资产/目标状态，后者只能在固定 merge commit 构建后生成；不可让模型自报发布状态。
+- **`contract/input.schema.json`、`output.schema.json`**：首期选定并固定一个 JSON Schema dialect（建议 Draft 2020-12，目标 loader 未验证时以 Workbench 服务端为准），CI 校验 schema 本身与 fixture。输入需区分业务字段、受信宿主注入的身份/授权上下文，不能让自由文本替代后者；输出定义 `ready / needs_verification / denied / failed` 等本项目建议的互斥结果状态、必填证据引用及缺证原因，未知不得用 `null` 冒称已确认。`required` 和 `additionalProperties` 应明确；输出契约通过不代表事实或权限正确。
+- **`contract/effects.yaml`（能力请求，而非授权）**：声明 `read_refs`、可选只读 `tool_requests`、外发/写入/执行/网络/文件系统需求、风险等级、审批节点和受众限制；无需求则显式写空集合。宿主先核 profile 与会话主体，资源端再核租户、对象、目的和参数，风险动作另经独立审批。`read-only` 只表示 Skill 不提出副作用，不表示读操作能越过知识 ACL；禁止把凭据、地址、真实获准状态或临时 token 放进声明。
+- **`dependencies.lock`（可复现来源）**：标明所需知识的稳定 ID/明确版本（确需动态业务实时数据则单列获准只读能力，不假造知识版本）、代码/模板依赖的来源与版本/哈希、许可证和目标运行限制。源码声明与 lock 的对应关系须 CI 校验；知识索引已失效、版本漂移、无权或查不到时按 Skill 的失败契约请求用户核实，不能降级为另一版本或从模型记忆补事实。锁文件不授予检索权限，也不复制受限原文。
+
+示意片段（占位字段不是已验证的真实 loader 格式）：
+
+```yaml
+# skill.yaml；源码中不含 status/package_digest
+id: skill.procurement.request_compare
+version: 0.1.0
+owner: procurement-skill-owner
+purpose: 只读比较需求版本，输出缺证清单
+risk_level: L1
+input_schema: contract/input.schema.json
+output_schema: contract/output.schema.json
+effects: contract/effects.yaml
+compatible_profiles: [] # 待目标 DSH profile 实测后填写
+knowledge_dependencies:
+  - id: knowledge.procurement.request_history
+    version: 1.0.0
+success_criteria:
+  outcome_levels: [technical, contract, business]
+```
+
+`SKILL.md` 的示例首部可写为 `--- / name: request-compare / description: 核对采购需求版本并列出缺证 / ---`（真实文件需各占一行）；正文必须重述禁止写订单/发信和查询失败时停止，不能仅靠 `skill.yaml`。若目标 loader 不读取机器契约，由 Workbench/CI 与宿主适配层在交接前强制核验，不把“loader 忽略”解释为允许绕过；在没有可控执行边界时阻断上线。
+
+### 测试源码、运行证据与构建物
+
+`tests/` 存放脱敏 fixture 和可机器判断的断言：至少覆盖正常 Golden、边界 Boundary、缺证或超时 Exception、修订后 Regression、越权/诱导 Security 五**类**，一条用例可以覆盖多类，但每类须能定位具体断言；不以建空目录或把静态演练标“tested”充数。示意用例字段为 `case_id`、`categories`、`input`、`test_subject`/受权对象、固定知识引用版本、模拟 Tool 返回/失败、`expected_status`、必要引用与禁止出现的事实、`forbidden_effects`、可检查的审批/拒绝条件。3–5 条起步样例须覆盖五类的关键路径，复杂 Skill 增加案例；人工复核意见单列。实际运行结果应保存测试环境、包/Workflow 版本、隔离 Runner 与权限决策、输出/差异、执行时间及最小化 trace 引用，**不放入运行包，不将敏感原文写回 Git**；Runner 准入未完成只能记录静态检查，不允许标测试通过。
+
+发布后的 builder 从**已核验的 canonical protected main merge commit**读取固定 `skills/<domain>/<name>/`，验证 ID、schema、源码路径、锁定依赖、许可和目标兼容，按确定性文件顺序、编码/时间戳规则与版本化映射生成目标 loader 布局；记录输入源码文件清单与哈希、源仓库/路径/commit、builder 版本、目标/profile、锁定依赖和输出文件清单于构建生成的 **manifest**。在确定性包字节上计算 `package_digest`，把 digest 与源 commit/manifest 关联到发布记录；**包内 manifest 不得包含自身包的最终 digest**，若外置 manifest 记录 digest，则其自身不参与包哈希，以免自引用。源码 `skill.yaml`、`dependencies.lock` 均不能填构建后 digest。测试 fixture 是否纳入运行包取决于目标 loader 最小化与审计选型，但无论是否分发，受审源码与测试证据必须可追溯。可复现构建用同一 commit/builder/依赖对比输出 digest；包已生成不证明 Registry 发布、目标安装、DSH loaded 或业务成功，后续状态仍按第 7–8 节分别读回。
 
 ## 4. 交互式生成体验
 
