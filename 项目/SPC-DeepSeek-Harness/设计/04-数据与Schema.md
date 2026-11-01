@@ -61,8 +61,8 @@ migrations/
 | 表 | 用途 | 关键字段 |
 |---|---|---|
 | `spc.alert_events` | 告警事件（**即工单**；**由后端判异引擎写入**事件事实列，DSH 侧仅更新处理状态列） | `event_id(PK)`, `event_type`, `process_key`, `window_id`, `severity`, `business_alert_time`, `occurred_at`, `digest`, `notify_status`, `workorder_status(open/diagnosing/closed)` |
-| `spc.diagnosis_session` | 诊断会话（挂在工单上） | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate` |
-| `spc.diagnosis_session_event` | gate/审计事件 + 诊断产物落库（append-only） | `session_id`, `event_type`(gate/evidence/candidate/conclusion/observation), `actor`, `payload` |
+| `spc.diagnosis_session` | 诊断会话（挂在工单上） | `session_id`, `event_id`, `process_key`, **`pack_id`, `pack_version`, `knowledge_projection_version`**（补现有缺口）, `current_gate`；可选 `operation_id` 用于关联异步尝试，非编排器业务状态 |
+| `spc.diagnosis_session_event` | gate/审计事件 + 诊断产物落库（append-only） | `session_id`, `event_type`(gate/evidence/candidate/conclusion/observation/knowledge_retrieval), `actor`, `payload`；检索事件仅记 attempt、最小来源引用、授权判定类别与失败原因，不存敏感原文或密钥 |
 | `spc.knowledge_pack_release` | Pack 发布审批 | `pack_id`, `version`, `candidate_digest`, `approved_by`, `approved_at` |
 | `spc.pipeline_release` | 流水线定义发布（算子编排/window 分割/参数；计算节点的运营配置，节点从 PG 读已发布版本自持运行） | `pipeline_id`, `version`, `definition(payload)`, `status(draft/active)`, `candidate_digest`, `approved_by`, `approved_at` |
 | `spc.compute_task` | 计算任务 | `task_id`, `task_type`, `idempotency_key(UQ)`, `status`, `reason_code`, `result_ref` |
@@ -74,6 +74,8 @@ migrations/
 ### 借鉴修正
 
 - `push_feedback` / `workorder_feedback` 双反馈源设计在新架构下合并为**单一反馈表**，统一带 `source_event_id` + `process_key` + `pack_version` 血缘（旧 workorder_feedback 缺 process_key 的教训）。
+- **团队经验引用（拟议）**：不新建 WeKnora 知识副本或第二工单状态表；在 `spc.diagnosis_session_event` 的 `knowledge_retrieval` 事件中按 `session_id + attempt_id + knowledge_id@version + chunk_anchor` 关联结果，记录来源 commit/path/空间、核权时点与决定类别、适用工艺/有效期、引用 digest、`no_result/denied/stale_or_mismatch/timeout/conflict` 等 reason code。零结果/拒绝也留最小 attempt 状态，不暴露拒绝对象身份；诊断产物用引用 ID 关联具体判断。完整字段、保留期限和必要的脱敏证据须在迁移前按数据分类/ACL Spike 固定。`knowledge_projection_version` 仍是 Pack 投影，不复用为 WeKnora index version；WeKnora 知识 ID/版本只记在逐条引用中。
+- **异步关联（拟议）**：`operation_id`/`event_id` 连接出站投递、检索 attempt 与诊断会话；编排器若以后引入只存外围执行引用，不拥有任何 PG 业务状态。对同一次 attempt 的幂等键、失败与重放由原写 owner 控制；外部 Flow succeeded 不是诊断或知识发布 receipt。
 - 拧紧判异落地时：若复用 workorder 引擎与计算节点，其工单/会话/gate 表与流水线定义在 `tightening` schema 按同构结构新建（Q12/Q14），不混入 `spc`。
 
 ## 4. 数据接入
@@ -99,7 +101,7 @@ migrations/
 | `spc.samples` / `measurements` / `windows` / `control_limits` / `rule_results` / `capability_results` | 计算节点（算子执行） | 计算产物 |
 | `spc.alert_events` **事件事实列**（`event_id`、`event_type`、`process_key`、`window_id`、`severity`、`metrics`、`business_alert_time`、`occurred_at`、`digest`） | 后端判异引擎 | 工单创建；后端是唯一入口，DSH 宕机不影响 |
 | `spc.alert_events` **处理状态列**（`workorder_status`、`notify_status`） | plugin-workorder | 诊断/闭环推进 |
-| `spc.diagnosis_session` / `spc.diagnosis_session_event` | plugin-workorder | 审计事件经 platform-core audit 写入 |
+| `spc.diagnosis_session` / `spc.diagnosis_session_event`（含团队经验检索引用与 attempt） | plugin-workorder | spc profile 和 integration 读适配器只返回经核验结果；业务事件由 workorder 写，系统级审计经 platform-core audit 写入；Kestra 不直接写库 |
 | `spc.knowledge_pack_release` / `spc.config_release` / `spc.pipeline_release` | spc profile 知识配置能力（经 platform-core 发布流水线） | 审批通过后写入；pipeline_release 为计算节点运营配置的真相源，节点只读 |
 | `spc.compute_task` | 后端任务执行器（全生命周期状态与结果） | DSH 侧（compute-client）只读 + 提交派单 |
 | `platform.schema_migrations` | plugin-ops 迁移 runner | — |
