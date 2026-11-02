@@ -232,7 +232,7 @@
 ## 6. 追加对照（2026-10-10）：DSH 取代了连山哪些模块、解决了什么问题
 
 > 触发：用户问"对比连山和这版基于 DeepSeek Harness 的框架，重点利用 DSH 本身解决了什么问题？省去了连山对应的哪些模块，以及解决了什么问题"。
-> 依据：`知识/技术/17` §12/§13（DSH 与 04-05 八层的逐层对照）、连山代码仓分析 `03-dsruntime.md` / `04-workstation-iclaw.md`、`项目/SPC-DeepSeek-Harness/plans` 02 §10 / 03 §5.4 的历史映射。
+> 依据：[DeepSeek Harness 插件文档](../../知识/技术/Agent与业务流程/DeepSeek-Harness插件：决定Agent如何被组装、扩展和观测.md) §12/§13（DSH 与 04-05 八层的逐层对照）、连山代码仓分析 `03-dsruntime.md` / `04-workstation-iclaw.md`、`项目/SPC-DeepSeek-Harness/plans` 02 §10 / 03 §5.4 的历史映射。
 
 ### 6.1 一句话结论
 
