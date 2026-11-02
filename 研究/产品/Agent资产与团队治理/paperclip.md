@@ -3,7 +3,7 @@
 > 调研日期：2026-10-10
 > 调研对象：`paperclipai/paperclip`（开源 Agent orchestration control plane）
 > 资料来源：官方仓库 README 与 Developing 文档；未运行本地实例或适配器。
-> 分类：agent-runtime-harnesses（Agent 组织、任务与治理控制面）
+> 分类：Agent资产与团队治理（Agent 组织、任务与治理控制面）
 
 ---
 

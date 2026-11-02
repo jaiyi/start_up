@@ -3,7 +3,7 @@
 > 调研日期：2026-10-10
 > 调研对象：`Tencent/teamai-cli`（TeamAI，MIT）
 > 资料来源：官方仓库 README 与 `product-overview`；未在真实团队 Git provider 上部署。
-> 分类：agent-runtime-harnesses（团队级 Harness 分发与学习控制面）
+> 分类：Agent资产与团队治理（团队级 Harness 分发与学习控制面）
 
 ---
 

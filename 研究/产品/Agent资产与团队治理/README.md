@@ -17,20 +17,20 @@
 
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
-| `skill-platform-private-deployment-comparison.md` | 私有化 Skill 平台横向对比 | 面向 WeKnora + DeepSeek Harness 的 Skill 发布、审核、分发和运行监控组合选型 | 为什么需要 SkillHub、Git/CI、DSH 与 Phoenix/Langfuse 分层组合，以及各候选的边界 |
-| `teamai-cli.md` | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发与持续改进控制面 | Skills、Rules、MCP、Models 如何随代码仓和团队约定发布，并通过 friction learning 持续改进 |
-| `paperclip.md` | Paperclip | Agent 公司级组织、任务、Heartbeat、预算和审批控制面 | Agent 如何被组织成可分工、可追踪、受预算和审批约束的团队 |
-| `skillhub-vs-skills-manager-and-a2a-skill-design.md` | SkillHub / Skills Manager 对比 | Skill 注册中心、个人 Skill 库房与 A2A Skill 资产治理设计 | Skill 契约、证据、协商和版本如何支撑跨团队发现、审核与调度 |
-| [`himarket.md`](./himarket.md) | HiMarket | 企业 AI 能力市场、Skill 包发现与分发 | HiMarket 的管理/开发者门户、包上传/审核与团队 Git 权威、固定 digest、目标装载如何分工 |
+| [Skill 平台私有化对比](./skill-platform-private-deployment-comparison.md) | 私有化 Skill 平台横向对比 | 面向 WeKnora + DeepSeek Harness 的 Skill 发布、审核、分发和运行监控组合选型 | 为什么需要 SkillHub、Git/CI、DSH 与 Phoenix/Langfuse 分层组合，以及各候选的边界 |
+| [TeamAI CLI](./teamai-cli.md) | Tencent TeamAI / AITeam | Git-backed 团队 Harness 分发与持续改进控制面 | Skills、Rules、MCP、Models 如何随代码仓和团队约定发布，并通过 friction learning 持续改进 |
+| [Paperclip](./paperclip.md) | Paperclip | Agent 公司级组织、任务、Heartbeat、预算和审批控制面 | Agent 如何被组织成可分工、可追踪、受预算和审批约束的团队 |
+| [SkillHub / Skills Manager 与 A2A Skill](./skillhub-vs-skills-manager-and-a2a-skill-design.md) | SkillHub / Skills Manager 对比 | Skill 注册中心、个人 Skill 库房与 A2A Skill 资产治理设计 | Skill 契约、证据、协商和版本如何支撑跨团队发现、审核与调度 |
+| [HiMarket](./himarket.md) | HiMarket | 企业 AI 能力市场、Skill 包发现与分发 | HiMarket 的管理/开发者门户、包上传/审核与团队 Git 权威、固定 digest、目标装载如何分工 |
 
 ## 与相邻类别的边界
 
 | 类别 | 核心对象 | 与本目录的区别 |
 |---|---|---|
-| `Agent运行时/` | 模型调用、工具执行、任务状态、恢复和审计 | Runtime 关注一次任务如何安全运行；本目录关注资产和组织如何被治理 |
-| `Agent学习系统/` | 轨迹评估、记忆、经验蒸馏和复用 | Learning System 关注从运行中学习；本目录关注 Skill / Agent 如何被注册、审核、分发和运营 |
-| `Agent工作台/` | 任务空间、协作文档和 Agent 产物 | Workspace 管理结果和协作界面；本目录管理背后的团队资产与组织策略 |
-| `知识库/` | 文档、切片、索引、RAG 和 Wiki | Knowledge Base 管知识内容；本目录管 Agent 资产的生命周期和团队使用权 |
+| [任务运行与编排](../任务运行与编排/README.md) | 模型调用、工具执行、任务状态、恢复和审计 | 运行时关注一次任务如何安全运行；本目录关注资产和组织如何被治理 |
+| [Agent 记忆与学习](../Agent记忆与学习/README.md) | 轨迹评估、记忆、经验蒸馏和复用 | 学习系统关注从运行中学习；本目录关注 Skill / Agent 如何被注册、审核、分发和运营 |
+| [人机协作与产物](../人机协作与产物/README.md) | 任务空间、协作文档和 Agent 产物 | 工作区管理结果和协作界面；本目录管理背后的团队资产与组织策略 |
+| [知识库与检索](../知识库与检索/README.md) | 文档、切片、索引、RAG 和 Wiki | 知识库管知识内容；本目录管 Agent 资产的生命周期和团队使用权 |
 
 ## 评估维度
 

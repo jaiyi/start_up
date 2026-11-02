@@ -772,7 +772,7 @@ Agent 能否根据运行结果调试后端？
 
 ### 本仓库相关边界
 
-- [Agent Runtime / Harness 产品分析](../Agent运行时/README.md)
-- [Knowledge Base 产品分析](../知识库/README.md)
-- [AI Native Data Platforms 产品分析](../AI原生数据平台/README.md)
-- [Data Governance Platforms 产品分析](../数据治理平台/README.md)
+- [Agent Runtime / Harness 产品分析](../任务运行与编排/README.md)
+- [Knowledge Base 产品分析](../知识库与检索/README.md)
+- [AI Native Data Platforms 产品分析](../数据与语义平台/README.md)
+- [Data Governance Platforms 产品分析](../数据治理与隐私/README.md)

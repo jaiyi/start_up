@@ -19,9 +19,9 @@ AI 编程 Agent / 应用代码
 
 这类产品负责为应用提供数据和后端能力，不自动等同于：
 
-- **Agent Runtime / Harness**：负责模型循环、Session / Run / Step、工具策略、任务恢复、人审、Trace 和评测；
-- **Knowledge Base**：负责稳定知识、文档、切片、索引、引用和知识治理；
-- **Data Governance Platform**：负责跨系统数据目录、血缘、质量、合规和统一治理；
+- [任务运行与编排](../任务运行与编排/README.md)：负责模型循环、Session / Run / Step、工具策略、任务恢复、人审、Trace 和评测；
+- [知识库与检索](../知识库与检索/README.md)：负责稳定知识、文档、切片、索引、引用和知识治理；
+- [数据治理与隐私](../数据治理与隐私/README.md)：负责跨系统数据目录、血缘、质量、合规和统一治理；
 - **业务系统**：负责生产业务事实、关键状态和权威动作。
 
 MCP 可以成为后端与 Agent 之间的连接协议，但 **MCP 接入不等于 Agent Runtime**，Agent 能调用后端工具也不等于后端已经具备企业级任务治理能力。
@@ -30,7 +30,7 @@ MCP 可以成为后端与 Agent 之间的连接协议，但 **MCP 接入不等�
 
 | 产品文档 | 产品 / 能力 | 类型判断 | 核心问题 |
 |---|---|---|---|
-| `insforge.md` | InsForge | 面向 AI coding agents 的开源后端平台 / Agent-facing BaaS | 后端资源是否能被 AI 编程 Agent 读取、配置、部署和调试，以及这种 Agent-native 入口是否形成超越传统 BaaS 的差异化 |
+| [InsForge](./insforge.md) | InsForge | 面向 AI coding agents 的开源后端平台 / Agent-facing BaaS | 后端资源是否能被 AI 编程 Agent 读取、配置、部署和调试，以及这种 Agent-native 入口是否形成超越传统 BaaS 的差异化 |
 
 ## 评估维度
 
