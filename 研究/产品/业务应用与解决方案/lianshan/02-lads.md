@@ -1,9 +1,9 @@
 # 02 · lads —— 连山 Monday 工业 AI「计算底座」深度结构分析
 
-> 分析对象：`/Users/lijiayi/lianshan/agent/lads`（分支 `main`，约 3696 个 git-tracked 文件）
-> 方法：以 `AGENTS.md`（1042 行主文档）、`README.md`、`flow.yaml` 为纲，实际打开
-> `lads/cli/`、`lads/framework/{agent,ontology,evi,decision,compiler,messaging}`、
-> `lads/domains/` 下核心源码逐一阅读。结论均标注文件路径证据；未读到的地方标「待深挖」，不臆测。
+> 分析对象：`/Users/lijiayi/lianshan/lads`（本次增补核查：`lisen-core` 分支，提交 `8a08fdc9`）。
+> 方法：结合 `AGENTS.md`、`README.md`、`flow.yaml` 和所引模块源码分析；本次对照
+> `lads/domains/` 的 28 份 `domain.toml` 与所列算法入口补查 §2.7。源码具备某项能力不等于
+> dsproject 已接入、Bundle 已验收或客户环境已部署；未验证的运行效果不作推断。
 
 ---
 
@@ -37,7 +37,7 @@ BPMN 工作流引擎 + OWL 故障树诊断引擎**（确定性规则推理，非
 
 ```
 lads/cli/         单一 LazyGroup 命令面（new/run/deploy/publish/bundle/profile/agent/...）
-lads/domains/     业务算法层（17 个域：spc/curve/audio/oee/vision/scheduling/...）横向自治
+lads/domains/     业务算法层（14 份顶层 + 14 份嵌套域清单；另有 param 命名空间）横向自治
 lads/framework/   业务无关通用支撑层（compiler/messaging/agent/ontology/evi/decision/io/...）
 ```
 
@@ -158,24 +158,78 @@ Pydantic 契约（`_bindings/_rule_binding.py` 等），供编译期做 `Ontolog
 `messaging._inference_event` 按 `intelligence_code` 路由到自动注册的 `evi_sink`。做到 O(1) 扩展：
 新增业务模块只加 emit，framework/evi 不动。
 
-### 2.7 业务算法域（`lads/domains/`，17 个域）
+### 2.7 业务算法域（`lads/domains/`：28 份域清单）
 
-`audio / curve(tightening+spotwelding) / cycletime_opt / electro_coating / epms / fta / oee /
-outlier_detection / param / scheduling / smart_loading / spare_parts_pred / spc /
-standard_labor_hour_generation / vision`（另有 `curve_tightening`/`curve_spotwelding` 兼容别名）。
+**口径与命名**：本次在 `lads/domains/` 查到 **14 份顶层 + 14 份嵌套 `domain.toml`**；嵌套项是
+`audio.noload_classification`、`curve` 下 4 项（含拧紧下两项）和 `param` 下 9 项。
+`param` 自身只有命名空间 `__init__.py`，**没有**独立域清单或统一的参数优化算法；`curve`
+有清单，但状态为 `deprecated`，主要兼容转发 `curve.tightening`。不能把父级、子级和兼容入口
+相加当作 28 个独立部署单元。SPC 清单标 `stable`，`curve` 标 `deprecated`，其余 26 份
+标 `experimental`；这些仅是源码声明的成熟度，不是生产验收结果（见各域 `domain.toml`
+及 `domains/param/__init__.py:1-3`、`domains/curve/domain.toml:8-13`）。
 
-**canonical 7 支柱模板**（`lads.domains.spc` 是参考实现，AGENTS.md 长篇规定）：
-```
-<domain>/__init__.py（public API + lazy import）
-├── _core/       纯 numpy/pandas/scipy 计算，禁 import psycopg/streamlit/io（AP4 反模式）
-├── _contracts/  frozen dataclass + schema_version + YAML + SHA-256 checksum
-├── _sql/        幂等 PG DDL
-├── _worker/     BasePgmqWorker 子类（禁手写 while True 轮询，AP5）
-├── _trainer/    定时重训
-└── _model/      BaseModelInfer 薄适配
-```
-文档还给出"支柱必要性矩阵"和三种范式变体（fit-once/eval-stream、fit-and-eval-per-sample、
-pipeline-composition），并对齐 sklearn/HuggingFace/MLflow 的极简主义——工程治理相当成熟。
+下表的 **`lads-domain-XXXX` 是按现有 manifest `id` 将点号换成连字符生成的拟议拆包名称／
+文档索引**，例如 `curve.tightening.rules` → `lads-domain-curve-tightening-rules`；**目前并无
+这些名字的独立发行包**。真实发行名为 `lads`（`pyproject.toml:47-54`），可按 extra
+安装依赖（例如 `lads[spc]`），现有导入门面为 `lads.domains.<表中 id>`（点号照原样保留），
+清单 ID 与发行名、extra、导入名不可混同。`pyproject.toml:9-44` 将领域 SQL、模型材料及
+`domain.toml` 等作为包数据收集；这不表示每域都已独立构建、发布或部署。
+
+**SPC 的七支柱是参考组织方式，并非 28 域都齐备的实际结构**：可按需拆为 public facade、
+`_core` 计算、`_contracts` 契约、`_sql` 持久化、`_worker` 消费、`_trainer` 训练和
+`_model` 推理适配。实际切片以各域清单的 `slices`、代码和调用入口为准：
+`spc/domain.toml:5-29` 声明计算、评估、反馈、worker 等；`curve/domain.toml:8-13`
+则无算法切片。表内“落地”是**源码输入 → 计算／编排 → 输出和消费入口**，不推断客户
+`dsproject` 已接入、Bundle 已验收或现场效果。下表省略 `lads/domains/` 公共前缀；
+`_core/…` 等路径均相对于**本行清单 ID 所在目录**；`domains/…` 从 `lads/` 起算。状态以本行的 `domain.toml` 为准。
+
+**顶层域（14 份；路径约定见上）：**
+
+| 拟议标识（清单 ID／导入门面后缀） | 源码实现的算法落地方式 | 入口、边界与证据 |
+| --- | --- | --- |
+| `lads-domain-audio`（`audio`） | 音频做 FFT／发动机阶次噪声特征，规则模型据特征判断 NVH；另有将原生 NVH 特征线性投到 768 维的检索投影，冷启动权重为固定种子初始化，不等同于已训练跨模态模型。 | `_core/_fft.py:5`、`_core/_vehicle_nvh_noise_order_method.py:55` → `_infer/_vehicle_nvh_noise_order_model.py:16`；`_model/_projection.py:37-54,90-98`。**不含**下方无负载 CNN 子域。 |
+| `lads-domain-curve`（`curve`） | **兼容门面而非独立曲线算法**；现有清单无计算切片，目标为 `curve.tightening`。 | `domains/curve/domain.toml:2-13`、`domains/curve/__init__.py:1,110`；状态 `deprecated`。 |
+| `lads-domain-cycletime_opt`（`cycletime_opt`） | 分别提供多口径瓶颈识别、堵／待损失追踪，以及以遗传搜索／Pareto 前沿产生线平衡候选；各算法在域内**未自动串成同一条执行流水线**。 | `_assessment/_bottleneck_algorithms.py:22,86,161,206`、`_assessment/_loss_trace_algorithms.py:203,271`；线平衡见 `_core/_line_balancing_algorithms.py:38,1951,2064`、`_core/_line_balancing_model.py:274-385`；候选方案不是实际调线回执。 |
+| `lads-domain-electro_coating`（`electro_coating`） | 电泳工艺与膜厚样本预处理成特征，训练时按膜厚分位分层切分，配置选择 CatBoost 回归或 Ridge，再对新工艺参数预测膜厚。 | `_preprocessing/preprocessor.py:8,108` → `_core/model_trainer.py:17,35-65,132` → `_infer/inference_engine.py:27`；CatBoost 不可用时明确抛异常，并非必然有模型。 |
+| `lads-domain-epms`（`epms`） | 设备多变量时序以 GMM 区分状态模式，按模式转移计算风险并融合健康分／多传感器工单确认；另有异常管线和 z-score 健康评分分支。 | `_core/_mtsage/gmm.py:55`、`_core/_mtsage/edges.py:48`、`_core/_mtsage/scoring.py:47,79` → `_infer/mtsage_model.py:34`；其他分支见 `_core/_liujue/pipeline_algorithm.py:11`、`_core/_health_score/scoring_engine.py:112` 和 `_worker/mtsage_tick_worker.py:39`。不是一种统一的故障判定模型。 |
+| `lads-domain-fta`（`fta`） | 新工单的 SQL 触发消息进入 `fta_diagnose` pgmq；worker 将工单 ID 等映射为 `runtime_signal_outbox` 信号，下游 relay／数字员工接管诊断。**本域只实现触发与唤醒，并未实现故障树诊断算法。** | `_worker/_pgmq_worker.py:1-16,99-120`；诊断本体在外部 dsClaw，不能把信号发出视为故障根因已定位。 |
+| `lads-domain-oee`（`oee`） | 从班次、设备运行和产出记录计算可用率、性能、良率与 JPH，在评估层组织指标推理及停机／损失归因。 | `_core/_availability.py:22`、`_core/_performance.py:94`、`_core/_yield.py:19`、`_core/_jph.py:39` → `_assessment/oee_infers.py:28,766,905,2260`、`_assessment/attribution_engine.py:10`；结果依赖实际事件口径与源数据。 |
+| `lads-domain-outlier_detection`（`outlier_detection`） | 数值样本分别按三西格玛和分位数阈值检测离群点，返回统计判别；不是训练式异常分类。 | `_core/_three_sigma.py:12`、`_core/_percentile.py:12`；清单只有 core／contracts 切片，未见该域自带 worker／训练闭环（`domain.toml:8-17`）。 |
+| `lads-domain-scheduling`（`scheduling`） | 场景编译为排程问题并展开 BOM 净需求；根据问题规模走直接／分解求解，细排有 OR-Tools CP-SAT 与启发式求解，产出排程并通过约束检查。 | `_workflow/compiler.py:48`、`_core/planner/_mrp.py:207` → `_workflow/service.py:82,96-176`、`_scheduler/detail/cpsat_spi.py:113,201`、`_core/evaluator/checker.py:73`；启发式回退须显式许可及安全检查（`_workflow/service.py:229-250`），不是无条件产出可执行排程。 |
+| `lads-domain-smart_loading`（`smart_loading`） | 根据订单构建箱体，遗传搜索组合装箱次序，用三维极点放置评估车厢装载率，输出装载候选及整车运输评估。 | `_core/_engine.py:198,254,519`、`_core/_evaluation.py:126` → `_assessment/_ftl_model.py:72`；结果是空间约束下的计算方案，不代表现场装车完成。 |
+| `lads-domain-spare_parts_pred`（`spare_parts_pred`） | 备件历史样本训练神经网络并由预测管线输出需求／库存预测；另有安全库存计算，以及以独立输入做库存合理性校验的**另一条管线**，不能默认把二者当作预测后的自动校正。 | `_trainer/spare_parts_model_trainer.py:68,208`、`_infer/spare_parts_pipeline.py:79-102,123-136`；安全库存见 `_core/spare_parts_stock_calculator.py:113`，独立校验见 `_infer/reasonableness_pipeline.py:81-109,127-144`。 |
+| `lads-domain-spc`（`spc`） | 历史过程样本拟合控制限，在线测量进入 IMR／Xbar-R／Xbar-S／EWMA／CUSUM／T² 控制图，按 Nelson 规则判失控并计算 Cpk；worker 消费样本后进入评估／反馈投影。 | `_core/_chart.py:493,538,592,646,859,1105`、`_core/_nelson_rules.py:109`、`_core/_capability.py:54` → `_trainer/_trainer.py`、`_worker/_pgmq_worker.py:42`；**唯一 `stable` 清单**（`domain.toml:40`），不等于全部客户工序已配置。 |
+| `lads-domain-standard_labor_hour_generation`（`standard_labor_hour_generation`） | 工作要素、标准工时表与装配标准表进入文本 BM25 匹配和工位／车型映射，生成跨车型工时记录。 | `_core/bm25_matcher.py:8,84`、`_core/station_line_mapping.py:50` → `_model/labor_hour_engine.py:19` → `_infer/inference_engine.py:17,84,117`；匹配结果需对齐工厂真实标准。 |
+| `lads-domain-vision`（`vision`） | 已有 YOLO／PaddleOCR 训练与推理适配；图像／OCR 结果经框位置、阈值等节点后处理并由节点流水线编排。 | `_trainer/_yolo_train.py:49,380`、`_trainer/_ocr_train.py:281,551` → `_infer/_yolo_nodes.py:13`、`_infer/_ocr_nodes.py:13`、`_infer/postprocessing/_node_ops/_bbox_nodes.py:240`、`_workflow/_nodeengine/pipeline.py`；是模型集成与编排，并非在本仓发明新检测网络。 |
+
+**嵌套域（`audio` 1 项、`curve` 4 项；下表独立于父级能力计数）：**
+
+| 拟议标识（清单 ID／导入门面后缀） | 源码实现的算法落地方式 | 入口、边界与证据 |
+| --- | --- | --- |
+| `lads-domain-audio-noload_classification`（`audio.noload_classification`） | 无负载音频有**不同模型路径**：Mel 时频特征的 Mel-bag CNN 对原始文件单位训练并输出未校准分类分数；另有音频 CNN／ResNet + XGB 训练和 NVH CNN 推理接口。不能用后一条推理器证明前一条模型已接入同一生产推理链。 | Mel-bag 见 `_model/_mel_bag_cnn.py:7`、`_trainer/_mel_bag_train.py:73-117,163-184`；另一条见 `_trainer/audio_cnn_model.py:84`、`_infer/nvh_cnn_infer.py:88`；基础分类入口 `_model/audio_classifier.py:35,1315`。 |
+| `lads-domain-curve-tightening`（`curve.tightening`） | 拧紧角度／扭矩曲线先定位主拧紧段，按多步曲线模型检验；另有同批次曲线异常评估，供不同分析路径使用。 | `_core/_main_tightening_segmentation.py:17`、`_core/_cot_model/_multistep_evaluator.py:36`、`_infer/curve_cohort_anomaly_engine.py:68`；具体规则判定和参数包另列子域。 |
+| `lads-domain-curve-tightening-rules`（`curve.tightening.rules`） | 原始曲线清洗、按拧紧阶段切分，再以专家模板／早期 NG 规则判定 OK／NG 和故障类型。 | `_core/_preprocess.py:87` → `_core/_phase_split.py:13` → `_core/_evaluator.py:196,225` → `_worker/_pgmq_worker.py:68`；需要真实模板配置，不等同于上一行的统计 cohort 算法。 |
+| `lads-domain-curve-tightening-parameter_package`（`curve.tightening.parameter_package`） | 冷路径从历史曲线训练参数包，热路径将新曲线和参数包交由评估器验收并消费 pgmq 消息。 | `_trainer/_trainer.py:45,58` → `_core/_evaluator.py:21` → `_worker/_pgmq_worker.py:13`；训练参数包与运行时曲线必须有匹配配置。 |
+| `lads-domain-curve-spotwelding`（`curve.spotwelding`） | 历史焊点曲线训练标准包，新焊点曲线并行接受包络、FFT、斜率、DTW、极值等检测；反馈样本支持两种回测：复用旧检测结果与用新配置全量重放。 | `_trainer/_trainer.py` → `_core/_evaluator.py:102` → `_worker/_pgmq_worker.py:32`、`_backtest/_runner.py:23`；有回测机制不等于已有现场质量收益，详见 §4.2。 |
+
+**`param` 命名空间下的 9 个独立子域**（`param/__init__.py:1-3` 无自身清单；以下各项均为 `experimental`）：
+
+| 拟议标识（清单 ID／导入门面后缀） | 源码实现的算法落地方式 | 入口、边界与证据 |
+| --- | --- | --- |
+| `lads-domain-param-mgmt`（`param.mgmt`） | 从 OWL 维度／约束定义解析参数层级，组织观测与推荐样本的批量写入及数据库 schema 管理；它是参数数据底座而非推荐器。 | `_core/_dimension_schema.py:37` → `_ingestion/_batch_writer.py:50,92`、`_sql/_schema_manager.py:36`。 |
+| `lads-domain-param-recom`（`param.recom`） | 测试参数与历史良品样本按文本 embedding 余弦相似度及数值字段相似度加权比较，从历史 OK 样本挑 Top-1 参数。 | `_model/_embedder.py:28` → `_core/_similarity.py:44,83` → `_worker/_pgmq_worker.py:32`；历史相似不等于自动保证工艺合格。 |
+| `lads-domain-param-gpr_recom`（`param.gpr_recom`） | 样本标准化后冷训练高斯过程回归代理模型；多起点约束搜索在模型上找推荐参数，代码含 L-BFGS-B 和差分进化方法。 | `_trainer/_trainer.py:21` → `_core/_search.py:100`、`_core/_optimizer.py:29,85` → `_worker/_pgmq_worker.py:20`；优化预测需受训练分布与硬约束约束。 |
+| `lads-domain-param-nn_recom`（`param.nn_recom`） | 数值参数与文本 embedding 联合构造特征，训练 CascadeNet，推理得神经网络驱动的参数候选。 | `_core/_features.py:17,90`、`_core/_network.py:14` → `_trainer/_trainer.py:39`、`_worker/_pgmq_worker.py:19`。 |
+| `lads-domain-param-rule_tune`（`param.rule_tune`） | 专家 IF–THEN 规则先产生调参方向，再以 CP-SAT 将候选限制在物理硬约束内。 | `_core/_rule_engine.py:15` → `_core/_cp_solver.py:30` → `_worker/_pgmq_worker.py:16`；不绕过人工工艺规则。 |
+| `lads-domain-param-behavior_tune`（`param.behavior_tune`） | 经验模板产生动作集合，Beta 策略对历史行为打分，并施加物理顺序限制形成调参建议。 | `_core/_template.py:16` → `_core/_policy.py:118`、`_core/_ordering.py:11` → `_trainer/_trainer.py:32`、`_worker/_pgmq_worker.py:16`。 |
+| `lads-domain-param-sensitivity_tune`（`param.sensitivity_tune`） | 训练梯度提升回归代理；扰动输入估计目标对参数的敏感度，结合补偿规则生成调参建议。 | `_trainer/_trainer.py:27` → `_core/_perturbation.py:32`、`_core/_adjustment.py:16` → `_worker/_pgmq_worker.py:22`；敏感度来自代理模型而非在线设备因果实验。 |
+| `lads-domain-param-opt`（`param.opt`） | 外部触发／反馈进入多轮 proposal→dispatch→feedback 状态机，NG 规则控制何时阻断并由分阶段 pgmq worker 推进；**它编排闭环，不自带参数推荐求解器**。 | `_workflow/_app.py:123,182-198`、`_core/_ng_rules.py:28`、`_worker/_pgmq_workers.py:15,60,86`；设备执行、外部 provider 与人工反馈必须由项目环境接通。 |
+| `lads-domain-param-wave_solder`（`param.wave_solder`） | 选焊坐标／工位输入做 TSP 路径优化（≤8 个原子穷举，>8 个用最近邻 + 2-opt），另做工位、喷嘴线体平衡；预置随机森林识别器参与器件识别，输出重建后的 NC／Coordinate、Basic CSV 与时长。 | `_core/_lb/_wave_solder/_optimizer.py:290-322`、`_core/_line_balance.py:140` → `_model/_path_optimization_infer.py:19`、`_model/_line_balance_infer.py:35`；**不产出参数提议**，不走 `param.opt` 的 proposal 信封（`param/wave_solder/README.md:6-24`）。 |
+
+**如何理解“落地”**：以上既有纯计算、预训练模型适配，也有队列消费和跨组件编排；是否有
+`_worker`、`_trainer`、`_sql`、反馈回测取决于具体域。源码清单状态、算法入口与数据流
+只能证明 SDK 的实现边界；要证实某一工厂的上线、实际工况表现、闭环质量或降本结果，还要查
+对应 `dsproject` 配置／Bundle 验收、数据权限、热路径记录及业务侧效果回执，本次均未核。
 
 ### 2.8 命名数据源（Named Datasource，工程亮点）
 
@@ -323,8 +377,8 @@ ground-truth 样本管理三件套俱全）**，EVI 记录表提供了推理轨�
    自身 `status="experimental"` 也说明未定型。
 3. **`calculate_intelligence_value` 用 `eval()` 执行公式字符串**（`evi/_contracts/_base.py:450`）：
    虽然限制了 `{"__builtins__":{}}`，但 formula 若来自不可信配置仍有注入面。属于需要收紧的安全点。
-4. **单体巨仓 + 大量兼容 shim**：17 个域 + 十几个 framework 能力塞进一个 pip 包，靠 extras 切分依赖；
-   `curve_tightening`/`curve_spotwelding` 兼容别名、`pipeline_executor` shim、
+4. **单体巨仓 + 兼容 shim**：28 份域清单（含 14 份嵌套清单；`param` 仅为命名空间）与十几个 framework 能力仍归一个 `lads` 发行包，extras 只切分可选依赖；
+   `curve` 的 deprecated 兼容门面、`pipeline_executor` shim、
    `agent/_contracts/models.py` 全是 re-export facade——技术债/迁移半成品痕迹多，
    CHANGELOG 达 126KB 印证了高频重构。
 5. **反馈/eval 未框架化**：点焊域范本很好，但跨域靠"照抄 spc/spotwelding"约定，没有统一的
