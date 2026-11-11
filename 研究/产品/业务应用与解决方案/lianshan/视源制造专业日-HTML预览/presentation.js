@@ -22,7 +22,7 @@ function showSlide(index) {
     slide.setAttribute("aria-hidden", String(!active));
   });
   const number = slides[activeIndex].dataset.number;
-  indicator.textContent = `${number} / 13`;
+  indicator.textContent = `${number} / ${String(slides.length - 1).padStart(2, "0")}`;
   previous.disabled = activeIndex === 0;
   next.disabled = activeIndex === slides.length - 1;
   const hash = `#${number}`;
