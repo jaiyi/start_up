@@ -47,6 +47,7 @@ Observe 观察运行轨迹
 | [Agent Beacon + Jev](./asymptote-agent-beacon.md) | Asymptote Labs Agent Beacon + Jev | 跨框架 Agent 轨迹层 / reviewed memory / 技能蒸馏层 | 编码 Agent 的会话历史如何变成可审阅、可迁移、可复用的工程经验 |
 | [MemPalace](./mempalace.md) | MemPalace（mempalace/mempalace） | 本地优先、原文保真的 Agent 长期记忆与协作 MCP | wing/room/drawer、时间关系图、diary、handoff 与本地隐私默认值 |
 | [Hindsight](./hindsight.md) | Hindsight（vectorize-io/hindsight） | 面向持续学习的 memory bank：retain / recall / reflect | 四路检索融合、证据型 observations、mental models 与 token-aware recall |
+| [MemoryBear](./memorybear.md) | MemoryBear（SuanmoSuanyangTechnology/MemoryBear） | 图谱／检索／遗忘／反思一体化的长期记忆服务 | 动态记忆的可追溯性、权限隔离、遗忘语义及多基础服务部署成本 |
 | [Harness²](./harness2.md) | Harness²（google-research/harness2） | 实验型递归 Harness 优化框架 | 候选 Harness 的提出、探测、合成和跨任务经验保留如何与隔离评测及 Git 审核分开 |
 
 ---
