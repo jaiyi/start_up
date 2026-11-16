@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "skills": {
+    "lark-doc": {
+      "source": "open.feishu.cn",
+      "sourceUrl": "https://open.feishu.cn",
+      "sourceType": "well-known",
+      "computedHash": "1323881a7ec6a09345e82929efdbca516f15b41421eef30d5e1e0f29f0e0f8a8",
+      "wellKnownDigest": "sha256:59e64577aabf95942d847979cf3be4c348909085899f612b4954d7a2ddae6c0b"
+    },
+    "lark-im": {
+      "source": "open.feishu.cn",
+      "sourceUrl": "https://open.feishu.cn",
+      "sourceType": "well-known",
+      "computedHash": "d79366a9b2a16613f1d930e5563c016d483b05e28e95cbcd7772fdce98503d6f",
+      "wellKnownDigest": "sha256:91e82d9f4a82c67524f98a65ce0677954dd5f4d91b49f88eb01e9c9724c6d2a6"
+    },
+    "lark-shared": {
+      "source": "open.feishu.cn",
+      "sourceUrl": "https://open.feishu.cn",
+      "sourceType": "well-known",
+      "computedHash": "9c2a2dd16dec84f0d4e70b8feffac19398b03f70dcd962fc402c3fab56070d57",
+      "wellKnownDigest": "sha256:4e52031d16e9eb563c0e72d9cf0faee65c57f0edff347ca053b4438ee8eff27a"
+    }
+  }
+}

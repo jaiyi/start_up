@@ -4,6 +4,7 @@
 > 分析对象：`lisen-infra`、`lads`、`dsruntime`、`workstation-iclaw`、`edge-inference`、`demos-fta`、`demos-spc`、`demos-param-opt` 及当前产品体系诊断。
 > 视角：以 `洞察/AI原生转型/04-AI-Native任务闭环平台.md` 的平台愿景，重新评价连山当前产品体系。
 > 结论口径：本文区分「平台愿景」「已有工程证据」「场景样板」「生产证据」「商业证据」，避免把完整 stack、demo 样板和可规模化产品混为一谈。
+> 后续补充（2026-11-16）：关于 dsproject／dsruntime／dsclaw／dsbase 的目标分工、跨项目 BPMN 和锡焊异常场景的实现核验，见 [11 · 连山跨项目任务闭环架构核验](./11-连山跨项目任务闭环架构核验.md)。本文保留 2026-09-23 的诊断口径。
 
 ---
 
